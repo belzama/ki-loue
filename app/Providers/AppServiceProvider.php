@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
+use App\Models\Pays;
+use App\Models\Notification;
+use App\Observers\NotificationObserver;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+        Schema::defaultStringLength(191);
+
+        view()->composer('*', function ($view) {
+        $view->with('paysList', Pays::orderBy('id')->get());
+
+        Notification::observe(NotificationObserver::class);
+
+        View::share('langs', config('languages.list'));
+    });
+    }
+}
