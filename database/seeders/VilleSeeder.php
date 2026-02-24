@@ -17,28 +17,36 @@ class VilleSeeder extends Seeder
             // ======================
             // TOGO
             // ======================
-            'Togo - Région maritime' => [
+            'Togo' => [
                 'Lomé',
                 'Tsévié',
                 'Aného',
-            ],
-            'Togo - Région des plateaux' => [
                 'Atakpamé',
                 'Notsè',
                 'Kpalimé',
                 'Badou',
-            ],
-            'Togo - Région centrale' => [
                 'Sokodé',
                 'Blitta',
-            ],
-            'Togo - Région de la kara' => [
                 'Kara',
                 'Bafilo',
-            ],
-            'Togo - Région des savanes' => [
                 'Dapaong',
                 'Mango',
+                'Anié',
+                'Cinkassé',
+                'Tabligbo',
+                'Tchamba',
+                'Elavanyo',
+                'Tohoun',
+                'Djarkpanga',
+                'Amlamé',
+                'Kougnohou',
+                'Mandouri',
+                'Pagouda',
+                'Danyi Apéyémé',
+                'Naki-Centre',
+                'Kévé',
+                'Agou Gadzépé',
+                'Tandjoaré',
             ],
         ];
 
