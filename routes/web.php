@@ -20,12 +20,6 @@ use App\Http\Controllers\SysParamController;
 use App\Http\Controllers\LocalisationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\NotificationController;
-/*
-Route::get('/change-pays/{id}', function ($id) {
-    session(['pays' => \App\Models\Pays::findOrFail($id)]);
-    return back();
-})->name('change.pays');
-*/
 
 Route::get('/change-pays/{pays}', [PaysController::class, 'change'])->name('change.pays');
 
