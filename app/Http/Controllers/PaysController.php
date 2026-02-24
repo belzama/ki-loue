@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Devise;
 use App\Models\Continent;
@@ -55,7 +56,7 @@ class PaysController extends Controller
         $request->validate([
             'continent_id' => 'required|exists:continents,id',
             'devise_id' => 'required|exists:devises,id',
-            'code' => 'required|unique:pays,code|max:5',
+            'code' => 'required|max:5',
             'indicatif' => 'required|max:10',
             'nom' => 'required|string|max:255',
             'nationalite' => 'required|string|max:255',
@@ -113,61 +114,79 @@ class PaysController extends Controller
 
     public function update(Request $request, Pays $pays)
     {
-        $request->validate([
-            'continent_id' => 'required|exists:continents,id',
-            'devise_id' => 'required|exists:devises,id',
-            'code' => "required|unique:pays,code,{$pays->id}|max:5",
-            'indicatif' => 'required|max:10',
-            'nom' => 'required|string|max:255',
-            'nationalite' => 'required|string|max:255',
-            'langue_officielle' => 'required|string|max:255',
-            'taux_commission' => 'required|numeric|min:0',
-            'bonus_sponsor' => 'required|numeric|min:0',
-            'taux_sponsor_new' => 'required|numeric|min:0',
-            'drapeau' => 'nullable|string|max:255',
+        info("1. Début de la méthode update pour le pays : " . $pays->id);
+        try {
+            // Validation principale
+            $request->validate([
+                'continent_id' => 'required|exists:continents,id',
+                'devise_id' => 'required|exists:devises,id',
+                'code' => "required|max:5",
+                'indicatif' => 'required|max:10',
+                'nom' => 'required|string|max:255',
+                'nationalite' => 'required|string|max:255',
+                'langue_officielle' => 'required|string|max:255',
+                'taux_commission' => 'required|numeric|min:0',
+                'bonus_sponsor' => 'required|numeric|min:0',
+                'taux_sponsor_new' => 'required|numeric|min:0',
+                'drapeau' => 'nullable|string|max:255',
 
-            'mode_paiements.*.designation' => 'required|string|max:255',
-            'mode_paiements.*.type' => 'required|string',
-            'mode_paiements.*.api_url' => 'nullable|string',
-            'mode_paiements.*.numero_compte' => 'nullable|string',
-        ]);
+                'mode_paiements.*.designation' => 'required|string|max:255',
+                'mode_paiements.*.type' => 'required|string',
+                'mode_paiements.*.api_url' => 'nullable|string',
+                'mode_paiements.*.numero_compte' => 'nullable|string',
+            ]);
+            info("2. Validation passée avec succès");
+            //return "Le formulaire n'est pas valide";
+            DB::transaction(function () use ($request, $pays) {
+                info("3. Entrée dans la transaction");
+                // Update des infos principales
+                $pays->update($request->only([
+                    'continent_id',
+                    'devise_id',
+                    'code',
+                    'indicatif',
+                    'nom',
+                    'nationalite',
+                    'langue_officielle',
+                    'taux_commission',
+                    'bonus_sponsor',
+                    'taux_sponsor_new',
+                    'drapeau'
+                ]));
+                info("4. Mise à jour des infos principales terminée");
 
-        DB::transaction(function () use ($request, $pays) {
+                // Suppression des anciens modes de paiement
+                $pays->modePaiements()->delete();
+                info("5. Anciens modes de paiement supprimés");
+                // Création des nouveaux modes
+                if ($request->has('mode_paiements')) {
+                    foreach ($request->mode_paiements as $index => $mode) {
 
-            $pays->update($request->only([
-                'continent_id',
-                'devise_id',
-                'code',
-                'indicatif',
-                'nom',
-                'nationalite',
-                'langue_officielle',
-                'taux_commission',
-                'bonus_sponsor',
-                'taux_sponsor_new',
-                'drapeau'
-            ]));
+                        // Ignorer les lignes vides
+                        if (empty($mode['designation']) || empty($mode['type'])) {
+                            continue;
+                        }
 
-            // suppression anciens modes
-            $pays->modePaiements()->delete();
-
-            // recréation
-            if ($request->has('mode_paiements')) {
-
-                foreach ($request->mode_paiements as $mode) {
-
-                    $pays->modePaiements()->create([
-                        'designation' => $mode['designation'],
-                        'type' => $mode['type'],
-                        'api_url' => $mode['api_url'] ?? null,
-                        'numero_compte' => $mode['numero_compte'] ?? null,
-                    ]);
+                        $pays->modePaiements()->create([
+                            'designation' => $mode['designation'],
+                            'type' => $mode['type'],
+                            'api_url' => $mode['api_url'] ?? null,
+                            'numero_compte' => $mode['numero_compte'] ?? null,
+                        ]);
+                        info("7. Mode de paiement ajouté pour l'index : " . $index);
+                    }
                 }
-            }
-        });
+            });
 
-        return redirect()->route('admin.pays.index')
-            ->with('success', 'Pays modifié avec ses modes de paiement.');
+            info("8. Transaction validée (Commit)");
+            return redirect()->route('admin.pays.index')
+                ->with('success', 'Pays modifié avec succès avec ses modes de paiement.');
+        } catch (\Exception $e) {// En cas d'erreur, on logue le message précis et la ligne
+            info("ERREUR DÉTECTÉE : " . $e->getMessage());
+            info("Fichier : " . $e->getFile() . " à la ligne " . $e->getLine());
+            //Log::error("Erreur lors de l'update pays : " . $e->getMessage());
+            return back()->withInput()->with('error', 'Une erreur est survenue.');
+        }
     }
 
     public function destroy(Pays $pays)

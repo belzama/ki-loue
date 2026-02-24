@@ -9,14 +9,14 @@
     </div>   
 
     <div class="col-md-3">
-        <select name="mode_paiements[{{ $index }}][type]"
-                class="form-select" required>
-            <option value="Mobile Money" {{ (isset($mode) && $mode->type=='Mobile Money') ? 'selected' : '' }}>Mobile Money</option>
-            <option value="Visa Card" {{ (isset($mode) && $mode->type=='Visa Card') ? 'selected' : '' }}>Visa Card</option>
-            <option value="Wallet" {{ (isset($mode) && $mode->type=='Wallet') ? 'selected' : '' }}>Wallet</option>
-            <option value="Espèce" {{ (isset($mode) && $mode->type=='Espèce') ? 'selected' : '' }}>Espèce</option>
-            <option value="Chèque" {{ (isset($mode) && $mode->type=='Chèque') ? 'selected' : '' }}>Chèque</option>
-       </select>
+        <select name="mode_paiements[{{ $index }}][type]" class="form-select" required>
+            @php $selectedType = $mode->type ?? 'Mobile Money'; @endphp
+            <option value="Mobile Money" {{ $selectedType=='Mobile Money' ? 'selected' : '' }}>Mobile Money</option>
+            <option value="Visa Card" {{ $selectedType=='Visa Card' ? 'selected' : '' }}>Visa Card</option>
+            <option value="Wallet" {{ $selectedType=='Wallet' ? 'selected' : '' }}>Wallet</option>
+            <option value="Espèce" {{ $selectedType=='Espèce' ? 'selected' : '' }}>Espèce</option>
+            <option value="Chèque" {{ $selectedType=='Chèque' ? 'selected' : '' }}>Chèque</option>
+        </select>
     </div>
 
     <div class="col-md-3">
@@ -31,9 +31,8 @@
         <input type="text"
                name="mode_paiements[{{ $index }}][numero_compte]"
                class="form-control"
-               placeholder="Numero de compte de paiement"
+               placeholder="Numéro de compte des paiements"
                value="{{ $mode->numero_compte ?? '' }}">
-
     </div>
 
     <div class="col-md-1">

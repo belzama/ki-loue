@@ -115,12 +115,11 @@
 <button type="submit" class="btn btn-success">Enregistrer</button>
 
 
-
 <script>
 let modeIndex = {{ isset($pays) ? $pays->modePaiements->count() : 1 }};
 
+// Ajouter un nouveau mode de paiement
 function addMode() {
-
     let wrapper = document.getElementById('mode_paiements-wrapper');
 
     let html = `
@@ -134,6 +133,7 @@ function addMode() {
 
             <div class="col-md-3">
                 <select name="mode_paiements[${modeIndex}][type]" class="form-select" required>
+                    <option value="">Sélectionner le type</option>
                     <option value="Mobile Money">Mobile Money</option>
                     <option value="Visa Card">Visa Card</option>
                     <option value="Wallet">Wallet</option>
@@ -151,14 +151,12 @@ function addMode() {
             <div class="col-md-2">
                 <input type="text" name="mode_paiements[${modeIndex}][numero_compte]"
                        class="form-control"
-                       placeholder="Numéro de compte des paiements">
+                       placeholder="Numéro de compte">
             </div>
 
             <div class="col-md-1">
-                <button type="button"
-                        class="btn btn-outline-danger btn-sm"
-                        onclick="removeMode(this)"
-                        title="Supprimer">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        onclick="removeMode(this)" title="Supprimer">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -170,10 +168,37 @@ function addMode() {
     modeIndex++;
 }
 
+// Supprimer un mode
 function removeMode(button) {
     button.closest('.mode-item').remove();
 }
 
+// Vérifier les modes avant la soumission
+document.querySelector('form').addEventListener('submit', function(e) {
+    let valid = true;
+    let messages = [];
+
+    document.querySelectorAll('.mode-item').forEach((row, idx) => {
+        let designation = row.querySelector('input[name*="[designation]"]').value.trim();
+        let type = row.querySelector('select[name*="[type]"]').value.trim();
+
+        if (!designation) {
+            valid = false;
+            messages.push(`Mode #${idx + 1} : la désignation est obligatoire.`);
+        }
+        if (!type) {
+            valid = false;
+            messages.push(`Mode #${idx + 1} : le type est obligatoire.`);
+        }
+    });
+
+    if (!valid) {
+        e.preventDefault();
+        alert(messages.join("\n"));
+    }
+});
+
+// Bootstrap tooltip init
 document.addEventListener('DOMContentLoaded', function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {

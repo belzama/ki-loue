@@ -55,10 +55,6 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('register', [RegisteredUserController::class, 'store']);
 
-Route::get('/reservations/{publication}/create',
-    [ReservationController::class, 'create'])
-    ->name('reservations.create');
-
 Route::middleware('auth')->group(function () {
     Route::get('/pays/create', [PaysController::class, 'create'])->name('pays.create');
     Route::post('/pays', [PaysController::class, 'store'])->name('pays.store');
@@ -95,6 +91,7 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     
 
     Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
+    Route::get('/reservations/{publication}/create',[ReservationController::class, 'create'])->name('reservations.create');
     Route::get('reservations/{id}/approve', [ReservationController::class, 'approveForm'])->name('reservations.approve.form');
     Route::post('reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
     Route::get('reservations/{id}/reject', [ReservationController::class, 'rejectForm'])->name('reservations.reject.form');
