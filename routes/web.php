@@ -38,9 +38,6 @@ Route::get('/publications/{publication}/reservation', [HomeController::class, 'c
 Route::post('/publications/{publication}/reservation', [HomeController::class, 'storeReservation'])
     ->name('reservations.store');
 
-Route::get('/reservations/whatsapp', [HomeController::class, 'whatsapp'])->name('reservations.whatsapp'); 
-
-
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
