@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Pays;
 use App\Models\Region;
@@ -145,8 +146,8 @@ class HomeController extends Controller
             'nom_prenom'       => 'nullable|string|max:255',
             'email'            => 'nullable|email|max:255',
             'telephone'        => 'nullable|string|max:50',
-            'date_demandee'    => 'required|date',
-            'duree_demandee'   => 'required|integer|min:1',
+            'date_demandee'    => 'nullable|date',
+            'duree_demandee'   => 'nullable|integer',
             'message'          => 'nullable|string',
         ]);
 
@@ -155,8 +156,8 @@ class HomeController extends Controller
             'publication_id'   => $publication->id,
             'user_id'          => auth()->id(), // null si non connecté
             'date_reservation' => now()->toDateString(),
-            'date_demandee'    => $data['date_demandee'],
-            'duree_demandee'   => $data['duree_demandee'],
+            'date_demandee'    => $data['date_demandee'] ?? null,
+            'duree_demandee'   => $data['duree_demandee'] ?? 1,
             'nom_prenom'       => $data['nom_prenom'] ?? null,
             'email'            => $data['email'] ?? null,
             'message'          => $data['message'] ?? null,
@@ -164,79 +165,100 @@ class HomeController extends Controller
             'statut'           => 'Demandée',
         ]);
 
-        //Création de la notification
-        // 1. Préparer le message proprement
-        $dispositif = $publication->dispositif;
+        try {
 
-        $message = "Demande de réservation du dispositif " . $dispositif->designation . 
-                " immatriculé " . $dispositif->numero_immatriculation . 
-                " pour " . $data['duree_demandee'] . 
-                " jour(s) à partir du " . $data['date_demandee'];
+            DB::beginTransaction();
 
-        // 2. Récupérer l'utilisateur pour simplifier la lecture
-        $user = $dispositif->user;
+            // =============================
+            // Création réservation
+            // =============================
+            $reservation = Reservation::create([
+                'publication_id'   => $publication->id,
+                'user_id'          => auth()->id(),
+                'date_reservation' => now()->toDateString(),
+                'date_demandee'    => $data['date_demandee'] ?? null,
+                'duree_demandee'   => $data['duree_demandee'] ?? 1,
+                'nom_prenom'       => $data['nom_prenom'] ?? null,
+                'email'            => $data['email'] ?? null,
+                'telephone'        => $data['telephone'] ?? null,
+                'message'          => $data['message'] ?? null,
+                'statut'           => 'Demandée',
+            ]);
 
-        // 3. Créer la notification
-        Notification::create([
-            'user_id'       => $user->id,
-            'type'          => 'Réservation',
-            'message'       => $message,
-            // On envoie l'email SEULEMENT SI l'utilisateur a une adresse email
-            'send_email'    => !empty($user->email), 
-            'send_email_address'    => $user->email, 
-            // On envoie WhatsApp SEULEMENT SI l'utilisateur a un contact
-            'send_whatsapp' => !empty($user->contact),
-            'send_whatsapp_number' => $user->contact,
-        ]);
+            // =============================
+            // Notification
+            // =============================
+            $dispositif = $publication->dispositif;
+            $owner = $dispositif->user;
 
-        $action = $request->action;
+            $notificationMessage = "Demande de réservation du dispositif "
+                . $dispositif->designation
+                . " immatriculé "
+                . $dispositif->numero_immatriculation;
 
-        if (empty($user->contact) && empty($user->email))
-        {
-            return redirect()->back()->with('success', 'Votre demande de réservation a été envoyée !');
-        } else
-        {
-            // Lien vers la réservation
-            $lienReservation = route('user.reservations.show', $reservation->id);
+            Notification::create([
+                'user_id'              => $owner->id,
+                'type'                 => 'Réservation',
+                'message'              => $notificationMessage,
+                'send_email'           => !empty($owner->email),
+                'send_email_address'   => $owner->email,
+                'send_whatsapp'        => !empty($owner->contact),
+                'send_whatsapp_number' => $owner->contact,
+            ]);
 
-            // Construction du message
-            $message  = "Bonjour,\n\n";
-            $message .= "Je souhaite réserver votre *"
-                . $publication->dispositif->type_dispositif->nom . " "
-                . $publication->dispositif->designation . "*\n\n";
+            DB::commit();
 
-            $message .= "*Date de début :* " . $request->date_demandee . "\n";
-            $message .= "*Durée :* " . $request->duree_demandee . " jour(s)\n";
+        } catch (\Exception $e) {
 
-            //$message .= "*Client :* " . auth()->user()->nom . "\n";
-            //$message .= "*Téléphone :* " . auth()->user()->contact . "\n\n";
+            DB::rollBack();
 
-            if ($request->message) {
-                $message .= "Message : " . $request->message . "\n\n";
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Une erreur est survenue.'
+                ], 500);
             }
 
-            $message .= "Voir la réservation :\n" . $lienReservation;
-
-            // Encodage obligatoire pour WhatsApp
-            $message = urlencode($message);
-
-            if ($action == 'call') {
-                return redirect("tel:$user->contact");
-            }
-
-            if ($action == 'whatsapp') {
-
-                $whatsappUrl = "https://wa.me/{$user->contact}?text={$message}";
-
-                return redirect()->route('home')
-                    ->with('success', 'Votre demande de réservation a été envoyée !')
-                    ->with('open_whatsapp', $whatsappUrl);
-            }
-
-            if ($action == 'email') {
-
-                return redirect("mailto:".$user->email);
-            }
+            return back()->with('error', 'Une erreur est survenue.');
         }
+
+        // =============================
+        // Construction message WhatsApp
+        // =============================
+        $lienReservation = route('user.reservations.show', $reservation->id);
+
+        $message  = "Bonjour,\n\n";
+        $message .= "Je souhaite réserver votre *"
+            . $publication->dispositif->type_dispositif->nom . " "
+            . $publication->dispositif->designation . "*\n\n";
+
+        if (!empty($data['message'])) {
+            $message .= "Message : " . $data['message'] . "\n\n";
+        }
+
+        $message .= "Voir la réservation :\n" . $lienReservation;
+
+        $messageEncoded = urlencode($message);
+
+        // =============================
+        // Retour Ajax
+        // =============================
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'reservation_id' => $reservation->id,
+                'owner' => [
+                    'contact' => $owner->contact,
+                    'email'   => $owner->email,
+                ],
+                'message' => $messageEncoded
+            ]);
+        }
+
+        // =============================
+        // Retour normal
+        // =============================
+        return back()->with('success', 'Votre demande de réservation a été envoyée !');
     }
 }
+

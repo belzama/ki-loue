@@ -171,16 +171,21 @@
                             <a href="{{ route('publications.show', $publication) }}"
                             class="btn btn-outline-primary">
                                 Voir détails
-                            </a>
+                            </a>                            
 
-                            <a href="{{ route('reservations.create', $publication) }}"
-                            class="btn btn-success">
-                                Demander réservation
-                            </a>
+                            <div class="d-grid gap-2">
+                                <button type="button"
+                                        class="btn btn-success contact-btn"
+                                        data-url="{{ route('reservations.store', $publication->id) }}">
+                                    Contacter
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            @include('partials.contact-modal')
 
         @empty
             <div class="col-12">
@@ -198,4 +203,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/dependent-select.js') }}"></script>
+    <script src="{{ asset('js/contact-modal.js') }}"></script>
 @endpush

@@ -49,6 +49,11 @@ class ReservationController extends Controller
             'statut' => 'Accordée'
         ]);
 
+        //changer le statut de la publication
+        $reservation->publication->update([
+            'active' => 0
+        ]);
+
         //Création de la notification
         // 1. Préparer le message proprement
         $dispositif = $reservation->publication->dispositif;

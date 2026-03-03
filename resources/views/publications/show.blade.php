@@ -34,6 +34,15 @@
             </span>
         </h3>
 
+        <div class="d-grid gap-2">
+            <button type="button"  
+                    class="btn btn-success contact-btn"
+                    data-url="{{ route('reservations.store', $publication->id) }}">
+                Contacter
+            </button>
+        </div>
+        @include('partials.contact-modal')
+
     </div>
 
     {{-- ===== 3. INFOS DISPOSITIF ===== --}}
@@ -113,3 +122,7 @@
 @include('partials.photo-viewer')
 
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/contact-modal.js') }}"></script>
+@endpush

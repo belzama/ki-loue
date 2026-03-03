@@ -14,11 +14,8 @@
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
-                <th>Publication</th>
-                <th>Nom</th>
-                <th>Téléphone</th>
-                <th>Date demandée</th>
-                <th>Durée</th>
+                <th>Date</th>
+                <th>Dispositif</th>
                 <th>Statut</th>
                 <th>Actions</th>
             </tr>
@@ -26,18 +23,13 @@
         <tbody>
             @foreach($reservations as $reservation)
             <tr>
-                <td>
-                    {{ $reservation->publication->dispositif->designation ?? '-' }} 
-                    <span class="badge bg-primary"> 
-                        {{ $reservation->publication->dispositif->numero_immatriculation ?? '-' }}                    
-                    </span>
+                <td> {{ $reservation->created_at->format('d/m/Y H:i') }} 
+                <td>                    
+                    {{ $reservation->publication->dispositif->type_dispositif->nom ?? '' }} 
+                    {{ $reservation->publication->dispositif->designation ?? '' }} 
+                    {{ $reservation->publication->dispositif->numero_immatriculation ?? '' }}
                 </td>
-                <td>{{ $reservation->nom_prenom }}</td>
-                <td>{{ $reservation->telephone }}</td>
-                <td>{{ $reservation->date_demandee }}</td>
-                <td>{{ $reservation->duree_demandee }} jours</td>
-                <td>
-                    
+                <td>                    
                     @if($reservation->statut == 'Demandée')
                         <a href="{{ route('user.reservations.approve.form',$reservation->id) }}"
                            class="btn btn-success btn-sm">

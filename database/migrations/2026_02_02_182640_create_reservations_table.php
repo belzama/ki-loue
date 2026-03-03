@@ -22,8 +22,8 @@ return new class extends Migration
 
             // Dates
             $table->date('date_reservation');      // date de la demande
-            $table->date('date_demandee');        // date souhaitée pour la réservation
-            $table->integer('duree_demandee');    // durée souhaitée (en jours)
+            $table->date('date_demandee')->nullable();        // date souhaitée pour la réservation
+            $table->integer('duree_demandee')->default(0);    // durée souhaitée (en jours)
             
             // Informations de l'utilisateur
             $table->string('nom_prenom')->nullable();
