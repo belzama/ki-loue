@@ -9,7 +9,7 @@ class DispositifParam extends Model
 {
     protected $fillable = [
         'dispositif_id',
-        'name',
+        'type_dispositif_param_id',
         'value'
     ];
 
@@ -21,11 +21,7 @@ class DispositifParam extends Model
     
     public function typeParam()
     {
-        return $this->belongsTo(
-            TypeDispositifParam::class,
-            'name',
-            'name'
-        );
+        return $this->belongsTo(TypeDispositifParam::class, 'type_dispositif_param_id');
     }
     
 }

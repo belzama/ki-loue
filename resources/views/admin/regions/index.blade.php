@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Villes/Préfectures</h1>
+<h1>Villes</h1>
 
-<a href="{{ route('admin.villes.create') }}" 
+<a href="{{ route('admin.regions.create') }}" 
     class="btn btn-primary mb-3 bi bi-plus-lg">
-    Ajouter une ville/préfecture
+    Ajouter une région
 </a>
 
 @if(session('success'))
@@ -16,27 +16,27 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Pays/Région</th>
+            <th>Pays</th>
             <th>Nom</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($villes as $ville)
+        @foreach($regions as $region)
         <tr>
-            <td>{{ $ville->id }}</td>
-            <td>{{ $ville->region->pays->nom }} - {{ $ville->region->nom }}</td>
-            <td>{{ $ville->nom ?? '' }}</td>
+            <td>{{ $region->id }}</td>
+            <td>{{ $region->pays->nom }}</td>
+            <td>{{ $region->nom ?? '' }}</td>
             <td>
-                <a href="{{ route('admin.villes.edit', $ville) }}" 
+                <a href="{{ route('admin.regions.edit', $region) }}" 
                     class="btn btn-sm btn-warning bi bi-pencil-square"
                     title="Modifier">
                 </a>
-                <form action="{{ route('admin.villes.destroy', $ville) }}" method="POST" style="display:inline-block">
+                <form action="{{ route('admin.regions.destroy', $region) }}" method="POST" style="display:inline-block">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-danger bi bi-trash-fill"
-                        onclick="return confirm('Supprimer cette ville ?')" title="Supprimer">
+                        onclick="return confirm('Supprimer cette region ?')" title="Supprimer">
                     </button>
                 </form>
             </td>
@@ -45,6 +45,6 @@
     </tbody>
 </table>
 
-{{-- $villeList->links() --}}
+{{-- $regionList->links() --}}
 @endsection
 

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Continent;
+use App\Models\Pays;
+use App\Models\Region;
+use App\Models\Ville;
 use App\Models\TypesDispositif;
 use App\Models\Publication;
 use App\Models\Reservation;
@@ -16,57 +18,98 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. On initialise la requête avec les relations nécessaires
+        // Requête de base avec eager loading
         $query = Publication::with([
             'dispositif.photos',
             'dispositif.type_dispositif',
-            'ville.pays',
+            'dispositif.type_dispositif.categorie',
+            'ville.region.pays',
             'devise'
-        ])->where('active', 1)
+        ])
+        ->where('active', 1)
         ->where('date_debut', '<=', now())
         ->where('date_fin', '>=', now());
 
-        // 2. Filtre par Continent (via la relation Ville -> Pays -> Continent)
-        if ($request->filled('continent_id')) {
-            $query->whereHas('ville.pays', function($q) use ($request) {
-                $q->where('continent_id', $request->continent_id);
-            });
-        }
+        /*
+        |----------------------------------------------------------------------
+        | FILTRES
+        |----------------------------------------------------------------------
+        */
 
-        // 3. Filtre par Pays (via la relation Ville -> Pays)
+        // Filtre par Continent via Ville → Région → Pays → Continent
+        /*if ($request->filled('continent_id')) {
+            $query->whereHas('ville.region.pays', function($q) use ($request){
+                $q->whereHas('continent', function($q2) use ($request){
+                    $q2->where('id', $request->continent_id);
+                });
+            });
+        } */       
+
+        // Filtre par Pays via Ville → Région → Pays
         if ($request->filled('pays_id')) {
-            $query->whereHas('ville', function($q) use ($request) {
-                $q->where('pays_id', $request->pays_id);
+            $query->whereHas('ville.region.pays', function($q) use ($request){
+                $q->where('id', $request->pays_id);
             });
         }
 
-        // 4. Filtre par Ville
+        // Filtre par Région via Ville → Région
+        if ($request->filled('region_id')) {
+            $query->whereHas('ville.region', function($q) use ($request){
+                $q->where('id', $request->region_id);
+            });
+        }
+
+        // Filtre par Ville
         if ($request->filled('ville_id')) {
             $query->where('ville_id', $request->ville_id);
         }
 
-        // 5. Filtre par Type de dispositif
+        // Filtre par Type de dispositif via Dispositif
         if ($request->filled('types_dispositif_id')) {
-            $query->whereHas('dispositif', function($q) use ($request) {
+            $query->whereHas('dispositif', function ($q) use ($request) {
                 $q->where('types_dispositif_id', $request->types_dispositif_id);
             });
         }
 
-        // 6. Filtres par Tarifs
+        // Filtre par Tarif minimum
         if ($request->filled('tarif_min')) {
             $query->where('tarif_location', '>=', $request->tarif_min);
         }
+
+        // Filtre par Tarif maximum
         if ($request->filled('tarif_max')) {
             $query->where('tarif_location', '<=', $request->tarif_max);
         }
 
-        // 7. On exécute la pagination en gardant les filtres dans l'URL (withQueryString)
-        $publications = $query->latest()->paginate(50)->withQueryString();
+        /*
+        |----------------------------------------------------------------------
+        | PAGINATION
+        |----------------------------------------------------------------------
+        */
 
-        $typesDispositifs = TypesDispositif::all();
-        $continents = Continent::all();
+        $publications = $query
+            ->latest()
+            ->paginate(12)
+            ->withQueryString(); // garde les filtres dans l'URL
 
-        return view('welcome', compact('publications', 'typesDispositifs', 'continents'));
+        /*
+        |----------------------------------------------------------------------
+        | DONNÉES POUR LES FILTRES
+        |----------------------------------------------------------------------
+        */
+
+        $typesDispositifs = TypesDispositif::orderBy('nom')->get();
+        $pays             = Pays::orderBy('nom')->get();
+        $regions             = Region::orderBy('nom')->get();
+        $villes             = Ville::orderBy('nom')->get();
+
+        return view('welcome', compact(
+            'publications',
+            'typesDispositifs',
+            'pays',
+            'regions',
+            'villes'
+        ));
     }
 
     /**
@@ -77,7 +120,7 @@ class HomeController extends Controller
         $publication->load([
             'dispositif.photos',
             'dispositif.type_dispositif',
-            'ville.pays',
+            'ville.region.pays',
             'devise'
         ]);
 
@@ -182,10 +225,12 @@ class HomeController extends Controller
             }
 
             if ($action == 'whatsapp') {
-                return redirect()->route('reservations.whatsapp', [
-                    'telephone' => $user->contact,// . ";97020283",
-                    'message' => $message
-                ]);
+
+                $whatsappUrl = "https://wa.me/{$user->contact}?text={$message}";
+
+                return redirect()->route('home')
+                    ->with('success', 'Votre demande de réservation a été envoyée !')
+                    ->with('open_whatsapp', $whatsappUrl);
             }
 
             if ($action == 'email') {

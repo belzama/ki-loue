@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pays;
+use App\Models\Region;
 use App\Models\Ville;
 use Illuminate\Http\Request;
 
@@ -15,9 +16,16 @@ class LocalisationController extends Controller
             ->get(['id','nom']);
     }
 
-    public function villesByPays($paysId)
+    public function regionsByPays($paysId)
     {
-        return Ville::where('pays_id', $paysId)
+        return Region::where('pays_id', $paysId)
+            ->orderBy('nom')
+            ->get(['id','nom']);
+    }
+
+    public function villesByRegion($regionId)
+    {
+        return Ville::where('region_id', $regionId)
             ->orderBy('nom')
             ->get(['id','nom']);
     }

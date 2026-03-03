@@ -8,6 +8,7 @@ use App\Models\User;
 class Transaction extends Model
 {
     protected $fillable = [
+        'created_at',
         'user_id',
         'montant',
         'type',

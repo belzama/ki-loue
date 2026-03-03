@@ -33,7 +33,7 @@
                 @foreach($dispositif->params as $param)
                     <div class="col-md-4 mb-3">
                         <div class="border rounded p-2 bg-light">
-                            <small class="text-muted">{{ ucfirst($param->typeParam->label ?? $param->name) }}</small>
+                            <small class="text-muted">{{ ucfirst($param->typeParam->label ?? $param->name) }} ({{ $param->typeParam->numeric_value_unit ?? '' }})</small>
                             <div class="fw-bold">
                                 {{ $param->value }}
                             </div>

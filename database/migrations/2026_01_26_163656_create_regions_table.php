@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dispositif_params', function (Blueprint $table) {
+        Schema::create('regions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('dispositif_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('type_dispositif_param_id')->constrained()->cascadeOnDelete();
-            $table->string('value');
+            $table->foreignId('pays_id')->constrained()->cascadeOnDelete();
+            $table->string('nom');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dispositif_params');
+        Schema::dropIfExists('regions');
     }
 };

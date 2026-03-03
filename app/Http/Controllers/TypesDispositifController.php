@@ -9,6 +9,54 @@ use Illuminate\Http\Request;
 
 class TypesDispositifController extends Controller
 {
+    public function search(Request $request)
+    {
+        $query = TypesDispositif::with('categorie');
+
+        // Filtre par catégorie si fourni
+        if ($request->filled('categorie_id')) {
+            $query->where('categorie_id', $request->categorie_id);
+        }
+
+        // Filtre par recherche
+        if ($request->filled('q')) {
+            $query->where('nom', 'like', '%' . $request->q . '%');
+        }
+
+        $types = $query->limit(50)->get();
+
+        return response()->json([
+            'results' => $types->map(function ($type) {
+                return [
+                    'id' => $type->id,
+                    'text' => $type->nom . (optional($type->categorie)->nom ? ' (' . $type->categorie->nom . ')' : ''),
+                    'categorie_id' => $type->categorie_id,
+                ];
+            }),
+        ]);
+    }
+
+    // ⚡ Récupérer un type par ID (pour Select2 + remplir catégorie)
+    public function show($id)
+    {
+        $type = TypesDispositif::with('categorie')->findOrFail($id);
+
+        return response()->json([
+            'id' => $type->id,
+            'nom' => $type->nom,
+            'categorie_id' => $type->categorie_id,
+            'categorie_nom' => $type->categorie->nom ?? ''
+        ]);
+    }
+
+    // ⚡ Récupérer les paramètres dynamiques d’un type
+    public function params($id)
+    {
+        $type = TypesDispositif::with('params')->findOrFail($id);
+
+        return response()->json($type->params);
+    }
+
     public function index()
     {
         $types = TypesDispositif::with(['categorie','params'])->paginate(10);
@@ -107,5 +155,12 @@ class TypesDispositifController extends Controller
     {
         $types_dispositif->delete();
         return back()->with('success', 'Type supprimé.');
+    }    
+
+    public function typesByCategorie($categorieId)
+    {
+        return TypesDispositif::where('categorie_id', $categorieId)
+            ->orderBy('nom')
+            ->get(['id','nom']);
     }
 }

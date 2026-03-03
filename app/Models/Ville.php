@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Pays;
+use App\Models\Region;
 
 class Ville extends Model
 {
-    protected $fillable = ['pays_id','nom'];
+    protected $fillable = ['region_id','nom'];
 
-    public function pays() { return $this->belongsTo(Pays::class); }
+    public function region() { return $this->belongsTo(Region::class); }
 }

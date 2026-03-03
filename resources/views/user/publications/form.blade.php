@@ -1,5 +1,6 @@
 @php
     $isEdit = isset($publication);
+    $dispositif = $dispositif ?? null; // sécurise la variable
     $user = auth()->user();
     $tauxPublication = $user->pays->taux_commission ?: sys_param('COMMISSION_RATE', 0);
 @endphp
@@ -22,44 +23,63 @@
 
     {{-- DISPOSITIF --}}
     @if(empty($dispositifs) || count($dispositifs) === 0)
+
+        {{-- Cas dispositif imposé --}}
         <input type="hidden" name="dispositif_id" value="{{ $dispositif->id }}">
+
         <input type="text" class="form-control mb-3"
-               value="{{ $dispositif->type_dispositif->nom ?? '' }} {{ $dispositif->designation }} {{ $dispositif->numero_immatriculation }} : {{ $dispositif->description }}"
-               disabled>
+            value="{{ $dispositif->designation }} ({{ $dispositif->type_dispositif->nom ?? '' }})"
+            disabled>
+
     @else
+
         <div class="mb-3">
-            <label class="form-label">Dispositif <span class="text-danger">*</span></label>
-            <select name="dispositif_id"
-                    id="dispositif_id"
-                    class="form-select"
-                    required
-                    {{ $isEdit ? 'disabled' : '' }}>
-                <option value="">Sélectionner</option>
-                @foreach($dispositifs as $dispositif)
-                    <option value="{{ $dispositif->id }}">
-                        {{ $dispositif->designation }} ({{ $dispositif->type_dispositif->nom ?? '' }})
-                    </option>
-                @endforeach
-            </select>
+            <label class="form-label">
+                Dispositif <span class="text-danger">*</span>
+            </label>
+
+            @if($isEdit)
+
+                {{-- On envoie la valeur --}}
+                <input type="hidden" name="dispositif_id" value="{{ $publication->dispositif_id }}">
+
+                {{-- On affiche mais non modifiable --}}
+                <input type="text"
+                    class="form-control"
+                    value="{{ $publication->dispositif->designation }} ({{ $publication->dispositif->type_dispositif->nom ?? '' }})"
+                    disabled>
+
+            @else
+
+                {{-- Mode création --}}
+                <select name="dispositif_id"
+                        id="dispositif_id"
+                        class="form-select"
+                        required>
+                    <option value="">Sélectionner</option>
+
+                    @foreach($dispositifs as $d)
+                        <option value="{{ $d->id }}"
+                            {{ old('dispositif_id') == $d->id ? 'selected' : '' }}>
+                            {{ $d->designation }} ({{ $d->type_dispositif->nom ?? '' }})
+                        </option>
+                    @endforeach
+                </select>
+
+            @endif
         </div>
+
     @endif
 
     {{-- LOCALISATION --}}
     <div class="row g-3 mb-3">
         <div class="col-md-4">
-            <label>Continent/Sous région</label>
-            <select id="continent_id" class="form-select">
-                <option value="">Sélectionner</option>
-                @foreach($continents as $continent)
-                    <option value="{{ $continent->id }}" {{ old('continent_id', $dispositif->user->pays->continent_id ?? $user->pays->continent_id ?? '') == $continent->id ? 'selected' : '' }}>
-                        {{ $continent->nom }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="col-md-4">
-            <label>Pays/région</label>
-            <select id="pays_id" class="form-select">
+            <label>Pays</label>
+            <select id="continent_id" 
+                    name="pays_id"
+                    data-child="region_id"
+                    data-url="/regions/by-pays/"
+                    class="form-select">
                 <option value="">Sélectionner</option>
                 @foreach($pays as $p)
                     <option value="{{ $p->id }}" {{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') == $p->id ? 'selected' : '' }}>
@@ -69,12 +89,24 @@
         </div>
 
         <div class="col-md-4">
-            <label>Ville/Préfecture <span class="text-danger">*</span></label>
-            <select name="ville_id" id="ville_id" class="form-select" required>
+            <label>Région</label>
+            <select id="region_id" 
+                    name="region_id" 
+                    data-child="ville_id"
+                    data-url="/villes/by-region/"
+                    data-selected="{{ old('ville_id', $publication->ville_id ?? '') }}"
+                    class="form-select">
                 <option value="">Sélectionner</option>
-                @foreach($villes as $ville)
-                    <option value="{{ $ville->id }}">{{ $ville->nom }}</option>
-                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label>Ville/Préfecture <span class="text-danger">*</span></label>
+            <select id="ville_id" 
+                    name="ville_id" 
+                    data-selected="{{ old('ville_id', $publication->ville_id ?? '') }}"
+                    class="form-select" required>
+                <option value="">Sélectionner</option>
             </select>
         </div>
     </div>
@@ -159,6 +191,10 @@
     </div>
 </form>
 
+
+@section('scripts')
+<script src="{{ asset('js/dependent-select.js') }}"></script>
+
 {{-- JAVASCRIPT --}}
 <script>
 const TAUX = {{ $tauxPublication }};
@@ -222,49 +258,7 @@ dispositifSelect?.addEventListener('change', function () {
         });
 });
 
-/* --- Gestion des filtres géographiques (Continent -> Pays -> Ville) --- */
-
-document.getElementById('continent_id').addEventListener('change', function () {
-    const paysSelect = document.getElementById('pays_id');
-    const villeSelect = document.getElementById('ville_id');
-
-    paysSelect.innerHTML = '<option value="">Chargement...</option>';
-    villeSelect.innerHTML = '<option value="">Sélectionner</option>';
-
-    if (!this.value) {
-        paysSelect.innerHTML = '<option value="">Sélectionner</option>';
-        return;
-    }
-
-    fetch(`/pays/by-continent/${this.value}`)
-        .then(r => r.json())
-        .then(data => {
-            paysSelect.innerHTML = '<option value="">Sélectionner</option>';
-            data.forEach(p => {
-                paysSelect.innerHTML += `<option value="${p.id}">${p.nom}</option>`;
-            });
-        });
-});
-
-document.getElementById('pays_id').addEventListener('change', function () {
-    const villeSelect = document.getElementById('ville_id');
-    villeSelect.innerHTML = '<option value="">Chargement...</option>';
-
-    if (!this.value) {
-        villeSelect.innerHTML = '<option value="">Sélectionner</option>';
-        return;
-    }
-
-    fetch(`/villes/by-pays/${this.value}`)
-        .then(r => r.json())
-        .then(data => {
-            villeSelect.innerHTML = '<option value="">Sélectionner</option>';
-            data.forEach(v => {
-                villeSelect.innerHTML += `<option value="${v.id}">${v.nom}</option>`;
-            });
-        });
-});
-
 // Lancement initial du calcul
 calculer();
 </script>
+@endsection

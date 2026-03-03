@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
@@ -22,15 +23,32 @@ class TransactionController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
+        // Dates par défaut = aujourd’hui
+        $dateDebut = $request->date_debut ?? Carbon::today()->toDateString();
+        $dateFin   = $request->date_fin ?? Carbon::today()->toDateString();
+
         $transactions = Transaction::where('user_id', $user->id)
+            ->whereBetween('created_at', [
+                Carbon::parse($dateDebut)->startOfDay(),
+                Carbon::parse($dateFin)->endOfDay()
+            ])
             ->latest()
             ->paginate(15);
 
-        return view('user.transactions.index', compact('transactions','user'));
+        return view('user.transactions.index', compact(
+            'transactions',
+            'dateDebut',
+            'dateFin'
+        ));
+    }
+
+    public function show(Transaction $transaction)
+    {
+        return view('user.transactions.show', compact('transaction'));
     }
 
     public function deposit(User $user)

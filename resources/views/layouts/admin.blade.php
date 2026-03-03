@@ -25,13 +25,19 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.pays.index') }}" 
                         class="nav-link">
-                        <i class="bi bi-flag me-2"></i> Pays/Régions
+                        <i class="bi bi-globe-americas me-2"></i> Pays
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.regions.index') }}" 
+                        class="nav-link">
+                        <i class="bi bi-map me-2"></i> Régions
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.villes.index') }}" 
                         class="nav-link">
-                        <i class="bi bi-flag me-2"></i> Villes/Préfectures
+                        <i class="bi bi-building me-2"></i> Villes/Préfectures
                     </a>
                 </li>
                 <li class="nav-item">

@@ -10,56 +10,90 @@ class VilleSeeder extends Seeder
     public function run(): void
     {
         // Récupération des pays par nom
-        $pays = DB::table('pays')->pluck('id', 'nom');
+        $regions = DB::table('regions')->pluck('id', 'nom');
 
         $villes = [
 
             // ======================
-            // TOGO
+            // TOGO - REGION MARITIME
             // ======================
-            'Togo' => [
-                'Lomé',
-                'Tsévié',
-                'Aného',
-                'Atakpamé',
-                'Notsè',
-                'Kpalimé',
-                'Badou',
-                'Sokodé',
-                'Blitta',
-                'Kara',
-                'Bafilo',
-                'Dapaong',
-                'Mango',
-                'Anié',
-                'Cinkassé',
-                'Tabligbo',
-                'Tchamba',
-                'Elavanyo',
-                'Tohoun',
-                'Djarkpanga',
-                'Amlamé',
-                'Kougnohou',
-                'Mandouri',
-                'Pagouda',
-                'Danyi Apéyémé',
-                'Naki-Centre',
-                'Kévé',
-                'Agou Gadzépé',
-                'Tandjoaré',
+            'Région maritime' => [
+                ['nom' => 'Avé'],
+                ['nom' => 'Golfe'],
+                ['nom' => 'Lacs'],
+                ['nom' => 'Vo'],
+                ['nom' => 'Yoto'],
+                ['nom' => 'Zio'],
+                ['nom' => 'Agoè-Nyivé'],
+                ['nom' => 'Bas-Mono'],
+            ],
+
+            // ======================
+            // TOGO - REGION DES PLATEAUX
+            // ======================
+            'Région des plateaux' => [
+                ['nom' => 'Agou'],
+                ['nom' => 'Amou'],
+                ['nom' => 'Danyi'],
+                ['nom' => 'Est-Mono'],
+                ['nom' => 'Haho'],
+                ['nom' => 'Kloto'],
+                ['nom' => 'Moyen-Mono'],
+                ['nom' => 'Ogou'],
+                ['nom' => 'Wawa'],
+                ['nom' => 'Akébou'],
+                ['nom' => 'Anié'],
+                ['nom' => 'Kpélé'],
+            ],
+
+            // ======================
+            // TOGO - REGION CENTRALE
+            // ======================
+            'Région centrale' => [
+                ['nom' => 'Blitta'],
+                ['nom' => 'Sotouboua'],
+                ['nom' => 'Tchamba'],
+                ['nom' => 'Tchaoudjo'],
+                ['nom' => 'Mô'],
+            ],
+
+            // ======================
+            // TOGO - REGION DE LA KARA
+            // ======================
+            'Région de la kara' => [
+                ['nom' => 'Assoli'],
+                ['nom' => 'Bassar'],
+                ['nom' => 'Binah'],
+                ['nom' => 'Dankpen'],
+                ['nom' => 'Doufelgou'],
+                ['nom' => 'Kéran'],
+                ['nom' => 'Kozah'],
+            ],
+
+            // ======================
+            // TOGO - REGION DES SAVANES
+            // ======================
+            'Région des savanes' => [
+                ['nom' => 'Kpendjal'],
+                ['nom' => 'Oti'],
+                ['nom' => 'Tandjouaré'],
+                ['nom' => 'Tône'],
+                ['nom' => 'Cinkassé'],
+                ['nom' => 'Oti-Sud'],
+                ['nom' => 'Kpendjal-Ouest'],
             ],
         ];
 
-        foreach ($villes as $nomPays => $listeVilles) {
+        foreach ($villes as $nomRegion => $listeVilles) {
 
-            if (!isset($pays[$nomPays])) {
+            if (!isset($regions[$nomRegion])) {
                 continue;
             }
 
             foreach ($listeVilles as $ville) {
                 DB::table('villes')->insert([
-                    'pays_id' => $pays[$nomPays],
-                    'nom' => $ville,
+                    'region_id' => $regions[$nomRegion],
+                    'nom' => $ville['nom'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

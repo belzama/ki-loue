@@ -14,7 +14,26 @@
         </p>
     </div>
 </section>
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 @include('partials.search-publications-actives')
 
-
 @endsection
+
+@push('scripts')
+@if(session('open_whatsapp'))
+    <a href="{{ session('open_whatsapp') }}"
+       id="autoWhatsappLink"
+       target="_blank"
+       style="display:none;"></a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("autoWhatsappLink").click();
+        });
+    </script>
+@endif
+@endpush

@@ -2,7 +2,7 @@
     $isEdit = isset($dispositif);
 @endphp
 
-{{-- Afficher les erreurs --}}
+{{-- Affichage erreurs --}}
 @if($errors->any())
     <div class="alert alert-danger">
         <ul class="mb-0">
@@ -20,174 +20,233 @@
         @method('PUT')
     @endif
 
-    {{-- Type de dispositif --}}
-    <div class="mb-3">
-        <label class="form-label">Type de dispositif <span class="text-danger">*</span></label>
-        <select name="types_dispositif_id" class="form-select" required>
-            <option value="">Sélectionner</option>
-            @foreach($types as $type)
-                <option value="{{ $type->id }}"
-                    {{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') == $type->id ? 'selected' : '' }}>
-                    {{ $type->nom }} ({{ $type->categorie->nom ?? '' }})
-                </option>
-            @endforeach
-        </select>
+    {{-- Catégorie & Type --}}
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+            <select id="categorie_id" 
+                    name="categorie_id"
+                    data-child="types_dispositif_id"
+                    data-url="/types_dispositif/by-categorie/"
+                    class="form-select" required>
+                <option value="">Sélectionner</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat->id }}"
+                        {{ old('categorie_id', $dispositif->type_dispositif->categorie_id ?? '') == $cat->id ? 'selected' : '' }}>
+                        {{ $cat->nom }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Type de dispositif <span class="text-danger">*</span></label>
+            <select id="types_dispositif_id"
+                    name="types_dispositif_id"
+                    data-selected="{{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') }}"
+                    class="form-select"
+                    required>
+                <option value="">Sélectionner</option>
+            </select>
+        </div>
     </div>
 
-    {{-- Numéro immatriculation --}}
-    <div class="mb-3">
-        <label class="form-label">N° d'immatriculation</label>
-        <input type="text" name="numero_immatriculation" class="form-control" value="{{ old('numero_immatriculation', $dispositif->numero_immatriculation ?? '') }}">
+    {{-- Désignation & Immatriculation --}}
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Désignation (Marque & modèle) <span class="text-danger">*</span></label>
+            <input type="text" name="designation" class="form-control"
+                   value="{{ old('designation', $dispositif->designation ?? '') }}" required>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">N° d'immatriculation</label>
+            <input type="text" name="numero_immatriculation" class="form-control"
+                   value="{{ old('numero_immatriculation', $dispositif->numero_immatriculation ?? '') }}">
+        </div>
     </div>
 
-    {{-- Marque et model --}}
-    <div class="mb-3">
-        <label class="form-label">Désignation (Marque & modèle) <span class="text-danger">*</span></label>
-        <input type="text" name="designation" class="form-control" value="{{ old('designation', $dispositif->designation ?? '') }}">
-    </div>
-    
-    {{-- Container pour les paramètres dynamiques --}}
+    {{-- Paramètres dynamiques --}}
     <div id="params-container" class="mt-3"></div>
 
-    {{-- Statut --}}
-    <div class="mb-3">
-        <label class="form-label">Statut <span class="text-danger">*</span></label>
-        <select name="statut" class="form-select" required>
-            @foreach(['Actif','Inactif','Suspendu'] as $statut)
-                <option value="{{ $statut }}"
-                    {{ old('statut', $dispositif->statut ?? '') == $statut ? 'selected' : '' }}>
-                    {{ $statut }}
-                </option>
-            @endforeach
-        </select>
+    {{-- Etat & Statut --}}
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Etat <span class="text-danger">*</span></label>
+            <select name="etat" class="form-select" required>
+                <option value="">Sélectionner</option>
+                @foreach(['Neuf','Bon','Révisé'] as $etat)
+                    <option value="{{ $etat }}"
+                        {{ old('etat', $dispositif->etat ?? '') == $etat ? 'selected' : '' }}>
+                        {{ $etat }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Statut <span class="text-danger">*</span></label>
+            <select name="statut" class="form-select" required>
+                <option value="">Sélectionner</option>
+                @foreach(['Actif','Inactif','Suspendu'] as $statut)
+                    <option value="{{ $statut }}"
+                        {{ strtolower(old('statut', $dispositif->statut ?? '')) == strtolower($statut) ? 'selected' : '' }}>
+                        {{ $statut }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     {{-- Photos --}}
     <div class="mb-3">
         <label class="form-label">Photos</label>
-        <input type="file" name="photos[]" multiple class="form-control">        
+        <input type="file" name="photos[]" multiple class="form-control">
     </div>
 
-    {{-- Boutons --}}
     <div class="mt-3">
         <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle"></i> {{ $isEdit ? 'Enregistrer' : 'Créer' }}
+            {{ $isEdit ? 'Enregistrer' : 'Créer' }}
         </button>
         <a href="{{ route('user.dispositifs.index') }}" class="btn btn-secondary">Annuler</a>
     </div>
 </form>
 
+{{-- Photos édition --}}
 @if($isEdit && $dispositif->photos->count())
 <div class="row mt-3">
     @foreach($dispositif->photos as $photo)
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm">
-
-                <img src="{{ asset('storage/'.$photo->path) }}"
-                    class="card-img-top"
-                    style="height:120px; object-fit:cover;">
-
-                <div class="card-body p-2 text-center">
-
-                    {{-- Badge photo principale --}}
-                    @if($photo->is_cover)
-                        <span class="badge bg-success mb-2">Photo principale</span>
-                    @endif
-
-                    {{-- Supprimer --}}
-                    <form action="{{ route('user.dispositifs.photos.destroy', $photo) }}"
-                        method="POST"
-                        onsubmit="return confirm('Supprimer cette photo ?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-outline-danger w-100">
-                            <i class="bi bi-trash"></i> Supprimer
-                        </button>
-                    </form>
-
-                </div>
+                <img src="{{ asset('storage/'.$photo->path) }}" class="card-img-top" style="height:120px; object-fit:cover;">
             </div>
         </div>
     @endforeach
 </div>
 @endif
 
-{{-- Toujours définir existingParams --}}
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="{{ asset('js/dependent-select.js') }}"></script>
+
 <script>
-    let existingParams = @json(
-        isset($dispositif)
-            ? $dispositif->params->pluck('value','name')
-            : []
-    );
-</script>
+$(document).ready(function(){
 
-{{-- Script qui génère les paramètres dynamiques --}}
-<script>
-let types = @json($types);
+    const container = $('#params-container');
 
-function renderParams(typeId)
-{
-    let container = document.getElementById('params-container');
-    container.innerHTML = '';
+    const existingParams = {!! json_encode(
+        isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []
+    ) !!};
 
-    let type = types.find(t => t.id == typeId);
-    if (!type || !type.params) return;
+    async function loadParams(typeId){
 
-    type.params.forEach(param => {
+        container.html('');
+        if(!typeId) return;
 
-        let inputHtml = '';
-        let value = existingParams[param.name] ?? '';
-        let requiredMark = param.required ? ' <span class="text-danger">*</span>' : '';
-        let requiredAttr = param.required ? 'required' : '';
+        try {
+            const res = await fetch(`/types_dispositif/${typeId}/params`);
+            const params = await res.json();
 
-        // ⚡ Liste déroulante si list_values
-        if(param.list_values && param.list_values.trim() !== '') {
-            let options = param.list_values.split(',').map(v => v.trim());
-            inputHtml += `<select name="params[${param.name}]" class="form-select" ${requiredAttr}>`;
-            inputHtml += `<option value="">Sélectionner</option>`;
-            options.forEach(opt => {
-                inputHtml += `<option value="${opt}" ${value == opt ? 'selected' : ''}>${opt}</option>`;
+            params.forEach(param => {
+
+                const paramId = param.id ?? null;
+
+                if(!paramId){
+                    console.error("Paramètre sans ID :", param);
+                    return;
+                }
+                
+                const inputName = `params[${paramId}]`;
+                const labelText = param.label ?? param.name;
+                const required  = param.required ?? false;
+                const value     = existingParams[paramId] ?? '';
+                const inputId   = `param_${paramId}`;
+
+                const wrapper = $('<div class="mb-3"></div>');
+
+                let unit = param.numeric_value_unit ? ` (${param.numeric_value_unit})` : '';
+                let star = required ? ' <span class="text-danger">*</span>' : '';
+
+                const labelEl = $(`
+                    <label class="form-label" for="${inputId}">
+                        ${labelText}${unit}${star}
+                    </label>
+                `);
+
+                let input;
+
+                // SELECT
+                if(param.list_values){
+
+                    input = $('<select class="form-select"></select>').attr({
+                        name: inputName,
+                        id: inputId
+                    });
+
+                    input.append('<option value="">Sélectionner</option>');
+
+                    param.list_values.split(',').forEach(opt=>{
+                        opt = opt.trim();
+                        const option = $('<option></option>').val(opt).text(opt);
+                        if(opt == value) option.prop('selected', true);
+                        input.append(option);
+                    });
+
+                }
+                // INPUT NORMAL
+                else {
+
+                    let type = 'text';
+                    if(param.value_type === 'int' || param.value_type === 'decimal') type='number';
+                    if(param.value_type === 'date') type='date';
+
+                    input = $('<input>', {
+                        type: type,
+                        class: 'form-control',
+                        id: inputId,
+                        name: inputName,
+                        value: value
+                    });
+
+                    if(param.value_type === 'decimal'){
+                        input.attr('step','0.01');
+                    }
+                }
+
+                if(required){
+                    input.prop('required', true);
+                }
+
+                wrapper.append(labelEl).append(input);
+                container.append(wrapper);
             });
-            inputHtml += `</select>`;
-        } else {
-            // ⚡ Sinon input standard
-            let inputType = 'text';
-            if(param.value_type === 'int' || param.value_type === 'decimal') inputType = 'number';
-            if(param.value_type === 'date') inputType = 'date';
-            if(param.value_type === 'datetime') inputType = 'datetime-local';
 
-            inputHtml += `<input type="${inputType}" 
-                                name="params[${param.name}]" 
-                                class="form-control" 
-                                value="${value}" 
-                                ${requiredAttr}>`;
+        } catch(error){
+            console.error("Erreur chargement paramètres :", error);
+            container.html('<div class="alert alert-danger">Erreur chargement paramètres</div>');
         }
+    }
 
-        let html = `
-            <div class="mb-3">
-                <label class="form-label">
-                    ${param.label ?? param.name}${requiredMark} 
-                    ${param.numeric_value_unit ? '('+param.numeric_value_unit+')' : ''}
-                </label>
-                ${inputHtml}
-            </div>
-        `;
+    // Sélection type → afficher params
+    const typeSelect = $('#types_dispositif_id');
 
-        container.insertAdjacentHTML('beforeend', html);
+    typeSelect.on('change', function(){
+        loadParams($(this).val());
     });
-}
 
-// ⚡ Initialisation
-document.addEventListener('DOMContentLoaded', function() {
-    let select = document.querySelector('[name="types_dispositif_id"]');
-    if(select.value) renderParams(select.value);
+    // Préchargement en édition
+    const selectedType = typeSelect.data('selected');
+    if(selectedType){
+        // Observer pour attendre que dependent-select.js ait rempli le select
+        const observer = new MutationObserver(function(){
+            if(typeSelect.find(`option[value="${selectedType}"]`).length){
+                typeSelect.val(selectedType).trigger('change');
+                observer.disconnect();
+            }
+        });
+        observer.observe(typeSelect[0], { childList: true });
+    }
 
-    select.addEventListener('change', function() {
-        renderParams(this.value);
-    });
 });
 </script>
-
-
-
-
+@endsection

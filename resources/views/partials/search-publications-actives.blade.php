@@ -2,87 +2,112 @@
 
     {{-- FILTRES --}}
     <div class="card mb-4 shadow-sm">
-        <form method="GET" class="card shadow-sm p-4">
-            <div class="row g-4 align-items-end">
+        <div class="card-body">
+            <form method="GET">
+                <div class="row align-items-start">
 
-                <!-- Champs à gauche -->
-                <div class="col-lg-10">
-                    <div class="row g-3">
+                    <!-- CHAMPS -->
+                    <div class="col-lg-9">
+                        <div class="row g-3">
 
-                        <div class="col-md-4">
-                            <label class="form-label">Continent/Sous région</label>
-                            <select id="continent_id" name="continent_id" class="form-select">
-                                <option value="">Tous</option>
-                                @foreach($continents as $continent)
-                                    <option value="{{ $continent->id }}" {{ request('continent_id') == $continent->id ? 'selected' : '' }}>
-                                        {{ $continent->nom }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="col-md-4">
+                                <label class="form-label">Pays</label>
+                                <select id="pays_id" 
+                                        name="pays_id"
+                                        data-child="region_id"
+                                        data-url="/regions/by-pays/"
+                                        class="form-select">
+                                    <option value="">Tous</option>
+                                    @foreach($pays as $p)
+                                        <option value="{{ $p->id }}" 
+                                            {{ request('pays_id') == $p->id ? 'selected' : '' }}>
+                                            {{ $p->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Région</label>
+                                <select id="region_id"
+                                        name="region_id" 
+                                        data-child="ville_id"
+                                        data-url="/villes/by-region/"
+                                        data-selected="{{ request('region_id') }}"
+                                        class="form-select">
+                                    <option value="">Toutes</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Ville/Préfecture</label>
+                                <select id="ville_id"
+                                        name="ville_id" 
+                                        data-selected="{{ request('ville_id') }}"
+                                        class="form-select">
+                                    <option value="">Toutes</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Type dispositif</label>
+                                <select name="types_dispositif_id" 
+                                        class="form-select">
+                                    <option value="">Tous</option>
+                                    @foreach($typesDispositifs as $type)
+                                        <option value="{{ $type->id }}" 
+                                            {{ request('types_dispositif_id') == $type->id ? 'selected' : '' }}>
+                                            {{ $type->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Tarif min</label>
+                                <input type="number" 
+                                    name="tarif_min" 
+                                    class="form-control" 
+                                    value="{{ request('tarif_min') }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Tarif max</label>
+                                <input type="number" 
+                                    name="tarif_max" 
+                                    class="form-control" 
+                                    value="{{ request('tarif_max') }}">
+                            </div>
+
                         </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Pays/Région</label>
-                            <select id="pays_id" name="pays_id" class="form-select">
-                                <option value="">Tous</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Ville/Préfecture</label>
-                            <select id="ville_id" name="ville_id" class="form-select">
-                                <option value="">Toutes</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Type dispositif</label>
-                            <select name="types_dispositif_id" class="form-select">
-                                <option value="">Tous</option>
-                                @foreach($typesDispositifs as $type)
-                                    <option value="{{ $type->id }}" {{ request('types_dispositif_id') == $type->id ? 'selected' : '' }}>
-                                        {{ $type->nom }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Tarif min</label>
-                            <input type="number" name="tarif_min" class="form-control" value="{{ request('tarif_min') }}">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Tarif max</label>
-                            <input type="number" name="tarif_max" class="form-control" value="{{ request('tarif_max') }}">
-                        </div>
-
                     </div>
-                </div>
 
-                <!-- Boutons à droite -->
-                <div class="col-lg-2">
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-dark">
-                            Rechercher
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary">
-                            Réinitialiser
-                        </button>
-                        <a href="{{-- route('filtres.avances') --}}" class="btn btn-outline-primary">
-                            Plus de filtres
-                        </a>
+                    <!-- BOUTONS -->
+                    <div class="col-lg-3">
+                        <div class="d-grid gap-2 mt-3 mt-lg-0">
+                            <button type="submit" class="btn btn-dark">
+                                Rechercher
+                            </button>
+
+                            <a href="{{ url()->current() }}" class="btn btn-outline-secondary">
+                                Réinitialiser
+                            </a>
+
+                            <a href="#" class="btn btn-outline-primary">
+                                Plus de filtres
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-            </div>
-        </form>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- LISTE --}}
     <div class="row g-4">
         @forelse($publications as $publication)
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card h-100 shadow-sm">
 
                     {{-- Carousel photos --}}
@@ -119,18 +144,21 @@
                     </div>
 
                     {{-- Contenu --}}
-                    <div class="card-body">
-                        <h5>{{ $publication->dispositif->designation }}</h5>
-
-                        <p class="mb-1">
-                            <strong>Type :</strong>
-                            {{ $publication->dispositif->type_dispositif->nom }}
-                        </p>
+                    <div class="card-body">                        
+                        {{-- Catégorie / Type --}}
+                        <div class="mb-2">
+                            <span class="badge bg-secondary text-truncate" style="width:100%">
+                                {{ $publication->dispositif->type_dispositif->categorie->nom ?? '-' }}
+                            </span>
+                            <span class="badge bg-primary text-truncate" style="width:100%">
+                                {{ $publication->dispositif->type_dispositif->nom ?? '-' }}
+                            </span>
+                        </div>
 
                         <p class="mb-1">
                             <strong>Lieu :</strong>
                             {{ $publication->ville->nom }},
-                            {{ $publication->ville->pays->nom }}
+                            {{ $publication->ville->region->pays->nom }}
                         </p>
 
                         <p class="fw-bold text-success">
@@ -168,51 +196,6 @@
     </div>
 </div>
 
-{{-- JS filtres --}}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const continentSelect = document.getElementById('continent_id');
-    const paysSelect = document.getElementById('pays_id');
-    const villeSelect = document.getElementById('ville_id');
-
-    // Récupérer les IDs depuis l'URL (si présents)
-    const currentPaysId = "{{ request('pays_id') }}";
-    const currentVilleId = "{{ request('ville_id') }}";
-
-    function loadPays(continentId, selectedPaysId = null) {
-        if (!continentId) return;
-        return fetch(`/pays/by-continent/${continentId}`)
-            .then(r => r.json())
-            .then(data => {
-                paysSelect.innerHTML = '<option value="">Tous</option>';
-                data.forEach(p => {
-                    const selected = p.id == selectedPaysId ? 'selected' : '';
-                    paysSelect.innerHTML += `<option value="${p.id}" ${selected}>${p.nom}</option>`;
-                });
-                if(selectedPaysId) loadVilles(selectedPaysId, currentVilleId);
-            });
-    }
-
-    function loadVilles(paysId, selectedVilleId = null) {
-        if (!paysId) return;
-        fetch(`/villes/by-pays/${paysId}`)
-            .then(r => r.json())
-            .then(data => {
-                villeSelect.innerHTML = '<option value="">Toutes</option>';
-                data.forEach(v => {
-                    const selected = v.id == selectedVilleId ? 'selected' : '';
-                    villeSelect.innerHTML += `<option value="${v.id}" ${selected}>${v.nom}</option>`;
-                });
-            });
-    }
-
-    // Au changement manuel
-    continentSelect.addEventListener('change', (e) => loadPays(e.target.value));
-    paysSelect.addEventListener('change', (e) => loadVilles(e.target.value));
-
-    // Au chargement initial de la page si des filtres existent
-    if (continentSelect.value) {
-        loadPays(continentSelect.value, currentPaysId);
-    }
-});
-</script>
+@push('scripts')
+    <script src="{{ asset('js/dependent-select.js') }}"></script>
+@endpush

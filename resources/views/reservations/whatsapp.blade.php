@@ -12,7 +12,7 @@
 
 @section('main-content')
 <div class="container text-center mt-5">
-
+ 
     <h3 class="mb-4">Votre demande a été enregistrée ✅</h3>
 
     <p>Vous allez être redirigé vers WhatsApp pour envoyer votre message.</p>

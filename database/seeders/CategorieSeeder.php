@@ -14,11 +14,12 @@ class CategorieSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Équipements de BTP',
-            'Équipements informatiques',
-            'Équipements agricoles',
-            'Équipements médicaux',
-            'Équipements événementiels',
+            'Matériels de terrassement',
+            'Matériels de bitumage',
+            'Matériels de transport',
+            'Matériels auxiliaires de chantier',
+            'Matériels de démolition',
+            'Matériels de production du béton',
         ];
 
         foreach ($categories as $nom) {

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('numero_immatriculation')->nullable();
             $table->string('designation');
             $table->text('description')->nullable();
+            $table->enum('etat', ['Neuf', 'Bon', 'Révisé'])->default('Bon');
             $table->enum('statut', ['actif', 'inactif', 'suspendu'])->default('actif');
             $table->timestamps();
         });

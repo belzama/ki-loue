@@ -6,24 +6,91 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; 
 use App\Models\Devise;
-use App\Models\Continent;
 use App\Models\Pays;
+use App\Models\Region;
 use App\Models\Ville;
+use App\Models\Categorie;
 use App\Models\Dispositif;
 use App\Models\Publication;
 use App\Services\TransactionService;
 
 class PublicationController extends Controller
-{
-    public function index()
+{   
+    public function index(Request $request)
     {
-        $userDispositifIds = Dispositif::where('user_id', auth()->id())->pluck('id');
-        $publications = Publication::with(['dispositif', 'ville', 'devise'])
-            ->whereIn('dispositif_id', $userDispositifIds)
-            ->latest()
-            ->paginate(10);
+        $categories = Categorie::orderBy('nom')->get();
+        $pays = Pays::orderBy('nom')->get();
 
-        return view('user.publications.index', compact('publications'));
+        $query = Publication::with([
+                'dispositif.type_dispositif.categorie',
+                'ville.region.pays',
+                'devise'
+            ])
+            ->whereHas('dispositif', function ($q) {
+                $q->where('user_id', auth()->id());
+            });
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTRES
+        |--------------------------------------------------------------------------
+        */
+
+        // Catégorie
+        $query->when($request->categorie_id, function ($q) use ($request) {
+            $q->whereHas('dispositif.type_dispositif', function ($qq) use ($request) {
+                $qq->where('categorie_id', $request->categorie_id);
+            });
+        });
+
+        // Type
+        $query->when($request->types_dispositif_id, function ($q) use ($request) {
+            $q->whereHas('dispositif', function ($qq) use ($request) {
+                $qq->where('type_dispositif_id', $request->types_dispositif_id);
+            });
+        });
+
+        // Désignation
+        $query->when($request->designation, function ($q) use ($request) {
+            $q->whereHas('dispositif', function ($qq) use ($request) {
+                $qq->where('designation', 'like', '%' . $request->designation . '%');
+            });
+        });
+
+        // Statut
+        $query->when($request->statut !== null && $request->statut !== '', function ($q) use ($request) {
+            $q->where('statut', $request->statut);
+        });
+
+        // Pays (via publication -> ville -> region)
+        $query->when($request->pays_id, function ($q) use ($request) {
+            $q->whereHas('ville.region', function ($qq) use ($request) {
+                $qq->where('pays_id', $request->pays_id);
+            });
+        });
+
+        // Région (via publication -> ville)
+        $query->when($request->region_id, function ($q) use ($request) {
+            $q->whereHas('ville', function ($qq) use ($request) {
+                $qq->where('region_id', $request->region_id);
+            });
+        });
+
+        // Ville (directement sur publication)
+        $query->when($request->ville_id, function ($q) use ($request) {
+            $q->where('ville_id', $request->ville_id);
+        });
+
+        $publications = $query
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('user.publications.index', compact(
+            'publications',
+            'categories',
+            'pays'
+        ));
     }
 
     // Méthode standard create
@@ -33,30 +100,24 @@ class PublicationController extends Controller
         // Récupérer les dispositifs de l'utilisateur connecté
         $dispositifs = Dispositif::where('user_id', auth()->id())->get();
 
-        $continents = Continent::all();
-        $pays = Pays::all();
-        $villes = Ville::all();      // si tu as des villes
+        $pays = Pays::orderBy('nom')->get();
         $devises = Devise::all();    // si tu as des devises
 
-        return view('user.publications.create', compact('dispositifs', 'continents', 'pays', 'villes', 'devises'));
+        return view('user.publications.create', compact('dispositifs', 'pays', 'devises'));
 
     }
 
     // Création à partir d'un dispositif
     public function createByDispositif(Dispositif $dispositif)
     {
-        $continents = Continent::all();
         $pays = Pays::all();
-        $villes = Ville::all();
         $devises = Devise::all();
 
         // On passe le dispositif sélectionné par défaut
         return view('user.publications.create', [
             'dispositifs' => [],
             'dispositif' => $dispositif,
-            'continents' => $continents,
             'pays' => $pays,
-            'villes' => $villes,
             'devises' => $devises,
         ]);
     }
@@ -66,7 +127,7 @@ class PublicationController extends Controller
         $publication->load([
             'dispositif.photos',
             'dispositif.type_dispositif',
-            'ville.pays',
+            'ville.region',
             'devise'
         ]);
 
@@ -211,16 +272,14 @@ class PublicationController extends Controller
 
     public function edit(Publication $publication)
     {
-        $continents = Continent::all();
+        $pays = Pays::orderBy('nom')->get();
         $devises = Devise::all();
-        $villes = Ville::all();
         $dispositifs = Dispositif::all(); // ou seulement ceux de l'utilisateur
 
         return view('user.publications.edit', compact(
             'publication',
-            'continents',
+            'pays',
             'devises',
-            'villes',
             'dispositifs'
         ));
     }

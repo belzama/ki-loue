@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pays;
+use App\Models\Region;
 use App\Models\Ville;
 
 
@@ -21,13 +22,14 @@ class VilleController extends Controller
     public function create()
     {
         $pays_list = Pays::all();
-        return view('admin.villes.create', compact('pays_list'));
+        $regions = Region::all();
+        return view('admin.villes.create', compact('pays_list', 'regions'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'pays_id' => 'required|exists:pays,id',
+            'region_id' => 'required|exists:regions,id',
             'nom' => 'required|string|max:255',
         ]);
 
@@ -39,7 +41,8 @@ class VilleController extends Controller
     public function edit(Ville $ville)
     {
         $pays_list = Pays::all();
-        return view('admin.villes.edit', compact('ville', 'pays_list'));
+        $regions = Region::all();
+        return view('admin.villes.edit', compact('ville', 'pays_list', 'regions'));
     }
 
     
@@ -47,7 +50,7 @@ class VilleController extends Controller
     public function update(Request $request, Ville $ville)
     {
         $validated = $request->validate([
-            'pays_id' => 'required|exists:pays,id',
+            'region_id' => 'required|exists:regions,id',
             'nom' => 'required|string|max:255',
         ]);
 

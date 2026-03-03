@@ -11,7 +11,14 @@ use App\Models\DispositifPhoto;
 
 class Dispositif extends Model
 {
-    protected $fillable = ['types_dispositif_id','user_id','numero_immatriculation','designation','description','statut'];
+    protected $fillable = [
+        'types_dispositif_id',
+        'user_id',
+        'numero_immatriculation',
+        'designation',
+        'description',
+        'etat',
+        'statut'];
 
     public function type_dispositif() { return $this->belongsTo(TypesDispositif::class, 'types_dispositif_id'); }
     public function user() { return $this->belongsTo(User::class); }

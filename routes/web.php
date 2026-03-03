@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\DeviseController;
 use App\Http\Controllers\PaysController;
+use App\Http\Controllers\RegionController;
 use App\Http\Controllers\VilleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategorieController;   
@@ -37,9 +38,7 @@ Route::get('/publications/{publication}/reservation', [HomeController::class, 'c
 Route::post('/publications/{publication}/reservation', [HomeController::class, 'storeReservation'])
     ->name('reservations.store');
 
-Route::get('/reservation/whatsapp', function () {
-    return view('reservations.whatsapp');
-})->name('reservations.whatsapp');
+Route::get('/reservations/whatsapp', [HomeController::class, 'whatsapp'])->name('reservations.whatsapp'); 
 
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -60,6 +59,7 @@ Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('devises', DeviseController::class);
     Route::resource('pays', PaysController::class)->parameters(['pays' => 'pays']);
+    Route::resource('regions', RegionController::class);
     Route::resource('villes', VilleController::class);
     Route::resource('users', UserController::class);
     Route::resource('categories', CategorieController::class);    
@@ -83,7 +83,6 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     // Création d'une publication à partir d'un dispositif existant
     Route::get('publications/create/{dispositif}', [PublicationController::class, 'createByDispositif'])->name('publications.createByDispositif');
     
-
     Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/{publication}/create',[ReservationController::class, 'create'])->name('reservations.create');
     Route::get('reservations/{id}/approve', [ReservationController::class, 'approveForm'])->name('reservations.approve.form');
@@ -100,6 +99,7 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('transactions/{transaction}/show', [TransactionController::class, 'show'])->name('transactions.show');
     Route::get('transactions/{user}/depot', [TransactionController::class, 'deposit'])->name('transactions.deposit');
     Route::post('transactions/depot', [TransactionController::class, 'storeDeposit'])->name('transactions.storeDeposit');
     Route::get('/transactions/retrait', [TransactionController::class, 'retrait'])->name('transactions.retrait');
@@ -128,4 +128,10 @@ Route::get('/dispositifs/{dispositif}/tarif-min', function (\App\Models\Disposit
 });
 
 Route::get('/pays/by-continent/{continent}', [LocalisationController::class, 'paysByContinent']);
-Route::get('/villes/by-pays/{pays}', [LocalisationController::class, 'villesByPays']);
+Route::get('/regions/by-pays/{pays}', [LocalisationController::class, 'regionsByPays']);
+Route::get('/villes/by-region/{region}', [LocalisationController::class, 'villesByRegion']);
+
+Route::get('/types_dispositif/by-categorie/{categorie}', [TypesDispositifController::class, 'typesByCategorie']);
+Route::get('/types_dispositif/search', [TypesDispositifController::class, 'search']);
+Route::get('/types_dispositif/{id}', [TypesDispositifController::class, 'show']);
+Route::get('/types_dispositif/{id}/params', [TypesDispositifController::class, 'params']);

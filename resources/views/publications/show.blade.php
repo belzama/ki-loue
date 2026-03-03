@@ -49,7 +49,7 @@
 
             <p><strong>Lieu :</strong>
                 {{ $publication->ville->nom }},
-                {{ $publication->ville->pays->nom }}
+                {{ $publication->ville->region->pays->nom }}
             </p>
 
             {{-- Paramètres --}}

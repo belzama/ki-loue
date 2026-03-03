@@ -60,7 +60,7 @@
             @endif
         </div>
 
-        {{-- Formulaire à droite --}}
+        {{-- Formulaire à droite --}} 
         <div class="col-md-8">
             <form action="{{ route('reservations.store', $publication) }}" method="POST">
                 @csrf
@@ -106,6 +106,7 @@
                 {{-- Boutons --}}
                 <div class="mt-4">
                     {{-- ACTION PRINCIPALE --}}
+                    
                     <button type="submit"
                             name="action"
                             value="whatsapp"

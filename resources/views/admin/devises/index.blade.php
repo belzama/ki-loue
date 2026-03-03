@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Catégories</h1>
+<h1>Devises</h1>
 
 <a href="{{ route('admin.devises.create') }}" 
     class="btn btn-primary mb-3 bi bi-plus-lg">

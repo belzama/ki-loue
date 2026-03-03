@@ -88,7 +88,7 @@
 
             <p><strong>Lieu :</strong>
                 {{ $reservation->publication->ville->nom }},
-                {{ $reservation->publication->ville->pays->nom }}
+                {{ $reservation->publication->ville->region->pays->nom }}
             </p>
 
             {{-- Paramètres --}}
