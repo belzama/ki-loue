@@ -6,7 +6,7 @@
         <select id="pays_id" 
                 name="pays_id"
                 data-child="region_id"
-                data-url="/regions/by-pays/"
+                data-url="{{ url('regions/by-pays') }}/"
                 data-selected="{{ old('region_id', $ville->region_id ?? '') }}" 
                 class="form-select" required>
             <option value="">Sélectionner</option>
@@ -24,7 +24,7 @@
         <select id="region_id"
                 name="region_id" 
                 data-child="ville_id"
-                data-url="/villes/by-region/"
+                data-url="{{ url('villes/by-region') }}/"
                 data-selected="{{ old('ville_id', $ville->id ?? '') }}"
                 class="form-select" required>
             <option value="">Sélectionner</option>

@@ -116,44 +116,5 @@
 @endsection
 
 @section('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const categorieSelect = document.getElementById('categorie_id');
-    const typeSelect = document.getElementById('types_dispositif_id');
-    const selectedType = typeSelect.getAttribute('data-selected');
-
-    function loadTypes(categorieId, selectedId = null) {
-        if (!categorieId) {
-            typeSelect.innerHTML = '<option value="">-- Tous les types --</option>';
-            return;
-        }
-
-        // Appel AJAX vers votre route (à adapter selon votre web.php)
-        fetch(`/types_dispositif/by-categorie/${categorieId}`)
-            .then(response => response.json())
-            .then(data => {
-                typeSelect.innerHTML = '<option value="">-- Tous les types --</option>';
-                data.forEach(type => {
-                    const option = document.createElement('option');
-                    option.value = type.id;
-                    option.textContent = type.nom;
-                    if (selectedId && type.id == selectedId) {
-                        option.selected = true;
-                    }
-                    typeSelect.appendChild(option);
-                });
-            });
-    }
-
-    // Charger au changement
-    categorieSelect.addEventListener('change', function() {
-        loadTypes(this.value);
-    });
-
-    // Charger au démarrage si une catégorie est déjà sélectionnée (cas du retour de recherche)
-    if (categorieSelect.value) {
-        loadTypes(categorieSelect.value, selectedType);
-    }
-});
-</script>
+<script src="{{ asset('js/dependent-select.js') }}"></script>
 @endsection

@@ -15,7 +15,7 @@
                                 <select id="pays_id" 
                                         name="pays_id"
                                         data-child="region_id"
-                                        data-url="/regions/by-pays/"
+                                        data-url="{{ url('regions/by-pays') }}/"
                                         class="form-select">
                                     <option value="">Tous</option>
                                     @foreach($pays as $p)
@@ -32,7 +32,7 @@
                                 <select id="region_id"
                                         name="region_id" 
                                         data-child="ville_id"
-                                        data-url="/villes/by-region/"
+                                        data-url="{{ url('villes/by-region') }}/"
                                         data-selected="{{ request('region_id') }}"
                                         class="form-select">
                                     <option value="">Toutes</option>

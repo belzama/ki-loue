@@ -33,7 +33,7 @@
                     <select id="categorie_id" 
                             name="categorie_id" 
                             data-child="types_dispositif_id"
-                            data-url="/types_dispositif/by-categorie/"
+                            data-url="{{ url('types_dispositif/by-categorie/') }}"
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>
                         @foreach($categories as $categorie)
@@ -92,7 +92,7 @@
                     <select id="pays_id" 
                             name="pays_id"
                             data-child="region_id"
-                            data-url="/regions/by-pays/"
+                            data-url="{{ url('regions/by-pays') }}/"
                             class="form-select shadow-sm">
                         <option value="">Tous</option>
                         @foreach($pays as $p)
@@ -109,7 +109,7 @@
                     <select id="region_id"
                             name="region_id" 
                             data-child="ville_id"
-                            data-url="/villes/by-region/"
+                            data-url="{{ url('villes/by-region') }}/"
                             data-selected="{{ request('region_id') }}"
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>

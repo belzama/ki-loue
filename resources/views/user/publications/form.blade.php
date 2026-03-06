@@ -78,7 +78,7 @@
             <select id="continent_id" 
                     name="pays_id"
                     data-child="region_id"
-                    data-url="/regions/by-pays/"
+                    data-url="{{ url('regions/by-pays') }}/"
                     class="form-select">
                 <option value="">Sélectionner</option>
                 @foreach($pays as $p)
@@ -93,7 +93,7 @@
             <select id="region_id" 
                     name="region_id" 
                     data-child="ville_id"
-                    data-url="/villes/by-region/"
+                    data-url="{{ url('villes/by-region') }}/"
                     data-selected="{{ old('ville_id', $publication->ville_id ?? '') }}"
                     class="form-select">
                 <option value="">Sélectionner</option>
@@ -246,7 +246,7 @@ const dispositifSelect = document.getElementById('dispositif_id');
 dispositifSelect?.addEventListener('change', function () {
     if (!this.value) return;
 
-    fetch(`/dispositifs/${this.value}/tarif-min`)
+    fetch(`dispositifs/${this.value}/tarif-min`)
         .then(r => r.json())
         .then(data => {
             currentTarifMin = parseFloat(data.tarif_min) || 0;

@@ -170,4 +170,11 @@ class DispositifController extends Controller
 
         return redirect()->route('user.dispositifs.index')->with('success', 'Dispositif supprimé avec succès');
     }
+
+    public function getTarifMin(Dispositif $dispositif) 
+    {
+        return response()->json([
+            'tarif_min' => $dispositif->type_dispositif->tarif_min
+        ]);
+    }
 }

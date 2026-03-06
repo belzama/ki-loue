@@ -27,7 +27,7 @@
             <select id="categorie_id" 
                     name="categorie_id"
                     data-child="types_dispositif_id"
-                    data-url="/types_dispositif/by-categorie/"
+                    data-url="{{ url('types_dispositif/by-categorie') }}"
                     class="form-select" required>
                 <option value="">Sélectionner</option>
                 @foreach($categories as $cat)

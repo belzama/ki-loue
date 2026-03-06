@@ -75,6 +75,8 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     Route::delete('dispositifs/{dispositif}', [DispositifController::class, 'destroy'])->name('dispositifs.destroy');
     // Page "Voir plus"
     Route::get('dispositifs/{dispositif}/show', [DispositifController::class, 'show'])->name('dispositifs.show');
+    // tarif min dispositif
+    Route::get('dispositifs/{dispositif}/tarif-min', [DispositifController::class, 'getTarifMin'])->name('dispositifs.tarif-min');
     
     Route::resource('publications', PublicationController::class);
     // Création d'une publication à partir d'un dispositif existant
@@ -110,18 +112,6 @@ Route::middleware(['auth'])->group(function () {
         [DispositifPhotoController::class, 'destroy']
     )->name('user.dispositifs.photos.destroy');
 
-});
-
-Route::get('/ajax/types-dispositifs/{categorie}', function ($categorie) {
-    return \App\Models\TypesDispositif::where('categorie_id', $categorie)
-        ->select('id','nom')
-        ->get();
-})->middleware('auth');
-
-Route::get('/dispositifs/{dispositif}/tarif-min', function (\App\Models\Dispositif $dispositif) {
-    return response()->json([
-        'tarif_min' => $dispositif->type_dispositif->tarif_min
-    ]);
 });
 
 Route::get('/pays/by-continent/{continent}', [LocalisationController::class, 'paysByContinent']);
