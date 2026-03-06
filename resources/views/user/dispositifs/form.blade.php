@@ -27,7 +27,7 @@
             <select id="categorie_id" 
                     name="categorie_id"
                     data-child="types_dispositif_id"
-                    data-url="{{ url('types_dispositif/by-categorie') }}"
+                    data-url="{{ url('types_dispositif/by-categorie') }}/"
                     class="form-select" required>
                 <option value="">Sélectionner</option>
                 @foreach($categories as $cat)
@@ -134,6 +134,8 @@ $(document).ready(function(){
 
     const container = $('#params-container');
 
+    const baseUrl = "{{ url('/') }}";
+
     const existingParams = {!! json_encode(
         isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []
     ) !!};
@@ -143,8 +145,9 @@ $(document).ready(function(){
         container.html('');
         if(!typeId) return;
 
-        try {
-            const res = await fetch(`/types_dispositif/${typeId}/params`);
+        try {            
+            
+            const res = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
             const params = await res.json();
 
             params.forEach(param => {

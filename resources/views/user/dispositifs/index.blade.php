@@ -1,4 +1,4 @@
-@extends(auth()->user()->role == 'Admin' ? 'layouts.admin' : 'layouts.user') {{-- Corrigé 'guest' en 'user' car un guest n'a pas de dispositifs --}}
+@extends(auth()->user()->role == 'Admin' ? 'layouts.admin' : 'layouts.guest')
 
 @section('content')
 

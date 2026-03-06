@@ -33,7 +33,7 @@
                     <select id="categorie_id" 
                             name="categorie_id" 
                             data-child="types_dispositif_id"
-                            data-url="{{ url('types_dispositif/by-categorie/') }}"
+                            data-url="{{ url('types_dispositif/by-categorie') }}/"
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>
                         @foreach($categories as $categorie)
