@@ -4,13 +4,13 @@
 
 {{-- Affichage erreurs --}}
 @if($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
 @endif
 
 <form action="{{ $isEdit ? route('user.dispositifs.update', $dispositif) : route('user.dispositifs.store') }}"
@@ -51,57 +51,48 @@
         </div>
     </div>
 
-    {{-- Désignation & Immatriculation --}}
+    {{-- Marque & modèle --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
-            <label class="form-label">Désignation (Marque & modèle) <span class="text-danger">*</span></label>
-            <input type="text" name="designation" class="form-control"
-                   value="{{ old('designation', $dispositif->designation ?? '') }}" required>
+            <label class="form-label">Marque <span class="text-danger">*</span></label>
+            <input type="text" name="marque" class="form-control"
+                   value="{{ old('marque', $dispositif->marque ?? '') }}" required>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">N° d'immatriculation</label>
-            <input type="text" name="numero_immatriculation" class="form-control"
-                   value="{{ old('numero_immatriculation', $dispositif->numero_immatriculation ?? '') }}">
+            <label class="form-label">Modèle</label>
+            <input type="text" name="modele" class="form-control"
+                   value="{{ old('modele', $dispositif->modele ?? '') }}">
         </div>
     </div>
 
     {{-- Paramètres dynamiques --}}
     <div id="params-container" class="mt-3"></div>
 
-    {{-- Etat & Statut --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <label class="form-label">Etat <span class="text-danger">*</span></label>
-            <select name="etat" class="form-select" required>
-                <option value="">Sélectionner</option>
-                @foreach(['Neuf','Bon','Révisé'] as $etat)
-                    <option value="{{ $etat }}"
-                        {{ old('etat', $dispositif->etat ?? '') == $etat ? 'selected' : '' }}>
-                        {{ $etat }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label">Statut <span class="text-danger">*</span></label>
-            <select name="statut" class="form-select" required>
-                <option value="">Sélectionner</option>
-                @foreach(['Actif','Inactif','Suspendu'] as $statut)
-                    <option value="{{ $statut }}"
-                        {{ strtolower(old('statut', $dispositif->statut ?? '')) == strtolower($statut) ? 'selected' : '' }}>
-                        {{ $statut }}
-                    </option>
-                @endforeach
-            </select>
+    {{-- Etat --}}
+    <div class="mb-3">
+        <label class="form-label">Etat <span class="text-danger">*</span></label>
+        <div class="d-flex gap-4">
+            @foreach(['Neuf','Bon','Révisé'] as $etat)
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="radio"
+                       name="etat"
+                       id="etat_{{ strtolower($etat) }}"
+                       value="{{ $etat }}"
+                       {{ old('etat',$dispositif->etat ?? 'Neuf') == $etat ? 'checked' : '' }}>
+                <label class="form-check-label" for="etat_{{ strtolower($etat) }}">
+                    {{ $etat }}
+                </label>
+            </div>
+            @endforeach
         </div>
     </div>
 
     {{-- Photos --}}
     <div class="mb-3">
         <label class="form-label">Photos</label>
-        <input type="file" name="photos[]" multiple class="form-control">
+        <div id="photos-container" class="row g-3"></div>
     </div>
 
     <div class="mt-3">
@@ -112,19 +103,6 @@
     </div>
 </form>
 
-{{-- Photos édition --}}
-@if($isEdit && $dispositif->photos->count())
-<div class="row mt-3">
-    @foreach($dispositif->photos as $photo)
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm">
-                <img src="{{ asset('storage/'.$photo->path) }}" class="card-img-top" style="height:120px; object-fit:cover;">
-            </div>
-        </div>
-    @endforeach
-</div>
-@endif
-
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="{{ asset('js/dependent-select.js') }}"></script>
@@ -133,93 +111,140 @@
 $(document).ready(function(){
 
     const container = $('#params-container');
-
+    const photosContainer = $('#photos-container');
     const baseUrl = "{{ url('/') }}";
 
     const existingParams = {!! json_encode(
         isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []
     ) !!};
 
-    async function loadParams(typeId){
+    const existingPhotos = {!! json_encode(
+        isset($dispositif)
+            ? $dispositif->photos->map(function($p){
+                return ['id'=>$p->id,'url'=>asset('storage/'.$p->path)];
+            })->values()
+            : []
+    ) !!};
 
+    // Rendu des cases photos
+    function renderPhotoInputs(maxPhotos){
+        photosContainer.html('');
+
+        for(let i=0; i<maxPhotos; i++){
+            const photo = existingPhotos[i] ?? null;
+            const hiddenInput = photo ? `<input type="hidden" name="existing_photos[${i}]" value="${photo.id}">` : '';
+
+            const previewHtml = photo
+                ? `<img id="preview_${i}" class="photo-preview" src="${photo.url}">`
+                : `<div id="preview_${i}" class="photo-empty">
+                    <i class="bi bi-image"></i>
+                </div>`;
+
+            const html = `
+            <div class="col-md-3">
+                <div class="photo-box">
+                    ${previewHtml}
+                    <div class="photo-buttons">
+                        <label class="btn btn-sm btn-primary mb-0">
+                            <i class="bi bi-pencil"></i>
+                            <input type="file" name="photos[${i}]" hidden accept="image/jpeg,image/png" onchange="previewPhoto(event,${i})">
+                        </label>
+                        ${i!==0 ? `<button type="button" class="btn btn-sm btn-danger remove-photo" data-index="${i}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>` : ''}
+                    </div>
+                    ${hiddenInput}
+                </div>
+            </div>`;
+            photosContainer.append(html);
+        }
+    }
+
+    // Preview photo et mise à jour du hidden
+    window.previewPhoto = function(event, index){
+        const file = event.target.files[0];
+        if(!file) return;
+
+        const allowed = ['image/jpg','image/jpeg','image/png'];
+        if(!allowed.includes(file.type)){
+            alert("Format non autorisé. Utilisez JPG, JPEG, PNG.");
+            event.target.value='';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e){
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'photo-preview';
+            img.id = 'preview_'+index;
+
+            const oldEl = document.getElementById('preview_'+index);
+            if(oldEl) oldEl.replaceWith(img);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Supprimer une photo
+    $(document).on('click','.remove-photo',function(){
+        const index = $(this).data('index');
+        const emptyHtml = `<div id="preview_${index}" class="photo-empty d-flex justify-content-center align-items-center">
+                               <span>Aucune photo</span>
+                           </div>`;
+        $('#preview_'+index).replaceWith(emptyHtml);
+        $(`input[name="existing_photos[${index}]"]`).remove();
+        $(`input[name="photos[${index}]"]`).val('');
+    });
+
+    // Chargement des paramètres dynamiques
+    async function loadParams(typeId){
         container.html('');
         if(!typeId) return;
 
-        try {            
-            
+        try{
             const res = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
-            const params = await res.json();
+            const data = await res.json();
+            const params = data.params;
 
+            // Nombre de photos selon le type
+            const nbPhotos = data.nb_max_photo ?? {{ $dispositif->type_dispositif->nb_max_photo ?? 5 }};
+            renderPhotoInputs(nbPhotos);
+
+            // Affichage des params
             params.forEach(param => {
-
                 const paramId = param.id ?? null;
+                if(!paramId) return;
 
-                if(!paramId){
-                    console.error("Paramètre sans ID :", param);
-                    return;
-                }
-                
                 const inputName = `params[${paramId}]`;
                 const labelText = param.label ?? param.name;
-                const required  = param.required ?? false;
-                const value     = existingParams[paramId] ?? '';
-                const inputId   = `param_${paramId}`;
+                const required = param.required ?? false;
+                const value = existingParams[paramId] ?? '';
+                const inputId = `param_${paramId}`;
 
                 const wrapper = $('<div class="mb-3"></div>');
-
                 let unit = param.numeric_value_unit ? ` (${param.numeric_value_unit})` : '';
                 let star = required ? ' <span class="text-danger">*</span>' : '';
-
-                const labelEl = $(`
-                    <label class="form-label" for="${inputId}">
-                        ${labelText}${unit}${star}
-                    </label>
-                `);
+                const labelEl = $(`<label class="form-label" for="${inputId}">${labelText}${unit}${star}</label>`);
 
                 let input;
-
-                // SELECT
                 if(param.list_values){
-
-                    input = $('<select class="form-select"></select>').attr({
-                        name: inputName,
-                        id: inputId
-                    });
-
+                    input = $('<select class="form-select"></select>').attr({name:inputName,id:inputId});
                     input.append('<option value="">Sélectionner</option>');
-
                     param.list_values.split(',').forEach(opt=>{
                         opt = opt.trim();
-                        const option = $('<option></option>').val(opt).text(opt);
+                        const option = $('<option>').val(opt).text(opt);
                         if(opt == value) option.prop('selected', true);
                         input.append(option);
                     });
-
-                }
-                // INPUT NORMAL
-                else {
-
+                } else {
                     let type = 'text';
-                    if(param.value_type === 'int' || param.value_type === 'decimal') type='number';
-                    if(param.value_type === 'date') type='date';
-
-                    input = $('<input>', {
-                        type: type,
-                        class: 'form-control',
-                        id: inputId,
-                        name: inputName,
-                        value: value
-                    });
-
-                    if(param.value_type === 'decimal'){
-                        input.attr('step','0.01');
-                    }
+                    if(param.value_type==='int'||param.value_type==='decimal') type='number';
+                    if(param.value_type==='date') type='date';
+                    input = $('<input>', {type:type,class:'form-control',id:inputId,name:inputName,value:value});
+                    if(param.value_type==='decimal') input.attr('step','0.01');
                 }
 
-                if(required){
-                    input.prop('required', true);
-                }
-
+                if(required) input.prop('required', true);
                 wrapper.append(labelEl).append(input);
                 container.append(wrapper);
             });
@@ -230,24 +255,20 @@ $(document).ready(function(){
         }
     }
 
-    // Sélection type → afficher params
+    // Gestion du select type → params
     const typeSelect = $('#types_dispositif_id');
+    typeSelect.on('change', function(){ loadParams($(this).val()); });
 
-    typeSelect.on('change', function(){
-        loadParams($(this).val());
-    });
-
-    // Préchargement en édition
+    // Préchargement édition
     const selectedType = typeSelect.data('selected');
     if(selectedType){
-        // Observer pour attendre que dependent-select.js ait rempli le select
         const observer = new MutationObserver(function(){
             if(typeSelect.find(`option[value="${selectedType}"]`).length){
                 typeSelect.val(selectedType).trigger('change');
                 observer.disconnect();
             }
         });
-        observer.observe(typeSelect[0], { childList: true });
+        observer.observe(typeSelect[0],{childList:true});
     }
 
 });

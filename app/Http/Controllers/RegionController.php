@@ -12,7 +12,7 @@ class RegionController extends Controller
     public function index()
     {
         return view('admin.regions.index', [
-            'regions' => Region::all()
+            'regions' => Region::with('pays')->get()
         ]);
     }
 

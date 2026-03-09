@@ -15,10 +15,11 @@ class Dispositif extends Model
         'types_dispositif_id',
         'user_id',
         'numero_immatriculation',
+        'marque',
+        'modele',
         'designation',
         'description',
-        'etat',
-        'statut'];
+        'etat'];
 
     public function type_dispositif() { return $this->belongsTo(TypesDispositif::class, 'types_dispositif_id'); }
     public function user() { return $this->belongsTo(User::class); }

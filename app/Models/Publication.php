@@ -10,6 +10,11 @@ use App\Models\Reservation;
 
 class Publication extends Model
 {
+    protected $casts = [
+        'date_debut' => 'date',
+        'date_fin' => 'date',
+    ];
+    
     protected $fillable = [
         'dispositif_id','ville_id','devise_id','tarif_location','prix_publication','bonus_accorde','cout_publication','date_debut','date_fin','active'
     ];

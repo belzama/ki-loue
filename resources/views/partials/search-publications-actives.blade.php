@@ -50,33 +50,30 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Type dispositif</label>
-                                <select name="types_dispositif_id" 
+                                <label class="form-label">Catégorie</label>
+                                <select id="categorie_id" 
+                                        name="categorie_id"
+                                        data-child="types_dispositif_id"
+                                        data-url="{{ url('types_dispositif/by-categorie') }}/"
                                         class="form-select">
                                     <option value="">Tous</option>
-                                    @foreach($typesDispositifs as $type)
-                                        <option value="{{ $type->id }}" 
-                                            {{ request('types_dispositif_id') == $type->id ? 'selected' : '' }}>
-                                            {{ $type->nom }}
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" 
+                                            {{ request('categorie_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ $cat->nom }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">Tarif min</label>
-                                <input type="number" 
-                                    name="tarif_min" 
-                                    class="form-control" 
-                                    value="{{ request('tarif_min') }}">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">Tarif max</label>
-                                <input type="number" 
-                                    name="tarif_max" 
-                                    class="form-control" 
-                                    value="{{ request('tarif_max') }}">
+                            <div class="col-md-8">
+                                <label class="form-label">Type dispositif</label>
+                                <select id="types_dispositif_id" 
+                                        name="types_dispositif_id" 
+                                        data-selected="{{ request('types_dispositif_id') }}"
+                                        class="form-select">
+                                    <option value="">Tous</option>
+                                </select>
                             </div>
 
                         </div>
@@ -155,15 +152,21 @@
                             </span>
                         </div>
 
-                        <p class="mb-1">
-                            <strong>Lieu :</strong>
-                            {{ $publication->ville->nom }},
-                            {{ $publication->ville->region->pays->nom }}
-                        </p>
-
+                        
+                        {{-- localisation --}}
+                        <small class="text-muted mb-2">
+                            <i class="bi bi-geo-alt"></i>
+                            {{ $publication->ville->nom ?? '' }},
+                            {{ $publication->ville->region->pays->nom ?? '' }}
+                        </small>
+                        
+                        {{-- prix --}}
                         <p class="fw-bold text-success">
-                            {{ number_format($publication->tarif_location, 0, ',', ' ') }}
-                            {{ $publication->devise->symbol }}
+                        <div class="mt-2 fs-5 fw-bold text-success">
+                            {{ number_format($publication->tarif_location,0,',',' ') }}
+                            {{ $publication->devise->symbol ?? '' }}
+                            <span class="text-muted fs-6">/ jour</span>
+                        </div>
                         </p>
 
                         {{-- Actions --}}

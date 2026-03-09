@@ -55,18 +55,58 @@
             <div class="card h-100 shadow-sm border-0">
                 {{-- Photo principale --}}
                 <div class="position-relative">
-                    @if($dispositif->main_photo)
-                        <img src="{{ asset('storage/'.$dispositif->main_photo->path) }}" class="card-img-top" style="height:200px; object-fit:cover;" alt="Photo">
-                    @else
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                            <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                    {{-- Carousel photos --}}
+                    <div id="carousel{{ $dispositif->id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+
+                            @forelse($dispositif->photos as $index => $photo)
+
+                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                    <img src="{{ asset('storage/'.$photo->path) }}"
+                                        class="d-block w-100"
+                                        style="height:220px; object-fit:cover;"
+                                        alt="photo dispositif">
+                                </div>
+
+                            @empty
+
+                                <div class="carousel-item active">
+                                    <img src="{{ asset('images/no-image.png') }}"
+                                        class="d-block w-100"
+                                        style="height:220px; object-fit:cover;">
+                                </div>
+
+                            @endforelse
+
                         </div>
-                    @endif
+
+                        @if($dispositif->photos->count() > 1)
+
+                            <button class="carousel-control-prev"
+                                type="button"
+                                data-bs-target="#carousel{{ $dispositif->id }}"
+                                data-bs-slide="prev">
+
+                                <span class="carousel-control-prev-icon"></span>
+
+                            </button>
+
+                            <button class="carousel-control-next"
+                                    type="button"
+                                    data-bs-target="#carousel{{ $dispositif->id }}"
+                                    data-bs-slide="next">
+
+                                <span class="carousel-control-next-icon"></span>
+
+                            </button>
+
+                        @endif
+                    </div>
                     
                     {{-- Badge Statut sur l'image --}}
                     <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge {{ $dispositif->statut === 'Actif' ? 'bg-success' : ($dispositif->statut === 'Suspendu' ? 'bg-warning' : 'bg-secondary') }}">
-                            {{ $dispositif->statut }}
+                        <span class="badge {{ $dispositif->etat === 'Neuf' ? 'bg-success' : ($dispositif->etat === 'Bon' ? 'bg-primary' : 'bg-warning') }}">
+                            {{ $dispositif->etat }}
                         </span>
                     </div>
                 </div>

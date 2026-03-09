@@ -21,17 +21,27 @@
 
         <p>{{ $dispositif->description }}</p>
 
-        <hr>
+        {{-- ===== 4. GALERIE PHOTOS ===== --}}
+        <div class="card mb-3 shadow-sm">
 
-        <div class="row g-2">
-            @forelse($dispositif->photos as $photo)
-                <div class="col-md-3">
-                    <img src="{{ asset('storage/'.$photo->path) }}"
-                         class="img-fluid rounded shadow-sm">
+            <div class="card-body">
+                <div class="lightbox-gallery row g-2">
+                    @forelse($dispositif->photos as $index => $photo)
+                        <div class="col-md-3 mb-3">
+                            <img src="{{ asset('storage/' . $photo->path) }}"
+                            class="img-fluid rounded shadow-sm lightbox-item"
+                            style="height:150px; object-fit:cover; cursor:pointer;"
+                            data-bs-toggle="modal"
+                            data-bs-target="#photoModal"
+                            data-index="{{ $index }}">
+                        </div>
+                    @empty
+                        <div class="col-12 text-center text-muted">
+                            Aucune photo disponible
+                        </div>
+                    @endforelse
                 </div>
-            @empty
-                <p class="text-muted">Aucune photo</p>
-            @endforelse
+            </div>
         </div>
 
         <div class="mt-4">
@@ -43,4 +53,5 @@
     </div>
 </div>
 
+@include('partials.photo-viewer')
 @endsection

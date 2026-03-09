@@ -41,9 +41,9 @@ class SysParamSeeder extends Seeder
                 'desc'  => 'Numéro du support client',
             ],
             [
-                'code'  => 'COMMISSION_RATE',
-                'value' => '0.10',
-                'desc'  => 'Taux de commission par publication',
+                'code'  => 'MIN_PUB_DAYS',
+                'value' => '3',
+                'desc'  => 'Nombre de jour minimum de publication',
             ],
             [
                 'code'  => 'SPONSOR_BONUS',

@@ -12,6 +12,8 @@ use App\Models\Ville;
 use App\Models\Categorie;
 use App\Models\Dispositif;
 use App\Models\Publication;
+
+use App\Services\TarifService;
 use App\Services\TransactionService;
 
 class PublicationController extends Controller
@@ -139,10 +141,27 @@ class PublicationController extends Controller
         $dispositif = Dispositif::findOrFail($request->dispositif_id);
         $user = $dispositif->user;
 
-        $taux = $user->pays->taux_commission ?: sys_param('COMMISSION_RATE', 0);
+        //validation du formulaire
+        $validated = $request->validate([
+            'dispositif_id' => 'required|exists:dispositifs,id',
+            'tarif_location' => 'required|numeric|min:1',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after:date_debut',
+            'nb_jours' => 'required|integer|min:1|max:365',
+            'prix_publication' => 'required|numeric|min:0',
+            'bonus_accorde' => 'required|numeric|min:0',
+            'cout_publication' => 'required|numeric|min:0',
+        ]);
 
-        $prix_publication = $request->tarif_location * $taux / 100;
+        //Détermination du prix de publication
+        $prix_publication = TarifService::calculPrixPublication(
+            $user->pays_id,
+            $request->tarif_location,
+            $request->date_debut,
+            $request->date_fin
+        );
 
+        //Calcul du cout de publication
         $bonus_accorde = min($user->solde_bonus, $prix_publication);
         $cout_publication = $prix_publication - $bonus_accorde;
 
@@ -153,8 +172,7 @@ class PublicationController extends Controller
         */
         if ($prix_publication > ($user->solde_reel + $user->solde_bonus)) {
 
-            $montantARecharger =
-                $prix_publication - ($user->solde_reel + $user->solde_bonus);
+            $montantARecharger = $prix_publication - ($user->solde_reel + $user->solde_bonus);
 
             // On sauvegarde la demande en session
             session([
@@ -275,6 +293,9 @@ class PublicationController extends Controller
         $pays = Pays::orderBy('nom')->get();
         $devises = Devise::all();
         $dispositifs = Dispositif::all(); // ou seulement ceux de l'utilisateur
+        $tarifs = Tarif::with('pays')
+            ->where('pays_id', $publication->dispositif->user->pays_id)
+            ->get();
 
         return view('user.publications.edit', compact(
             'publication',

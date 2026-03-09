@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Support\Facades\Auth;
 use App\Models\Categorie;
 use App\Models\Dispositif;
@@ -49,16 +50,18 @@ class DispositifController extends Controller
         $data = $request->validate([
             'types_dispositif_id'    => 'required|exists:types_dispositifs,id',
             'numero_immatriculation' => 'nullable|string',
-            'designation'            => 'required|string',
+            'marque'            => 'required|string',
+            'modele'            => 'required|string',
             'description'            => 'nullable|string',
-            'statut'                 => 'required|in:Actif,Inactif,Suspendu',
             'etat'                   => 'required|in:Neuf,Bon,Révisé',
-            'photos.*'               => 'image|max:2048',
+            'photos'                 => 'required|array|min:1',        // <-- au moins 1 photo
+            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:2048',
             'params'                 => 'nullable|array',
             'params.*'               => 'nullable|string',
         ]);
 
         $data['user_id'] = Auth::id();
+        $data['designation'] = $data['marque']. ' '.$data['modele'];
         $dispositif = Dispositif::create($data);
 
         // Enregistrement des paramètres par ID
@@ -102,28 +105,39 @@ class DispositifController extends Controller
     {
         abort_if($dispositif->user_id !== Auth::id(), 403);
 
+        $request['designation'] = $request['marque'].' '.$request['modele'];
+
         $data = $request->validate([
-            'types_dispositif_id'    => 'required|exists:types_dispositifs,id',
+            'types_dispositif_id' => 'required|exists:types_dispositifs,id',
             'numero_immatriculation' => 'nullable|string',
-            'designation'            => 'required|string',
-            'description'            => 'nullable|string',
-            'statut'                 => 'required|in:Actif,Inactif,Suspendu',
-            'etat'                   => 'required|in:Neuf,Bon,Révisé',
-            'photos.*'               => 'image|max:2048',
-            'params'                 => 'nullable|array',
-            'params.*'               => 'nullable|string',
-        ]); 
-        
+            'marque' => 'required|string',
+            'modele' => 'required|string',
+            'description' => 'nullable|string',
+            'etat' => 'required|in:Neuf,Bon,Révisé',
+            'photos' => 'required|array|min:1',        // <-- au moins 1 photo
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'params' => 'nullable|array',
+            'params.*' => 'nullable|string',
+        ]);
+
+        $dispositif->update($data);
+
+        /*
+        |---------------------------
+        | PARAMETRES
+        |---------------------------
+        */
+
         $dispositif->params()->delete();
 
         if ($request->filled('params')) {
+
             foreach ($request->params as $paramId => $value) {
 
-                if (!is_numeric($paramId)) {
-                    continue; // Ignore toute clé invalide
-                }
-                
+                if (!is_numeric($paramId)) continue;
+
                 if (!empty($value)) {
+
                     $dispositif->params()->create([
                         'type_dispositif_param_id' => $paramId,
                         'value' => $value
@@ -132,17 +146,50 @@ class DispositifController extends Controller
             }
         }
 
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('dispositifs', 'public');
+        /*
+        |---------------------------
+        | PHOTOS
+        |---------------------------
+        */
+
+        $existingPhotos = $request->input('existing_photos', []);
+        $uploadedPhotos = $request->file('photos', []);
+
+        $currentPhotos = $dispositif->photos()->get()->keyBy('id');
+
+        // --- SUPPRESSION DES PHOTOS SUPPRIMÉES
+        $keepIds = array_filter($existingPhotos);
+        $photosToDelete = $dispositif->photos()->whereNotIn('id', $keepIds)->get();
+        foreach($photosToDelete as $photo){
+            Storage::disk('public')->delete($photo->path);
+            $photo->delete();
+        }
+        
+        // --- UPLOAD / REMPLACEMENT
+        foreach ($uploadedPhotos as $index => $photoFile) {
+            if (!$photoFile) continue;
+
+            $oldPhotoId = $existingPhotos[$index] ?? null;
+
+            if ($oldPhotoId && isset($currentPhotos[$oldPhotoId])) {
+                // remplacer photo existante
+                $oldPhoto = $currentPhotos[$oldPhotoId];
+                Storage::disk('public')->delete($oldPhoto->path);
+                $path = $photoFile->store('dispositifs','public');
+                $oldPhoto->update(['path' => $path]);
+            } else {
+                // nouvelle photo
+                $path = $photoFile->store('dispositifs','public');
                 $dispositif->photos()->create([
                     'path' => $path,
-                    'is_cover' => false,
+                    'is_cover' => $dispositif->photos()->count() == 0
                 ]);
             }
         }
 
-        return redirect()->route('user.dispositifs.index')->with('success', 'Dispositif mis à jour avec succès');
+        return redirect()
+            ->route('user.dispositifs.index')
+            ->with('success','Dispositif mis à jour avec succès');
     }
 
     public function show(Dispositif $dispositif)

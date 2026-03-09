@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Pays;
 use App\Models\Region;
 use App\Models\Ville;
+use App\Models\Categorie;
 use App\Models\TypesDispositif;
 use App\Models\Publication;
 use App\Models\Reservation;
@@ -22,7 +23,6 @@ class HomeController extends Controller
         // Requête de base avec eager loading
         $query = Publication::with([
             'dispositif.photos',
-            'dispositif.type_dispositif',
             'dispositif.type_dispositif.categorie',
             'ville.region.pays',
             'devise'
@@ -65,6 +65,13 @@ class HomeController extends Controller
             $query->where('ville_id', $request->ville_id);
         }
 
+        // Filtre par Categorie via TypeDispositif → Dispositif
+        if ($request->filled('categorie_id')) {
+            $query->whereHas('dispositif.type_dispositif.categorie', function ($q) use ($request) {
+                $q->where('id', $request->categorie_id);
+            });
+        }
+
         // Filtre par Type de dispositif via Dispositif
         if ($request->filled('types_dispositif_id')) {
             $query->whereHas('dispositif', function ($q) use ($request) {
@@ -99,6 +106,7 @@ class HomeController extends Controller
         |----------------------------------------------------------------------
         */
 
+        $categories = Categorie::orderBy('nom')->get();
         $typesDispositifs = TypesDispositif::orderBy('nom')->get();
         $pays             = Pays::orderBy('nom')->get();
         $regions             = Region::orderBy('nom')->get();
@@ -106,6 +114,7 @@ class HomeController extends Controller
 
         return view('welcome', compact(
             'publications',
+            'categories',
             'typesDispositifs',
             'pays',
             'regions',

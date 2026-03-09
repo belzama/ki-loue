@@ -31,14 +31,18 @@ class UserController extends Controller
             'user_id' => 'nullable|exists:users,id',
 
             'code' => 'required|string|max:50|unique:users,code',
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|string|max:150',
+            'prenom' => 'required|string|max:150',
+            'raison_sociale' => 'required|string|max:150',
 
             'email' => 'required|email|unique:users,email',
 
             'password' => 'required|string|min:6',
 
-            'contact' => 'nullable|string|max:30',
+            'telephone' => 'required|string|max:30',
+            'whatsapp' => 'required|string|max:30',
 
+            'type' => 'required|in:Société,Particulier',
             'role' => 'required|in:Admin,User',
 
             'taux_commission' => 'required|numeric|min:0',
@@ -54,7 +58,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $pays = Pays::all();
-        return view('admin.users.edit', compact('user','pays'));
+        $users = User::where('id','!=',$user->id)->get(); // éviter lui-même
+        return view('admin.users.edit', compact('user','pays','users'));
     }
 
     public function update(Request $request, User $user)
@@ -64,14 +69,18 @@ class UserController extends Controller
             'user_id' => 'nullable|exists:users,id',
 
             'code' => 'required|string|max:50|unique:users,code',
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|string|max:150',
+            'prenom' => 'required|string|max:150',
+            'raison_sociale' => 'required|string|max:150',
 
             'email' => 'required|email|unique:users,email',
 
             'password' => 'required|string|min:6',
 
-            'contact' => 'nullable|string|max:30',
+            'telephone' => 'required|string|max:30',
+            'whatsapp' => 'required|string|max:30',
 
+            'type' => 'required|in:Société,Particulier',
             'role' => 'required|in:Admin,User',
 
             'taux_commission' => 'required|numeric|min:0',

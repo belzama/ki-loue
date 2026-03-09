@@ -20,9 +20,7 @@
             <th>Email</th>
             <th>Rôle</th>
             <th>Pays</th>
-            <th>Contact whatsapp</th>
-            <th>Code du parrain</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     
@@ -34,9 +32,11 @@
             <td>{{ $u->email }}</td>
             <td>{{ $u->role }}</td>
             <td>{{ $u->pays->nom }}</td>
-            <td>{{ $u->contact }}</td>
-            <td>{{ $u->sponsor_code }}</td>
             <td>
+                <a href="{{ route('admin.users.show', $u) }}" 
+                    class="btn btn-sm btn-outline-primary bi bi-eye" 
+                    title="Voir plus">
+                </a>
                 <a href="{{ route('admin.users.edit',$u) }}" 
                     class="btn btn-sm btn-warning bi bi-pencil-square"
                     title="Modifier">

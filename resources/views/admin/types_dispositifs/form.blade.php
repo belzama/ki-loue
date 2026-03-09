@@ -1,5 +1,15 @@
 @csrf
 
+@if($errors->any())
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="row g-3 mb-3">
     <div class="col-md-6">
         <label>Catégorie <span class="text-danger">*</span></label>
@@ -22,16 +32,22 @@
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label>Tarif minimum <span class="text-danger">*</span></label>
         <input type="number" name="tarif_min" class="form-control" step="0.01"
             value="{{ old('tarif_min', $types_dispositif->tarif_min ?? '') }}" required>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label>Tarif maximum <span class="text-danger">*</span></label>
         <input type="number" name="tarif_max" class="form-control" step="0.01"
             value="{{ old('tarif_max', $types_dispositif->tarif_max ?? '') }}" required>
+    </div>
+
+    <div class="col-md-4">
+        <label>Nombre maximum de photo <span class="text-danger">*</span></label>
+        <input type="number" name="nb_max_photo" class="form-control" step="1"
+            value="{{ old('nb_max_photo', $types_dispositif->nb_max_photo ?? '') }}" required>
     </div>
 </div>
 

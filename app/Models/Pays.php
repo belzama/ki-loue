@@ -7,6 +7,7 @@ use App\Models\Continent;
 use App\Models\Devise;
 use App\Models\Region;
 use App\Models\ModePaiement;
+use App\Models\Tarif;
 
 class Pays extends Model
 {
@@ -28,4 +29,5 @@ class Pays extends Model
     public function devise() { return $this->belongsTo(Devise::class); }
     public function regions() { return $this->hasMany(Region::class); }
     public function modePaiements() { return $this->hasMany(ModePaiement::class); }
+    public function tarifs() { return $this->hasMany(Tarif::class); }
 }

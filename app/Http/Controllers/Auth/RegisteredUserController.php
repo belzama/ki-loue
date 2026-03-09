@@ -32,12 +32,16 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'nom'      => ['required', 'string', 'max:255'],
+            'nom'      => ['required', 'string', 'max:150'],
+            'prenom'      => ['required', 'string', 'max:150'],
+            'type' => 'required|in:Société,Particulier',
+            'raison_sociale' => 'required|string|max:150',
             'code'      => ['nullable', 'string', 'max:50'],
             'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'pays_id'  => ['required', 'exists:pays,id'],
-            'contact'  => ['nullable', 'string', 'max:50'],
+            'telephone' => 'required|string|max:30',
+            'whatsapp' => 'required|string|max:30',
             'ref_code' => ['nullable', 'exists:users,code'],
         ]);
 
@@ -53,9 +57,13 @@ class RegisteredUserController extends Controller
             'user_id'   => $sponsor, // sponsor si nécessaire
             'code'      => $request->code,
             'nom'       => $request->nom,
+            'prenom'       => $request->prenom,
+            'type'       => $request->type,
+            'raison_sociale'       => $request->raison_sociale,
             'email'     => $request->email,
             'password'  => Hash::make($request->password),
-            'contact'   => $request->contact,
+            'telephone'   => $request->telephone,
+            'whatsapp'   => $request->whatsapp,
             'role'      => 'User',
         ]);
         

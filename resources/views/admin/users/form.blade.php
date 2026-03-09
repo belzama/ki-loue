@@ -1,5 +1,15 @@
 @csrf
 
+@if($errors->any())
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="mb-3">
     <label>Code Parrainage <span class="text-danger">*</span></label>
     <input type="text" name="code" class="form-control" 
@@ -7,13 +17,40 @@
 </div>
 
 <div class="mb-3">
-    <label>Nom & prénom(s)/Raison sociale <span class="text-danger">*</span></label>
+    <label>Nom <span class="text-danger">*</span></label>
     <input type="text" name="nom" class="form-control" 
            value="{{ old('nom', $user->nom ?? '') }}" required>
 </div>
 
+<div class="mb-3">
+    <label>Prénom(s) <span class="text-danger">*</span></label>
+    <input type="text" name="prenom" class="form-control" 
+           value="{{ old('prenom', $user->prenom ?? '') }}" required>
+</div>
+
+{{-- TYPE UTILISATEUR --}}
+<div class="mb-3">
+    <label>Type de compte <span class="text-danger">*</span></label>
+    <select name="type" class="form-select" required>
+        <option value="Société" {{ (old('type', $user->type ?? '') === 'Société') ? 'selected' : '' }}>Société</option>
+        <option value="Particulier" {{ (old('type', $user->type ?? '') === 'Particulier') ? 'selected' : '' }}>Particulier</option>
+    </select>
+</div>
+
+{{-- RAISON SOCIALE --}}
+<div class="mb-3" id="raison_sociale_block">
+    <label class="form-label">
+        Raison sociale <span class="text-danger">*</span>
+    </label>
+
+    <input type="text"
+        name="raison_sociale"
+        value="{{ old('raison_sociale'), $user->raison_sociale ?? '' }}"
+        class="form-control">
+</div>
+
 <div class="row g-3 mb-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label>Pays <span class="text-danger">*</span></label>
         <select name="pays_id" class="form-select" required>
             <option value="">Sélectionner</option>
@@ -26,10 +63,16 @@
         </select>
     </div>
 
-    <div class="col-md-6">
-        <label>Contact whatsapp</label>
-        <input type="text" name="contact" class="form-control" 
-            value="{{ old('contact', $user->contact ?? '') }}">
+    <div class="col-md-4">
+        <label>Téléphone</label>
+        <input type="text" name="telephone" class="form-control" 
+            value="{{ old('telephone', $user->telephone ?? '') }}">
+    </div>
+
+    <div class="col-md-4">
+        <label>Whatsapp</label>
+        <input type="text" name="whatsapp" class="form-control" 
+            value="{{ old('whatsapp', $user->whatsapp ?? '') }}">
     </div>
 </div>
 

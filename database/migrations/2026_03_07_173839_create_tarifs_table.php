@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('types_dispositifs', function (Blueprint $table) {
+        Schema::create('tarifs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('categorie_id')->constrained()->cascadeOnDelete();
-            $table->string('nom');
-            $table->double('tarif_min', 10, 2)->default(0);
-            $table->double('tarif_max', 10, 2)->default(0);
-            $table->integer('nb_max_photo')->default(5);
+            $table->foreignId('pays_id')->constrained()->cascadeOnDelete();
+            $table->string('designation');
+            $table->integer('tranche_debut');
+            $table->integer('tranche_fin');
+            $table->decimal('tranche_valeur', 15, 4);
+            $table->unique(['pays_id','tranche_debut']);
+
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('types_dispositifs');
+        Schema::dropIfExists('tarifs');
     }
 };

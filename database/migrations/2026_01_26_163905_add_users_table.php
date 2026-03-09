@@ -24,14 +24,18 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->string('code')->unique();
+            $table->string('code')->unique();            
+            $table->enum('type', ['Société', 'Particulier'])->default('Société');
             $table->string('nom');
+            $table->string('prenom');
+            $table->string('raison_sociale')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
 
-            $table->string('contact')->nullable();
+            $table->string('telephone');
+            $table->string('whatsapp');
 
             $table->enum('role', ['Admin', 'User'])->default('User');
 

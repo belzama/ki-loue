@@ -2,7 +2,7 @@
     $isEdit = isset($publication);
     $dispositif = $dispositif ?? null; // sécurise la variable
     $user = auth()->user();
-    $tauxPublication = $user->pays->taux_commission ?: sys_param('COMMISSION_RATE', 0);
+    $nbJourMinPub = $user->pays->nb_jour_min_pub ?: sys_param('MIN_PUB_DAYS', 1);
 @endphp
 
 {{-- ERREURS --}}
@@ -160,25 +160,51 @@
             <input type="date"
                    name="date_fin"
                    id="date_fin"
-                   class="form-control readonly-field"
-                   value="{{ old('date_fin', $publication->date_fin ?? now()->addDays(7)->toDateString()) }}"
-                   readonly>
+                   class="form-control"
+                   value="{{ old('date_fin', $publication->date_fin ?? now()->addDays($nbJourMinPub)->toDateString()) }}"
+                   require>
         </div>
     </div>
 
     {{-- CALCUL --}}
     <div class="row g-3 mb-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <label>Durée (jours)</label>
+            <input type="text" id="nb_jours" name="nb_jours" class="form-control readonly-field" readonly>
+        </div>
+        <div class="col-md-3">
             <label>Prix publication</label>
-            <input type="text" id="prix_publication" class="form-control readonly-field" readonly>
+            <input type="text" id="prix_publication" name="prix_publication" class="form-control readonly-field" readonly>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label>Bonus accordé</label>
-            <input type="text" id="bonus_accorde" class="form-control readonly-field" readonly>
+            <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control readonly-field" readonly>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label>Coût publication</label>
-            <input type="text" id="cout_publication" class="form-control readonly-field" readonly>
+            <input type="text" id="cout_publication" name="cout_publication" class="form-control readonly-field" readonly>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">
+            Détail du calcul
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Tranche</th>
+                        <th>Jours</th>
+                        <th>Taux</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+
+                <tbody id="detail_tranches">
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -197,68 +223,256 @@
 
 {{-- JAVASCRIPT --}}
 <script>
-const TAUX = {{ $tauxPublication }};
+
 const SOLDE_BONUS = {{ $user->solde_bonus ?? 0 }};
+const PAYS_ID = {{ $user->pays_id }};
+const baseUrl = "{{ url('/') }}";
+
+const OLD_PAYS   = "{{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
+const OLD_REGION = "{{ old('region_id', $publication->region_id ?? '') }}";
+const OLD_VILLE  = "{{ old('ville_id', $publication->ville_id ?? '') }}";
 
 const tarifInput = document.getElementById('tarif_location');
-const dateDebut = document.getElementById('date_debut');
-const dateFin = document.getElementById('date_fin');
+const dateDebutInput = document.getElementById('date_debut');
+const dateFinInput = document.getElementById('date_fin');
 
-// On initialise le tarif min avec la valeur par défaut du type de dispositif
 let currentTarifMin = {{ $dispositif->type_dispositif->tarif_min ?? 0 }};
+let tarifs = [];
 
-function calculer() {
+
+/* =================================
+   Charger les tarifs du pays
+================================= */
+async function chargerTarifs(pays_id)
+{
+    try {
+
+        const res = await fetch(`${baseUrl}/pays/${pays_id}/tarifs`, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+        });
+
+        if (!res.ok)
+            throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+
+        tarifs = Array.isArray(data) ? data : [];
+
+        calculer();
+
+    } catch (e) {
+
+        console.error("Erreur chargement tarifs :", e);
+
+    }
+}
+
+
+/* =================================
+   Calcul nombre de jours
+================================= */
+function diffDays(date1, date2)
+{
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    const diff = d2 - d1;
+
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+
+/* =================================
+   Appliquer contraintes dates
+================================= */
+function appliquerContraintesDates()
+{
+    const debut = dateDebutInput?.value;
+
+    if (!debut) return;
+
+    // Date minimum fin
+    dateFinInput.min = debut;
+
+    // Date max = 365 jours
+    const maxDate = new Date(debut);
+    maxDate.setDate(maxDate.getDate() + 365);
+
+    dateFinInput.max = maxDate.toISOString().split('T')[0];
+
+    // Si date fin invalide
+    if (dateFinInput.value && dateFinInput.value < debut)
+        dateFinInput.value = '';
+}
+
+
+/* =================================
+   Calcul publication
+================================= */
+function calculer()
+{
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
-    
-    // Protection : si currentTarifMin n'est pas encore chargé
-    const minReference = typeof currentTarifMin !== 'undefined' ? currentTarifMin : 0;
-    
-    // On utilise le plus élevé entre le tarif saisi et le minimum autorisé
+    const date_debut = dateDebutInput?.value;
+    const date_fin = dateFinInput?.value;
+
+    if (!tarifSaisi || !date_debut || !date_fin || tarifs.length === 0)
+        return;
+
     const tarifBase = Math.max(tarifSaisi, currentTarifMin);
-    
-    // Calcul du prix selon le taux (commission/frais)
-    const prix = tarifBase * TAUX / 100;
-    
-    // Calcul du bonus (ne peut pas dépasser le prix de la publication ni le solde dispo)
+
+    const jours = diffDays(date_debut, date_fin);
+
+    if (jours <= 0)
+        return;
+
+    document.getElementById("nb_jours").value = jours;
+
+    let prix = 0;
+    let html = '';
+
+    tarifs.forEach(t => {
+
+        if (jours < t.tranche_debut)
+            return;
+
+        const joursTranche = Math.min(jours, t.tranche_fin) - t.tranche_debut + 1;
+
+        if (joursTranche > 0)
+        {
+            const montant = joursTranche * (tarifBase * t.tranche_valeur);
+
+            prix += montant;
+
+            html += `
+                <tr>
+                    <td>${t.tranche_debut} - ${t.tranche_fin}</td>
+                    <td>${joursTranche}</td>
+                    <td>${(t.tranche_valeur * 100).toFixed(2)} %</td>
+                    <td>${montant.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+
+    });
+
+    document.getElementById("detail_tranches").innerHTML = html;
+
     const bonus = Math.min(prix, SOLDE_BONUS);
-    
-    // Coût final à payer
     const cout = prix - bonus;
 
-    // Mise à jour de l'affichage
     document.getElementById('prix_publication').value = prix.toFixed(2);
     document.getElementById('bonus_accorde').value = bonus.toFixed(2);
     document.getElementById('cout_publication').value = cout.toFixed(2);
 }
 
-// Écouteurs d'événements
+
+/* =================================
+   Restaurer localisation
+================================= */
+async function restoreLocalisation()
+{
+    if (!OLD_PAYS) return;
+
+    const paysSelect = document.getElementById('continent_id');
+    const regionSelect = document.getElementById('region_id');
+    const villeSelect = document.getElementById('ville_id');
+
+    paysSelect.value = OLD_PAYS;
+
+    // Charger régions
+    const res = await fetch(`${baseUrl}/regions/by-pays/${OLD_PAYS}`);
+    const regions = await res.json();
+
+    regionSelect.innerHTML = '<option value="">Sélectionner</option>';
+
+    regions.forEach(r => {
+        regionSelect.innerHTML += `<option value="${r.id}">${r.nom}</option>`;
+    });
+
+    if (OLD_REGION)
+    {
+        regionSelect.value = OLD_REGION;
+
+        // Charger villes
+        const res2 = await fetch(`${baseUrl}/villes/by-region/${OLD_REGION}`);
+        const villes = await res2.json();
+
+        villeSelect.innerHTML = '<option value="">Sélectionner</option>';
+
+        villes.forEach(v => {
+            villeSelect.innerHTML += `<option value="${v.id}">${v.nom}</option>`;
+        });
+
+        if (OLD_VILLE)
+            villeSelect.value = OLD_VILLE;
+    }
+}
+
+
+/* =================================
+   Événements
+================================= */
+
 tarifInput?.addEventListener('input', calculer);
 
-dateDebut?.addEventListener('change', () => {
-    if (!dateDebut.value) return;
-    const d = new Date(dateDebut.value);
-    d.setDate(d.getDate() + 7);
-    dateFin.value = d.toISOString().split('T')[0];
+dateDebutInput?.addEventListener('change', () => {
+
+    if (!dateDebutInput.value) return;
+
+    const d = new Date(dateDebutInput.value);
+
+    d.setDate(d.getDate() + {{ $nbJourMinPub }});
+
+    dateFinInput.value = d.toISOString().split('T')[0];
+
+    appliquerContraintesDates();
+
+    calculer();
 });
 
-/* Mise à jour du Tarif min quand on change de dispositif */
+dateFinInput?.addEventListener('change', calculer);
+
+
+/* =================================
+   Changement dispositif
+================================= */
+
 const dispositifSelect = document.getElementById('dispositif_id');
-dispositifSelect?.addEventListener('change', function () {
+
+dispositifSelect?.addEventListener('change', function ()
+{
     if (!this.value) return;
 
-    fetch(`dispositifs/${this.value}/tarif-min`)
+    fetch(`${baseUrl}/dispositifs/${this.value}/tarif-min`)
         .then(r => r.json())
         .then(data => {
+
             currentTarifMin = parseFloat(data.tarif_min) || 0;
-            
-            tarifInput.min = data.tarif_min;            
-            tarifInput.value = data.tarif_min;
-            
+
+            tarifInput.min = currentTarifMin;
+            tarifInput.value = currentTarifMin;
+
             calculer();
         });
 });
 
-// Lancement initial du calcul
-calculer();
+
+/* =================================
+   Initialisation
+================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    chargerTarifs(PAYS_ID);
+
+    restoreLocalisation();
+
+    appliquerContraintesDates();
+
+    calculer();
+
+});
+
 </script>
 @endsection

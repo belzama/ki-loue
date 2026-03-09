@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/pays/{pays}', [PaysController::class, 'update'])->name('pays.update');
     Route::delete('/pays/{pays}', [PaysController::class, 'destroy'])->name('pays.destroy');
 });
+
 Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('devises', DeviseController::class);
@@ -75,9 +76,7 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     Route::delete('dispositifs/{dispositif}', [DispositifController::class, 'destroy'])->name('dispositifs.destroy');
     // Page "Voir plus"
     Route::get('dispositifs/{dispositif}/show', [DispositifController::class, 'show'])->name('dispositifs.show');
-    // tarif min dispositif
-    Route::get('dispositifs/{dispositif}/tarif-min', [DispositifController::class, 'getTarifMin'])->name('dispositifs.tarif-min');
-    
+
     Route::resource('publications', PublicationController::class);
     // Création d'une publication à partir d'un dispositif existant
     Route::get('publications/create/{dispositif}', [PublicationController::class, 'createByDispositif'])->name('publications.createByDispositif');
@@ -122,3 +121,7 @@ Route::get('/types_dispositif/by-categorie/{categorie}', [TypesDispositifControl
 Route::get('/types_dispositif/search', [TypesDispositifController::class, 'search']);
 Route::get('/types_dispositif/{id}', [TypesDispositifController::class, 'show']);
 Route::get('/types_dispositif/{id}/params', [TypesDispositifController::class, 'params']);
+
+Route::get('/dispositifs/{dispositif}/tarif-min', [DispositifController::class, 'getTarifMin']);
+    
+Route::get('/pays/{pays}/tarifs', [PaysController::class, 'getTarifs']);

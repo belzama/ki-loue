@@ -20,6 +20,7 @@
             <th>Catégorie</th>
             <th>Tarif min</th>
             <th>Tarif max</th>
+            <th>Nb. max photo</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -29,8 +30,9 @@
             <td>{{ $type->id }}</td>
             <td>{{ $type->nom }}</td>
             <td>{{ $type->categorie->nom ?? '' }}</td>
-            <td>{{ number_format($type->tarif_min, 2) }}</td>
-            <td>{{ number_format($type->tarif_max, 2) }}</td>
+            <td>{{ number_format($type->tarif_min, 0) }}</td>
+            <td>{{ number_format($type->tarif_max, 0) }}</td>
+            <td>{{ number_format($type->nb_max_photo, 0) }}</td>
             <td>
                 <a href="{{ route('admin.types_dispositifs.edit', $type) }}" 
                     class="btn btn-sm btn-warning bi bi-pencil-square"

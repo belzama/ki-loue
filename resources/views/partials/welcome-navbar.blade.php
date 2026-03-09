@@ -7,9 +7,9 @@
 
         @auth
             @if(auth()->user()->role === 'Admin')
-                <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Tableau de bord</a></li>
             @else
-                <li class="nav-item"><a class="nav-link" href="{{ route('user.dashboard') }}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('user.dashboard') }}">Tableau de bord</a></li>
             @endif
             <li class="nav-item">
                 <form method="POST" action="{{ route('logout') }}">

@@ -14,8 +14,16 @@
 
                 <div class="lh-sm">
                     <div class="fw-semibold">
-                        {{ auth()->user()->nom ?? auth()->user()->email }}
+                        {{ auth()->user()->nom ?? '' }} 
+                        {{ auth()->user()->prenom ?? '' }} 
                     </div>
+
+                    <div class="fw-bold">
+                        <small class="text-white">
+                            {{ auth()->user()->raison_sociale ?? auth()->user()->email }} 
+                        </small>
+                    </div>
+
                     <small class="text-warning">
                         {{ number_format(
                             (auth()->user()->solde_reel ?? 0) +

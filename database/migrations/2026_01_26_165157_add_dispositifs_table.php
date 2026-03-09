@@ -17,10 +17,11 @@ return new class extends Migration
             $table->foreignId('types_dispositif_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('numero_immatriculation')->nullable();
+            $table->string('marque');
+            $table->string('modele');
             $table->string('designation');
             $table->text('description')->nullable();
             $table->enum('etat', ['Neuf', 'Bon', 'Révisé'])->default('Bon');
-            $table->enum('statut', ['actif', 'inactif', 'suspendu'])->default('actif');
             $table->timestamps();
         });
     }

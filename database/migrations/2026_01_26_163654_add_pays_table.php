@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('nom');
             $table->string('nationalite');
             $table->string('langue_officielle');
-            $table->double('taux_commission', 10, 2)->default(0);
+            $table->integer('nb_jour_min_pub')->default(1);
             $table->double('bonus_sponsor', 10, 2)->default(0);
             $table->double('taux_sponsor_new', 10, 2)->default(0);
             $table->string('drapeau')->nullable();

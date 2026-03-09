@@ -54,7 +54,10 @@ class TypesDispositifController extends Controller
     {
         $type = TypesDispositif::with('params')->findOrFail($id);
 
-        return response()->json($type->params);
+        return response()->json([
+            'params' => $type->params,
+            'nb_max_photo' => $type->nb_max_photo
+        ]);
     }
 
     public function index()
@@ -76,6 +79,7 @@ class TypesDispositifController extends Controller
             'nom' => 'required|string|max:255',
             'tarif_min' => 'required|numeric|min:0',
             'tarif_max' => 'required|numeric|gte:tarif_min',
+            'nb_max_photo' => 'required|numeric|min:1',
             'params.*.name' => 'nullable|string|max:255',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',
@@ -120,6 +124,7 @@ class TypesDispositifController extends Controller
             'nom' => 'required|string|max:255',
             'tarif_min' => 'required|numeric|min:0',
             'tarif_max' => 'required|numeric|gte:tarif_min',
+            'nb_max_photo' => 'required|numeric|min:1',
             'params.*.name' => 'nullable|string|max:255',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',

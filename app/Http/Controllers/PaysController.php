@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Devise;
 use App\Models\Continent;
 use App\Models\Pays;
+use App\Models\Tarif;
 use App\Models\ModePaiement;
 
 class PaysController extends Controller
@@ -194,4 +195,15 @@ class PaysController extends Controller
         $pays->delete();
         return redirect()->route('admin.pays.index')->with('success', 'Pays supprimé.');
     }
+
+    public function getTarifs($pays_id)
+    {
+        $tarifs = Tarif::where('pays_id', $pays_id)
+            ->orderBy('tranche_debut')
+            ->get();
+
+        return response()->json($tarifs);
+    }
+
+    
 }

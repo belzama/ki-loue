@@ -15,6 +15,8 @@
     
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     
+    <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/css/intlTelInput.css" rel="stylesheet">
+
     {{-- Custom CSS --}}
     <style>
         body {
@@ -88,6 +90,72 @@
             cursor: not-allowed;
         }
 
+        .photo-box {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* carré */
+            overflow: hidden;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .photo-box img.photo-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* remplit tout le cadre */
+            z-index: 1;
+        }
+
+        .photo-empty {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #e9ecef; /* gris clair */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #adb5bd; /* couleur icône */
+            font-size: 2rem;
+            z-index: 0;
+            border: 2px dashed #ced4da; /* effet cadre photo vide */
+            border-radius: 5px;
+        }
+
+        .photo-empty i {
+            pointer-events: none;
+        }
+
+        .photo-buttons {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            z-index: 2; /* devant l'image */
+            display: flex;
+            gap: 5px;
+        }
+        
+        .publication-card{
+            transition: all .25s ease;
+            border-radius:12px;
+        }
+
+        .publication-card:hover{
+            transform: translateY(-5px);
+            box-shadow:0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .carousel img{
+            border-top-left-radius:12px;
+            border-top-right-radius:12px;
+        }
     </style>
 </head>
 <body>
@@ -162,7 +230,7 @@
 
 {{-- Bootstrap JS --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>  
 {{-- Custom JS --}}
 @stack('scripts')
 
