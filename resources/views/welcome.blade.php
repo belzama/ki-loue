@@ -10,7 +10,7 @@
 <section class="bg-warning text-white py-5">
     <div class="container text-center">
         <p class="lead mt-3">
-            Trouvez et louez rapidement des dispositifs disponibles partout en Afrique
+            Trouvez et louez rapidement des matériels disponibles partout en Afrique
         </p>
     </div>
 </section>

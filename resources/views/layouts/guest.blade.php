@@ -22,7 +22,7 @@
                 <li class="nav-item">
                     <a href="{{ route('user.dispositifs.index') }}"
                        class="nav-link {{ request()->routeIs('user.dispositifs.*') ? 'active' : '' }}">
-                        <i class="bi bi-truck me-2"></i> Dispositifs
+                        <i class="bi bi-truck me-2"></i> Matériels
                     </a>
                 </li>
 

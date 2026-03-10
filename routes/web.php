@@ -111,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
         [DispositifPhotoController::class, 'destroy']
     )->name('user.dispositifs.photos.destroy');
 
-});
+}); 
 
 Route::get('/pays/by-continent/{continent}', [LocalisationController::class, 'paysByContinent']);
 Route::get('/regions/by-pays/{pays}', [LocalisationController::class, 'regionsByPays']);

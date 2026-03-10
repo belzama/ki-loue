@@ -23,7 +23,7 @@
     {{-- Catégorie & Type --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
-            <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+            <label class="form-label">Catégorie de matériel <span class="text-danger">*</span></label>
             <select id="categorie_id" 
                     name="categorie_id"
                     data-child="types_dispositif_id"
@@ -40,7 +40,7 @@
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Type de dispositif <span class="text-danger">*</span></label>
+            <label class="form-label">Type de matériel <span class="text-danger">*</span></label>
             <select id="types_dispositif_id"
                     name="types_dispositif_id"
                     data-selected="{{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') }}"
@@ -60,9 +60,9 @@
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Modèle</label>
+            <label class="form-label">Modèle <span class="text-danger">*</span></label>
             <input type="text" name="modele" class="form-control"
-                   value="{{ old('modele', $dispositif->modele ?? '') }}">
+                   value="{{ old('modele', $dispositif->modele ?? '') }}" required>
         </div>
     </div>
 
@@ -161,28 +161,58 @@ $(document).ready(function(){
     }
 
     // Preview photo et mise à jour du hidden
-    window.previewPhoto = function(event, index){
+        window.previewPhoto = function(event, index){
+
         const file = event.target.files[0];
         if(!file) return;
 
-        const allowed = ['image/jpg','image/jpeg','image/png'];
-        if(!allowed.includes(file.type)){
-            alert("Format non autorisé. Utilisez JPG, JPEG, PNG.");
+        const allowedTypes = ['image/jpeg','image/png','image/jpg'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        // supprimer ancienne erreur
+        $(`#error_photo_${index}`).remove();
+
+        // type
+        if(!allowedTypes.includes(file.type)){
+            showPhotoError(index,"Format invalide. Utilisez JPG ou PNG.");
             event.target.value='';
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function(e){
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'photo-preview';
-            img.id = 'preview_'+index;
+        // taille
+        if(file.size > maxSize){
+            showPhotoError(index,"La photo dépasse 5MB.");
+            event.target.value='';
+            return;
+        }
 
-            const oldEl = document.getElementById('preview_'+index);
-            if(oldEl) oldEl.replaceWith(img);
+        // vérifier que c'est réellement une image
+        const img = new Image();
+
+        img.onload = function(){
+
+            const reader = new FileReader();
+            reader.onload = function(e){
+
+                const image = document.createElement('img');
+                image.src = e.target.result;
+                image.className = 'photo-preview';
+                image.id = 'preview_'+index;
+
+                const oldEl = document.getElementById('preview_'+index);
+                if(oldEl) oldEl.replaceWith(image);
+
+            };
+
+            reader.readAsDataURL(file);
         };
-        reader.readAsDataURL(file);
+
+        img.onerror = function(){
+            showPhotoError(index,"Le fichier n'est pas une image valide.");
+            event.target.value='';
+        };
+
+        img.src = URL.createObjectURL(file);
     }
 
     // Supprimer une photo
@@ -253,6 +283,17 @@ $(document).ready(function(){
             console.error("Erreur chargement paramètres :", error);
             container.html('<div class="alert alert-danger">Erreur chargement paramètres</div>');
         }
+    }
+
+    function showPhotoError(index,message){
+
+        const errorHtml = `
+            <div id="error_photo_${index}" class="text-danger small mt-1">
+                ${message}
+            </div>
+        `;
+
+        $(`#preview_${index}`).closest('.photo-box').append(errorHtml);
     }
 
     // Gestion du select type → params

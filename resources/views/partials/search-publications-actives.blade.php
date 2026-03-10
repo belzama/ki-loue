@@ -50,7 +50,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Catégorie</label>
+                                <label class="form-label">Catégorie de matériel</label>
                                 <select id="categorie_id" 
                                         name="categorie_id"
                                         data-child="types_dispositif_id"
@@ -67,7 +67,7 @@
                             </div>
 
                             <div class="col-md-8">
-                                <label class="form-label">Type dispositif</label>
+                                <label class="form-label">Type de matériel</label>
                                 <select id="types_dispositif_id" 
                                         name="types_dispositif_id" 
                                         data-selected="{{ request('types_dispositif_id') }}"

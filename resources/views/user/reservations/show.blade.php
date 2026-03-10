@@ -78,7 +78,7 @@
     {{-- ===== 3. INFOS DISPOSITIF ===== --}}
     <div class="card mb-3 shadow-sm">
         <div class="card-header bg-dark text-white">
-            Informations dispositif
+            Informations du matériel
         </div>
 
         <div class="card-body">

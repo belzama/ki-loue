@@ -50,21 +50,21 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.categories.index') }}" 
                         class="nav-link">
-                        <i class="bi bi-tags me-2"></i> Categories
+                        <i class="bi bi-tags me-2"></i> Categories de matériels
                     </a>
                 </li>
                 
                 <li class="nav-item">
                     <a href="{{ route('admin.types_dispositifs.index') }}" 
                         class="nav-link">
-                        <i class="bi bi-cpu me-2"></i> Types de dispositifs
+                        <i class="bi bi-cpu me-2"></i> Types de matériels
                     </a>
                 </li>
             
                 <li class="nav-item">
                     <a href="{{ route('user.dispositifs.index') }}"
                        class="nav-link {{ request()->routeIs('user.dispositifs.*') ? 'active' : '' }}">
-                        <i class="bi bi-truck me-2"></i> Dispositifs
+                        <i class="bi bi-truck me-2"></i> Matériels
                     </a>
                 </li>
 

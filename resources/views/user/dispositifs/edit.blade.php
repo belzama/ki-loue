@@ -3,6 +3,6 @@
     : 'layouts.guest')
 
 @section('content')
-<h1>Modifier le dispositif</h1>
+<h1>Modifier le matériel</h1>
 @include('user.dispositifs.form')
 @endsection

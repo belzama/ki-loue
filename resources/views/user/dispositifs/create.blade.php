@@ -3,7 +3,7 @@
     : 'layouts.guest')
 
 @section('content')
-<h1>Ajouter un dispositif</h1>
+<h1>Ajouter un matériel</h1>
 
 @include('user.dispositifs.form')
 @endsection

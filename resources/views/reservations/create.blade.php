@@ -12,7 +12,7 @@
 
 @section('main-content')
 <div class="container my-4">
-    <h2>Réserver le dispositif : {{ $publication->dispositif->designation }}</h2>
+    <h2>Réserver le matériel : {{ $publication->dispositif->designation }}</h2>
 
     {{-- Message de succès --}}
     @if(session('success'))

@@ -55,7 +55,7 @@ class DispositifController extends Controller
             'description'            => 'nullable|string',
             'etat'                   => 'required|in:Neuf,Bon,Révisé',
             'photos'                 => 'required|array|min:1',        // <-- au moins 1 photo
-            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:2048',
+            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:51200',
             'params'                 => 'nullable|array',
             'params.*'               => 'nullable|string',
         ]);
@@ -114,8 +114,8 @@ class DispositifController extends Controller
             'modele' => 'required|string',
             'description' => 'nullable|string',
             'etat' => 'required|in:Neuf,Bon,Révisé',
-            'photos' => 'required|array|min:1',        // <-- au moins 1 photo
-            'photos.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'photos' => 'nullable|array',        // <-- au moins 1 photo
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:51200',
             'params' => 'nullable|array',
             'params.*' => 'nullable|string',
         ]);

@@ -62,10 +62,15 @@ class PaysController extends Controller
             'nom' => 'required|string|max:255',
             'nationalite' => 'required|string|max:255',
             'langue_officielle' => 'required|string|max:255',
-            'taux_commission' => 'required|numeric|min:0',
+            'nb_jour_min_pub' => 'required|integer|min:1',
             'bonus_sponsor' => 'required|numeric|min:0',
             'taux_sponsor_new' => 'required|numeric|min:0',
             'drapeau' => 'nullable|string|max:255',
+
+            'tarifs.*.designation' => 'required|string|max:255',
+            'tarifs.*.tranche_debut' => 'required|integer|min:1',
+            'tarifs.*.tranche_fin' => 'required|integer|min:1',
+            'tarifs.*.tranche_valeur' => 'required|numeric|min:0',
 
             'mode_paiements.*.designation' => 'required|string|max:255',
             'mode_paiements.*.type' => 'required|string',
@@ -73,37 +78,29 @@ class PaysController extends Controller
             'mode_paiements.*.numero_compte' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request) {
-
+        DB::transaction(function() use($request) {
             $pays = Pays::create($request->only([
-                'continent_id',
-                'devise_id',
-                'code',
-                'indicatif',
-                'nom',
-                'nationalite',
-                'langue_officielle',
-                'taux_commission',
-                'bonus_sponsor',
-                'taux_sponsor_new',
-                'drapeau'
+                'continent_id','devise_id','code','indicatif','nom',
+                'nationalite','langue_officielle','nb_jour_min_pub',
+                'bonus_sponsor','taux_sponsor_new','drapeau'
             ]));
 
+            if ($request->has('tarifs')) {
+                foreach($request->tarifs as $tarif){
+                    if(empty($tarif['designation'])) continue;
+                    $pays->tarifs()->create($tarif);
+                }
+            }
+
             if ($request->has('mode_paiements')) {
-
-                foreach ($request->mode_paiements as $mode) {
-
-                    $pays->modePaiements()->create([
-                        'designation' => $mode['designation'],
-                        'api_url' => $mode['api_url'] ?? null,
-                        'numero_compte' => $mode['numero_compte'] ?? null,
-                    ]);
+                foreach($request->mode_paiements as $mode){
+                    if(empty($mode['designation']) || empty($mode['type'])) continue;
+                    $pays->modePaiements()->create($mode);
                 }
             }
         });
 
-        return redirect()->route('admin.pays.index')
-            ->with('success', 'Pays ajouté avec ses modes de paiement.');
+        return redirect()->route('admin.pays.index')->with('success','Pays ajouté.');
     }
 
     public function edit(Pays $pays)
@@ -115,79 +112,55 @@ class PaysController extends Controller
 
     public function update(Request $request, Pays $pays)
     {
-        info("1. Début de la méthode update pour le pays : " . $pays->id);
-        try {
-            // Validation principale
-            $request->validate([
-                'continent_id' => 'required|exists:continents,id',
-                'devise_id' => 'required|exists:devises,id',
-                'code' => "required|max:5",
-                'indicatif' => 'required|max:10',
-                'nom' => 'required|string|max:255',
-                'nationalite' => 'required|string|max:255',
-                'langue_officielle' => 'required|string|max:255',
-                'taux_commission' => 'required|numeric|min:0',
-                'bonus_sponsor' => 'required|numeric|min:0',
-                'taux_sponsor_new' => 'required|numeric|min:0',
-                'drapeau' => 'nullable|string|max:255',
+        $request->validate([
+            'continent_id' => 'required|exists:continents,id',
+            'devise_id' => 'required|exists:devises,id',
+            'code' => 'required|max:5',
+            'indicatif' => 'required|max:10',
+            'nom' => 'required|string|max:255',
+            'nationalite' => 'required|string|max:255',
+            'langue_officielle' => 'required|string|max:255',
+            'nb_jour_min_pub' => 'required|integer|min:1',
+            'bonus_sponsor' => 'required|numeric|min:0',
+            'taux_sponsor_new' => 'required|numeric|min:0',
+            'drapeau' => 'nullable|string|max:255',
 
-                'mode_paiements.*.designation' => 'required|string|max:255',
-                'mode_paiements.*.type' => 'required|string',
-                'mode_paiements.*.api_url' => 'nullable|string',
-                'mode_paiements.*.numero_compte' => 'nullable|string',
-            ]);
-            info("2. Validation passée avec succès");
-            //return "Le formulaire n'est pas valide";
-            DB::transaction(function () use ($request, $pays) {
-                info("3. Entrée dans la transaction");
-                // Update des infos principales
-                $pays->update($request->only([
-                    'continent_id',
-                    'devise_id',
-                    'code',
-                    'indicatif',
-                    'nom',
-                    'nationalite',
-                    'langue_officielle',
-                    'taux_commission',
-                    'bonus_sponsor',
-                    'taux_sponsor_new',
-                    'drapeau'
-                ]));
-                info("4. Mise à jour des infos principales terminée");
+            'tarifs.*.designation' => 'required|string|max:255',
+            'tarifs.*.tranche_debut' => 'required|integer|min:1',
+            'tarifs.*.tranche_fin' => 'required|integer|min:1',
+            'tarifs.*.tranche_valeur' => 'required|numeric|min:0',
 
-                // Suppression des anciens modes de paiement
-                $pays->modePaiements()->delete();
-                info("5. Anciens modes de paiement supprimés");
-                // Création des nouveaux modes
-                if ($request->has('mode_paiements')) {
-                    foreach ($request->mode_paiements as $index => $mode) {
+            'mode_paiements.*.designation' => 'required|string|max:255',
+            'mode_paiements.*.type' => 'required|string',
+            'mode_paiements.*.api_url' => 'nullable|string',
+            'mode_paiements.*.numero_compte' => 'nullable|string',
+        ]);
 
-                        // Ignorer les lignes vides
-                        if (empty($mode['designation']) || empty($mode['type'])) {
-                            continue;
-                        }
+        DB::transaction(function() use($request, $pays) {
+            $pays->update($request->only([
+                'continent_id','devise_id','code','indicatif','nom',
+                'nationalite','langue_officielle','nb_jour_min_pub',
+                'bonus_sponsor','taux_sponsor_new','drapeau'
+            ]));
 
-                        $pays->modePaiements()->create([
-                            'designation' => $mode['designation'],
-                            'type' => $mode['type'],
-                            'api_url' => $mode['api_url'] ?? null,
-                            'numero_compte' => $mode['numero_compte'] ?? null,
-                        ]);
-                        info("7. Mode de paiement ajouté pour l'index : " . $index);
-                    }
+            $pays->tarifs()->delete();
+            if($request->has('tarifs')){
+                foreach($request->tarifs as $tarif){
+                    if(empty($tarif['designation'])) continue;
+                    $pays->tarifs()->create($tarif);
                 }
-            });
+            }
 
-            info("8. Transaction validée (Commit)");
-            return redirect()->route('admin.pays.index')
-                ->with('success', 'Pays modifié avec succès avec ses modes de paiement.');
-        } catch (\Exception $e) {// En cas d'erreur, on logue le message précis et la ligne
-            info("ERREUR DÉTECTÉE : " . $e->getMessage());
-            info("Fichier : " . $e->getFile() . " à la ligne " . $e->getLine());
-            //Log::error("Erreur lors de l'update pays : " . $e->getMessage());
-            return back()->withInput()->with('error', 'Une erreur est survenue.');
-        }
+            $pays->modePaiements()->delete();
+            if($request->has('mode_paiements')){
+                foreach($request->mode_paiements as $mode){
+                    if(empty($mode['designation']) || empty($mode['type'])) continue;
+                    $pays->modePaiements()->create($mode);
+                }
+            }
+        });
+
+        return redirect()->route('admin.pays.index')->with('success','Pays mis à jour.');
     }
 
     public function destroy(Pays $pays)

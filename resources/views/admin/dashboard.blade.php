@@ -80,7 +80,7 @@
 
 <hr>
 
-<h5>🏗 Top dispositifs</h5>
+<h5>🏗 Top matériels</h5>
 <table class="table">
     <tr>
         <th>Description</th>

@@ -19,7 +19,7 @@ class Pays extends Model
         'nom',
         'nationalite', 
         'langue_officielle',
-        'taux_commission',
+        'nb_jour_min_pub',
         'bonus_sponsor',
         'taux_sponsor_new', 
         'drapeau'

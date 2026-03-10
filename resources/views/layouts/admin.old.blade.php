@@ -23,7 +23,7 @@
             
             <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link">Utilisateurs</a></li>
             <li class="nav-item"><a href="{{ route('admin.categories.index') }}" class="nav-link">Categories</a></li>
-            <li class="nav-item"><a href="{{ route('admin.types_dispositifs.index') }}" class="nav-link">Types de dispositifs</a></li>
+            <li class="nav-item"><a href="{{ route('admin.types_dispositifs.index') }}" class="nav-link">Types de matériels</a></li>
             </ul>
         </aside>
 

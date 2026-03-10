@@ -15,7 +15,7 @@
         <thead class="table-light">
             <tr>
                 <th>Date</th>
-                <th>Dispositif</th>
+                <th>Matériel</th>
                 <th>Statut</th>
                 <th>Actions</th>
             </tr>

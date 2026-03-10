@@ -18,7 +18,7 @@
             <a href="{{ route('user.dispositifs.create') }}"
                class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
                 <i class="bi bi-plus-lg me-2"></i>
-                Enregistrer mon premier dispositif
+                Enregistrer mon premier matériel
             </a>
         </div>
 
@@ -101,7 +101,7 @@
 
 <hr>
 
-<h5>🏗 Top dispositifs</h5>
+<h5>🏗 Top matériels</h5>
 <table class="table">
     <tr>
         <th>Description</th>

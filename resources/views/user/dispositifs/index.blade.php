@@ -4,9 +4,9 @@
 
 {{-- PAGE TITLE --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-truck me-2"></i> Mes dispositifs</h4>
+    <h4><i class="bi bi-truck me-2"></i> Mes matériels</h4>
     <a href="{{ route('user.dispositifs.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Ajouter un dispositif
+        <i class="bi bi-plus-lg"></i> Ajouter un matériel
     </a>
 </div>
 
@@ -29,7 +29,7 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label font-weight-bold">Type de dispositif</label>
+                <label class="form-label font-weight-bold">Type de matériel</label>
                 <select id="types_dispositif_id" 
                         name="types_dispositif_id" 
                         data-selected="{{ request('types_dispositif_id') }}"
@@ -145,7 +145,7 @@
     @empty
         <div class="col-12 text-center py-5">
             <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-            <p class="mt-3 text-muted">Aucun dispositif trouvé.</p>
+            <p class="mt-3 text-muted">Aucun matériel trouvé.</p>
         </div>
     @endforelse
 </div>

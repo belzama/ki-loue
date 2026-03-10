@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Types de dispositifs</h1>
+<h1>Types de matériels</h1>
 
 <a href="{{ route('admin.types_dispositifs.create') }}" 
     class="btn btn-primary mb-3 bi bi-plus-lg">

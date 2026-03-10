@@ -35,7 +35,7 @@
 
         <div class="mb-3">
             <label class="form-label">
-                Dispositif <span class="text-danger">*</span>
+                Matériel <span class="text-danger">*</span>
             </label>
 
             @if($isEdit)

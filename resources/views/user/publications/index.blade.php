@@ -29,7 +29,7 @@
             <div class="row g-4 mb-3">
 
                 <div class="col-md-5">
-                    <label class="form-label fw-semibold">Catégorie</label>
+                    <label class="form-label fw-semibold">Catégorie de matériel</label>
                     <select id="categorie_id" 
                             name="categorie_id" 
                             data-child="types_dispositif_id"
@@ -61,7 +61,7 @@
             <div class="row g-4 mb-3">
 
                 <div class="col-md-8">
-                    <label class="form-label fw-semibold">Dispositif</label>
+                    <label class="form-label fw-semibold">Matériel</label>
                     <input type="text"
                            name="designation"
                            value="{{ request('designation') }}"
