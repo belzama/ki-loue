@@ -17,12 +17,12 @@
                 name="pays_id"
                 data-child="region_id"
                 data-url="{{ url('regions/by-pays') }}/"
-                data-selected="{{ old('region_id', $ville->region_id ?? '') }}" 
+                data-selected="{{ old('region_id', $departement->region_id ?? '') }}" 
                 class="form-select" required>
             <option value="">Sélectionner</option>
             @foreach($pays_list as $p)
                 <option value="{{ $p->id }}" 
-                    {{ (old('pays_id', $ville->pays_id ?? '') == $p->id) ? 'selected' : '' }}>
+                    {{ (old('pays_id', $departement->pays_id ?? '') == $p->id) ? 'selected' : '' }}>
                     {{ $p->nom }}
                 </option>
             @endforeach
@@ -33,14 +33,14 @@
         <label>Région <span class="text-danger">*</span></label>
         <select id="region_id"
                 name="region_id" 
-                data-child="ville_id"
-                data-url="{{ url('villes/by-region') }}/"
-                data-selected="{{ old('ville_id', $ville->id ?? '') }}"
+                data-child="departement_id"
+                data-url="{{ url('departements/by-region') }}/"
+                data-selected="{{ old('departement_id', $departement->id ?? '') }}"
                 class="form-select" required>
             <option value="">Sélectionner</option>
             @foreach($regions as $region)
                 <option value="{{ $region->id }}" 
-                    {{ (old('region_id', $ville->region_id ?? '') == $region->id) ? 'selected' : '' }}>
+                    {{ (old('region_id', $departement->region_id ?? '') == $region->id) ? 'selected' : '' }}>
                     {{ $region->nom }}
                 </option>
             @endforeach
@@ -50,7 +50,7 @@
     <div class="col-md-4">
         <label>Nom <span class="text-danger">*</span></label>
         <input type="text" name="nom" class="form-control" 
-            value="{{ old('nom', $ville->nom ?? '') }}" required>
+            value="{{ old('nom', $departement->nom ?? '') }}" required>
     </div>
 </div>
 

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Devise;
 use App\Models\Pays;
 use App\Models\Region;
-use App\Models\Ville;
+use App\Models\Departement;
 use App\Models\Categorie;
 use App\Models\Dispositif;
 use App\Models\Publication;
@@ -25,7 +25,7 @@ class PublicationController extends Controller
 
         $query = Publication::with([
                 'dispositif.type_dispositif.categorie',
-                'ville.region.pays',
+                'departement.region.pays',
                 'devise'
             ])
             ->whereHas('dispositif', function ($q) {
@@ -64,23 +64,23 @@ class PublicationController extends Controller
             $q->where('statut', $request->statut);
         });
 
-        // Pays (via publication -> ville -> region)
+        // Pays (via publication -> departement -> region)
         $query->when($request->pays_id, function ($q) use ($request) {
-            $q->whereHas('ville.region', function ($qq) use ($request) {
+            $q->whereHas('departement.region', function ($qq) use ($request) {
                 $qq->where('pays_id', $request->pays_id);
             });
         });
 
-        // Région (via publication -> ville)
+        // Région (via publication -> departement)
         $query->when($request->region_id, function ($q) use ($request) {
-            $q->whereHas('ville', function ($qq) use ($request) {
+            $q->whereHas('departement', function ($qq) use ($request) {
                 $qq->where('region_id', $request->region_id);
             });
         });
 
-        // Ville (directement sur publication)
-        $query->when($request->ville_id, function ($q) use ($request) {
-            $q->where('ville_id', $request->ville_id);
+        // Departement (directement sur publication)
+        $query->when($request->departement_id, function ($q) use ($request) {
+            $q->where('departement_id', $request->departement_id);
         });
 
         $publications = $query
@@ -129,7 +129,7 @@ class PublicationController extends Controller
         $publication->load([
             'dispositif.photos',
             'dispositif.type_dispositif',
-            'ville.region',
+            'departement.region',
             'devise'
         ]);
 
@@ -144,6 +144,8 @@ class PublicationController extends Controller
         //validation du formulaire
         $validated = $request->validate([
             'dispositif_id' => 'required|exists:dispositifs,id',
+            'departement_id' => 'required|exists:departement,id',
+            'ville' => 'required|string|max:150',
             'tarif_location' => 'required|numeric|min:1',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after:date_debut',
@@ -200,7 +202,8 @@ class PublicationController extends Controller
             */
             Publication::create([
                 'dispositif_id'   => $request->dispositif_id,
-                'ville_id'        => $request->ville_id,
+                'departement_id'        => $request->departement_id,
+                'ville'        => $request->ville,
                 'devise_id'       => $request->devise_id,
                 'tarif_location'  => $request->tarif_location,
                 'prix_publication'=> $prix_publication,
@@ -312,7 +315,7 @@ class PublicationController extends Controller
     {
         $data = $request->validate([
             //'dispositif_id' => 'required|exists:dispositifs,id',
-            'ville_id' => 'required|exists:villes,id',
+            'departement_id' => 'required|exists:departements,id',
             /*'devise_id' => 'required|exists:devises,id',
             'tarif_location' => 'required|numeric|min:0',
             'prix_location' => 'required|numeric|min:0',
@@ -327,7 +330,7 @@ class PublicationController extends Controller
         }*/
 
         $publication->update([
-            'ville_id' => $data['ville_id'],
+            'departement_id' => $data['departement_id'],
             // on ne modifie pas date_debut/date_fin pour une mise à jour classique
         ]);
 

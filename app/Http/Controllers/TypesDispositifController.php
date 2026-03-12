@@ -76,11 +76,12 @@ class TypesDispositifController extends Controller
     {
         $data = $request->validate([
             'categorie_id' => 'required|exists:categories,id',
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|string|max:150',
             'tarif_min' => 'required|numeric|min:0',
             'tarif_max' => 'required|numeric|gte:tarif_min',
             'nb_max_photo' => 'required|numeric|min:1',
-            'params.*.name' => 'nullable|string|max:255',
+            'nom_dispositif_fields' => 'nullable|string|max:150',
+            'params.*.name' => 'nullable|string|max:150',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',
         ]);
@@ -121,11 +122,12 @@ class TypesDispositifController extends Controller
     {
         $data = $request->validate([
             'categorie_id' => 'required|exists:categories,id',
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|string|max:150',
             'tarif_min' => 'required|numeric|min:0',
             'tarif_max' => 'required|numeric|gte:tarif_min',
             'nb_max_photo' => 'required|numeric|min:1',
-            'params.*.name' => 'nullable|string|max:255',
+            'nom_dispositif_fields' => 'nullable|string|max:150',
+            'params.*.name' => 'nullable|string|max:150',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',
         ]);

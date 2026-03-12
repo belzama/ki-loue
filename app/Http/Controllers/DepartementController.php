@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pays;
 use App\Models\Region;
-use App\Models\Ville;
+use App\Models\Departement;
 
 
 
-class VilleController extends Controller
+class DepartementController extends Controller
 {
     public function index()
     {
-        return view('admin.villes.index', [
-            'villes' => Ville::all()
+        return view('admin.departements.index', [
+            'departements' => Departement::all()
         ]);
     }
 
@@ -23,7 +23,7 @@ class VilleController extends Controller
     {
         $pays_list = Pays::all();
         $regions = Region::all();
-        return view('admin.villes.create', compact('pays_list', 'regions'));
+        return view('admin.departements.create', compact('pays_list', 'regions'));
     }
 
     public function store(Request $request)
@@ -33,35 +33,35 @@ class VilleController extends Controller
             'nom' => 'required|string|max:255',
         ]);
 
-        Ville::create($validated);
+        Departement::create($validated);
 
-        return redirect()->route('admin.villes.index');
+        return redirect()->route('admin.departements.index');
     }
 
-    public function edit(Ville $ville)
+    public function edit(Departement $departement)
     {
         $pays_list = Pays::all();
         $regions = Region::all();
-        return view('admin.villes.edit', compact('ville', 'pays_list', 'regions'));
+        return view('admin.departements.edit', compact('departement', 'pays_list', 'regions'));
     }
 
     
 
-    public function update(Request $request, Ville $ville)
+    public function update(Request $request, Departement $departement)
     {
         $validated = $request->validate([
             'region_id' => 'required|exists:regions,id',
             'nom' => 'required|string|max:255',
         ]);
 
-        $ville->update($validated);
+        $departement->update($validated);
 
-        return redirect()->route('admin.villes.index');
+        return redirect()->route('admin.departements.index');
     }
 
-    public function destroy(Ville $ville)
+    public function destroy(Departement $departement)
     {
-        $ville->delete();
+        $departement->delete();
         return back();
     }
 }

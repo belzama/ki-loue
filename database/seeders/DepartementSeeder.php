@@ -5,14 +5,14 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class VilleSeeder extends Seeder
+class DepartementSeeder extends Seeder
 {
     public function run(): void
     {
         // Récupération des pays par nom
         $regions = DB::table('regions')->pluck('id', 'nom');
 
-        $villes = [
+        $departements = [
 
             // ======================
             // TOGO - REGION MARITIME
@@ -84,16 +84,16 @@ class VilleSeeder extends Seeder
             ],
         ];
 
-        foreach ($villes as $nomRegion => $listeVilles) {
+        foreach ($departements as $nomRegion => $listeDepartements) {
 
             if (!isset($regions[$nomRegion])) {
                 continue;
             }
 
-            foreach ($listeVilles as $ville) {
-                DB::table('villes')->insert([
+            foreach ($listeDepartements as $departement) {
+                DB::table('departements')->insert([
                     'region_id' => $regions[$nomRegion],
-                    'nom' => $ville['nom'],
+                    'nom' => $departement['nom'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

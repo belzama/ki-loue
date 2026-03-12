@@ -51,6 +51,12 @@
     </div>
 </div>
 
+<div class="mb-3">
+    <label>Constitution de la désignation du matériel</label>
+    <input type="text" name="nom_dispositif_fields" class="form-control"
+        value="{{ old('nom_dispositif_fields', $types_dispositif->nom_dispositif_fields ?? '') }}">
+</div>
+
 <hr>
 
 <h5>Paramètres du type</h5>
@@ -69,7 +75,7 @@
     + Ajouter un paramètre
 </button>
 
-
+<hr>
 <button type="submit" class="btn btn-success">Enregistrer</button>
 
 

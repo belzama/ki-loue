@@ -18,6 +18,7 @@ return new class extends Migration
             $table->double('tarif_min', 10, 2)->default(0);
             $table->double('tarif_max', 10, 2)->default(0);
             $table->integer('nb_max_photo')->default(4);
+            $table->string('nom_dispositif_fields')->nullable();
             $table->timestamps();
         });
     }

@@ -50,30 +50,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-            if (data.owner?.contact && isMobile) {
-                modalBody.innerHTML += `
-                    <a href="tel:${data.owner.contact}"
-                    class="btn btn-primary">
-                        Appeler
-                    </a>
-                `;
+            if (data.owner && data.owner.telephone) {
+                if (isMobile) {
+                    modalBody.innerHTML += `
+                        <a href="tel:${data.owner.telephone}"
+                        class="btn btn-primary">
+                            <i class="bi bi-telephone-fill"></i> Appeler
+                        </a>
+                    `;
+
+                    modalBody.innerHTML += `
+                        <a href="sms:${data.owner.telephone}"
+                        class="btn btn-secondary">
+                            <i class="bi bi-chat-dots-fill"></i> Envoyer SMS
+                        </a>
+                    `;
+                } else {
+                    modalBody.innerHTML += `
+                        <a href="#"
+                            class="btn btn-primary show-phone-btn"
+                            data-phone="${data.owner.telephone}">
+                            <i class="bi bi-telephone"></i> Afficher le numéro
+                        </a>
+                    `;
+                    
+                }
             }
 
-            if (data.owner?.contact) {
+            if (data.owner && data.owner.whatsapp) {
                 modalBody.innerHTML += `
-                    <a href="https://wa.me/${data.owner.contact}?text=${data.message}"
+                    <a href="https://wa.me/${data.owner.whatsapp}?text=${data.message}"
                     target="_blank"
                     class="btn btn-success">
-                        WhatsApp
+                        <i class="bi bi-whatsapp"></i> WhatsApp
                     </a>
                 `;
             }
 
-            if (data.owner?.email) {
+            if (data.owner && data.owner.email) {
                 modalBody.innerHTML += `
                     <a href="mailto:${data.owner.email}"
                     class="btn btn-warning">
-                        Email
+                        <i class="bi bi-envelope-fill"></i> Envoyer Email
                     </a>
                 `;
             }
@@ -97,6 +115,21 @@ document.addEventListener("DOMContentLoaded", function () {
             button.innerHTML = "Contacter";
         });
     }
+    
+    document.addEventListener("click", function(e){
+
+        const phoneBtn = e.target.closest(".show-phone-btn");
+        if (!phoneBtn) return;
+
+        e.preventDefault();
+
+        const phone = phoneBtn.dataset.phone;
+
+        phoneBtn.innerHTML =
+            `<i class="bi bi-telephone-fill"></i> ${phone}`;
+    });
+    
+
 
     // Listener global
     document.addEventListener("click", function (e) {

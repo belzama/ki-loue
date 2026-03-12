@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Pays;
 use App\Models\Region;
-use App\Models\Ville;
+use App\Models\Departement;
 use App\Models\Categorie;
 use App\Models\TypesDispositif;
 use App\Models\Publication;
@@ -24,7 +24,7 @@ class HomeController extends Controller
         $query = Publication::with([
             'dispositif.photos',
             'dispositif.type_dispositif.categorie',
-            'ville.region.pays',
+            'departement.region.pays',
             'devise'
         ])
         ->where('active', 1)
@@ -37,32 +37,32 @@ class HomeController extends Controller
         |----------------------------------------------------------------------
         */
 
-        // Filtre par Continent via Ville → Région → Pays → Continent
+        // Filtre par Continent via Departement → Région → Pays → Continent
         /*if ($request->filled('continent_id')) {
-            $query->whereHas('ville.region.pays', function($q) use ($request){
+            $query->whereHas('departement.region.pays', function($q) use ($request){
                 $q->whereHas('continent', function($q2) use ($request){
                     $q2->where('id', $request->continent_id);
                 });
             });
         } */       
 
-        // Filtre par Pays via Ville → Région → Pays
+        // Filtre par Pays via Departement → Région → Pays
         if ($request->filled('pays_id')) {
-            $query->whereHas('ville.region.pays', function($q) use ($request){
+            $query->whereHas('departement.region.pays', function($q) use ($request){
                 $q->where('id', $request->pays_id);
             });
         }
 
-        // Filtre par Région via Ville → Région
+        // Filtre par Région via Departement → Région
         if ($request->filled('region_id')) {
-            $query->whereHas('ville.region', function($q) use ($request){
+            $query->whereHas('departement.region', function($q) use ($request){
                 $q->where('id', $request->region_id);
             });
         }
 
-        // Filtre par Ville
-        if ($request->filled('ville_id')) {
-            $query->where('ville_id', $request->ville_id);
+        // Filtre par Departement
+        if ($request->filled('departement_id')) {
+            $query->where('departement_id', $request->departement_id);
         }
 
         // Filtre par Categorie via TypeDispositif → Dispositif
@@ -110,7 +110,7 @@ class HomeController extends Controller
         $typesDispositifs = TypesDispositif::orderBy('nom')->get();
         $pays             = Pays::orderBy('nom')->get();
         $regions             = Region::orderBy('nom')->get();
-        $villes             = Ville::orderBy('nom')->get();
+        $departements             = Departement::orderBy('nom')->get();
 
         return view('welcome', compact(
             'publications',
@@ -118,7 +118,7 @@ class HomeController extends Controller
             'typesDispositifs',
             'pays',
             'regions',
-            'villes'
+            'departements'
         ));
     }
 
@@ -130,7 +130,7 @@ class HomeController extends Controller
         $publication->load([
             'dispositif.photos',
             'dispositif.type_dispositif',
-            'ville.region.pays',
+            'departement.region.pays',
             'devise'
         ]);
 
@@ -211,8 +211,8 @@ class HomeController extends Controller
                 'message'              => $notificationMessage,
                 'send_email'           => !empty($owner->email),
                 'send_email_address'   => $owner->email,
-                'send_whatsapp'        => !empty($owner->contact),
-                'send_whatsapp_number' => $owner->contact,
+                'send_whatsapp'        => !empty($owner->whatsapp),
+                'send_whatsapp_number' => $owner->whatsapp,
             ]);
 
             DB::commit();
@@ -237,8 +237,7 @@ class HomeController extends Controller
         $lienReservation = route('user.reservations.show', $reservation->id);
 
         $message  = "Bonjour,\n\n";
-        $message .= "Je souhaite réserver votre *"
-            . $publication->dispositif->type_dispositif->nom . " "
+        $message .= "Je souhaite réserver votre matériel *"
             . $publication->dispositif->designation . "*\n\n";
 
         if (!empty($data['message'])) {
@@ -257,7 +256,8 @@ class HomeController extends Controller
                 'success' => true,
                 'reservation_id' => $reservation->id,
                 'owner' => [
-                    'contact' => $owner->contact,
+                    'telephone' => $owner->telephone,
+                    'whatsapp' => $owner->whatsapp,
                     'email'   => $owner->email,
                 ],
                 'message' => $messageEncoded

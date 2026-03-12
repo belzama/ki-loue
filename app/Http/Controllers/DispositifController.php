@@ -49,19 +49,36 @@ class DispositifController extends Controller
     {
         $data = $request->validate([
             'types_dispositif_id'    => 'required|exists:types_dispositifs,id',
-            'numero_immatriculation' => 'nullable|string',
-            'marque'            => 'required|string',
-            'modele'            => 'required|string',
+            'numero_immatriculation' => 'nullable|string|max:150',
+            'marque'            => 'nullable|string|max:150',
+            'modele'            => 'nullable|string|max:150',
             'description'            => 'nullable|string',
             'etat'                   => 'required|in:Neuf,Bon,Révisé',
             'photos'                 => 'required|array|min:1',        // <-- au moins 1 photo
-            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:51200',
+            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
             'params'                 => 'nullable|array',
             'params.*'               => 'nullable|string',
         ]);
 
         $data['user_id'] = Auth::id();
-        $data['designation'] = $data['marque']. ' '.$data['modele'];
+
+        //Constitution de la désignation du dispositif
+        $typeDispositif = TypesDispositif::findOrFail($data['types_dispositif_id']);
+        $designationParts = [];
+
+        if (!empty($typeDispositif->nom_dispositif_fields)) {
+            $fields = explode(',', $typeDispositif->nom_dispositif_fields);
+
+            foreach ($fields as $field) {
+                $field = trim($field);
+                if (!empty($data[$field] ?? null)) {
+                    $designationParts[] = $data[$field];
+                }
+            }
+        }
+
+        $data['designation'] = trim($typeDispositif->nom . ' ' . implode(' ', $designationParts));
+
         $dispositif = Dispositif::create($data);
 
         // Enregistrement des paramètres par ID
@@ -105,17 +122,32 @@ class DispositifController extends Controller
     {
         abort_if($dispositif->user_id !== Auth::id(), 403);
 
-        $request['designation'] = $request['marque'].' '.$request['modele'];
+        //Constitution de la désignation du dispositif
+        $typeDispositif = TypesDispositif::findOrFail($request['types_dispositif_id']);
+        $designationParts = [];
+
+        if (!empty($typeDispositif->nom_dispositif_fields)) {
+            $fields = explode(',', $typeDispositif->nom_dispositif_fields);
+
+            foreach ($fields as $field) {
+                $field = trim($field);
+                if (!empty($request[$field] ?? null)) {
+                    $designationParts[] = $request[$field];
+                }
+            }
+        }
+
+        $request['designation'] = trim($typeDispositif->nom . ' ' . implode(' ', $designationParts));
 
         $data = $request->validate([
             'types_dispositif_id' => 'required|exists:types_dispositifs,id',
-            'numero_immatriculation' => 'nullable|string',
-            'marque' => 'required|string',
-            'modele' => 'required|string',
+            'numero_immatriculation' => 'nullable|string|max:150',
+            'marque' => 'nullable|string|max:150',
+            'modele' => 'nullable|string|max:150',
             'description' => 'nullable|string',
             'etat' => 'required|in:Neuf,Bon,Révisé',
             'photos' => 'nullable|array',        // <-- au moins 1 photo
-            'photos.*' => 'image|mimes:jpg,jpeg,png|max:51200',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
             'params' => 'nullable|array',
             'params.*' => 'nullable|string',
         ]);

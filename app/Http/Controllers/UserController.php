@@ -33,7 +33,7 @@ class UserController extends Controller
             'code' => 'required|string|max:50|unique:users,code',
             'nom' => 'required|string|max:150',
             'prenom' => 'required|string|max:150',
-            'raison_sociale' => 'required|string|max:150',
+            'raison_sociale' => 'nullable|string|max:150',
 
             'email' => 'required|email|unique:users,email',
 
@@ -71,7 +71,7 @@ class UserController extends Controller
             'code' => 'required|string|max:50|unique:users,code',
             'nom' => 'required|string|max:150',
             'prenom' => 'required|string|max:150',
-            'raison_sociale' => 'required|string|max:150',
+            'raison_sociale' => 'nullable|string|max:150',
 
             'email' => 'required|email|unique:users,email',
 

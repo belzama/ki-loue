@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Villes</h1>
+<h1>Departements</h1>
 
 <a href="{{ route('admin.regions.create') }}" 
     class="btn btn-primary mb-3 bi bi-plus-lg">

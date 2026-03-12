@@ -15,8 +15,9 @@ return new class extends Migration
         Schema::create('publications', function (Blueprint $table) {
         $table->id();
         $table->foreignId('dispositif_id')->constrained()->cascadeOnDelete();
-        $table->foreignId('ville_id')->constrained()->cascadeOnDelete();
+        $table->foreignId('departement_id')->constrained()->cascadeOnDelete();
         $table->foreignId('devise_id')->constrained()->cascadeOnDelete();
+        $table->string('ville');
         $table->decimal('tarif_location', 10, 2);
         $table->decimal('prix_publication', 10, 2)->default(0);
         $table->decimal('bonus_accorde', 10, 2)->default(0);

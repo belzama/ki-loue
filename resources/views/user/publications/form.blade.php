@@ -92,23 +92,30 @@
             <label>Région</label>
             <select id="region_id" 
                     name="region_id" 
-                    data-child="ville_id"
-                    data-url="{{ url('villes/by-region') }}/"
-                    data-selected="{{ old('ville_id', $publication->ville_id ?? '') }}"
+                    data-child="departement_id"
+                    data-url="{{ url('departements/by-region') }}/"
+                    data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
                     class="form-select">
                 <option value="">Sélectionner</option>
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Ville/Préfecture <span class="text-danger">*</span></label>
-            <select id="ville_id" 
-                    name="ville_id" 
-                    data-selected="{{ old('ville_id', $publication->ville_id ?? '') }}"
+            <label>Préfecture/Département <span class="text-danger">*</span></label>
+            <select id="departement_id" 
+                    name="departement_id" 
+                    data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
                     class="form-select" required>
                 <option value="">Sélectionner</option>
             </select>
         </div>
+    </div>
+    
+    {{-- VILLE / LOCALITE --}}
+    <div class="mb-3">
+        <label>Ville/Localité <span class="text-danger">*</span></label>
+        <input type="text" name="ville" class="form-control"
+                   value="{{ old('ville', $dispositif->ville ?? '') }}" required>
     </div>
 
     {{-- TARIF & DEVISE --}}
@@ -230,7 +237,7 @@ const baseUrl = "{{ url('/') }}";
 
 const OLD_PAYS   = "{{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
 const OLD_REGION = "{{ old('region_id', $publication->region_id ?? '') }}";
-const OLD_VILLE  = "{{ old('ville_id', $publication->ville_id ?? '') }}";
+const OLD_VILLE  = "{{ old('departement_id', $publication->departement_id ?? '') }}";
 
 const tarifInput = document.getElementById('tarif_location');
 const dateDebutInput = document.getElementById('date_debut');
@@ -376,7 +383,7 @@ async function restoreLocalisation()
 
     const paysSelect = document.getElementById('continent_id');
     const regionSelect = document.getElementById('region_id');
-    const villeSelect = document.getElementById('ville_id');
+    const departementSelect = document.getElementById('departement_id');
 
     paysSelect.value = OLD_PAYS;
 
@@ -394,18 +401,18 @@ async function restoreLocalisation()
     {
         regionSelect.value = OLD_REGION;
 
-        // Charger villes
-        const res2 = await fetch(`${baseUrl}/villes/by-region/${OLD_REGION}`);
-        const villes = await res2.json();
+        // Charger departements
+        const res2 = await fetch(`${baseUrl}/departements/by-region/${OLD_REGION}`);
+        const departements = await res2.json();
 
-        villeSelect.innerHTML = '<option value="">Sélectionner</option>';
+        departementSelect.innerHTML = '<option value="">Sélectionner</option>';
 
-        villes.forEach(v => {
-            villeSelect.innerHTML += `<option value="${v.id}">${v.nom}</option>`;
+        departements.forEach(v => {
+            departementSelect.innerHTML += `<option value="${v.id}">${v.nom}</option>`;
         });
 
         if (OLD_VILLE)
-            villeSelect.value = OLD_VILLE;
+            departementSelect.value = OLD_VILLE;
     }
 }
 

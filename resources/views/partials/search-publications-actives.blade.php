@@ -31,8 +31,8 @@
                                 <label class="form-label">Région</label>
                                 <select id="region_id"
                                         name="region_id" 
-                                        data-child="ville_id"
-                                        data-url="{{ url('villes/by-region') }}/"
+                                        data-child="departement_id"
+                                        data-url="{{ url('departements/by-region') }}/"
                                         data-selected="{{ request('region_id') }}"
                                         class="form-select">
                                     <option value="">Toutes</option>
@@ -40,10 +40,10 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Ville/Préfecture</label>
-                                <select id="ville_id"
-                                        name="ville_id" 
-                                        data-selected="{{ request('ville_id') }}"
+                                <label class="form-label">Préfecture/Département</label>
+                                <select id="departement_id"
+                                        name="departement_id" 
+                                        data-selected="{{ request('departement_id') }}"
                                         class="form-select">
                                     <option value="">Toutes</option>
                                 </select>
@@ -144,21 +144,16 @@
                     <div class="card-body">                        
                         {{-- Catégorie / Type --}}
                         <div class="mb-2">
-                            <span class="badge bg-secondary text-truncate" style="width:100%">
-                                {{ $publication->dispositif->type_dispositif->categorie->nom ?? '-' }}
-                            </span>
-                            <span class="badge bg-primary text-truncate" style="width:100%">
-                                {{ $publication->dispositif->type_dispositif->nom ?? '-' }}
-                            </span>
+                            {{ $publication->dispositif->designation ?? '-' }}
                         </div>
-
                         
                         {{-- localisation --}}
-                        <small class="text-muted mb-2">
+                        <div class="text-muted mb-2">
                             <i class="bi bi-geo-alt"></i>
-                            {{ $publication->ville->nom ?? '' }},
-                            {{ $publication->ville->region->pays->nom ?? '' }}
-                        </small>
+                            {{ $publication->departement->nom ?? '' }},
+                            {{ $publication->departement->region->nom ?? '' }},
+                            {{ $publication->departement->region->pays->nom ?? '' }}
+                        </div>
                         
                         {{-- prix --}}
                         <p class="fw-bold text-success">

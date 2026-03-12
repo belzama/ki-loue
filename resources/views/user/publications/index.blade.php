@@ -49,7 +49,7 @@
                     <label class="form-label fw-semibold">Type</label>
                     <select id="types_dispositif_id" 
                             name="types_dispositif_id" 
-                            data-selected="{{ request('ville_id') }}"
+                            data-selected="{{ request('departement_id') }}"
                             class="form-select shadow-sm">
                         <option value="">Tous</option>
                     </select>
@@ -111,8 +111,8 @@
                     <label class="form-label fw-semibold">Région</label>
                     <select id="region_id"
                             name="region_id" 
-                            data-child="ville_id"
-                            data-url="{{ url('villes/by-region') }}/"
+                            data-child="departement_id"
+                            data-url="{{ url('departements/by-region') }}/"
                             data-selected="{{ request('region_id') }}"
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>
@@ -120,10 +120,10 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label fw-semibold">Ville</label>
-                    <select id="ville_id"
-                            name="ville_id" 
-                            data-selected="{{ request('ville_id') }}"
+                    <label class="form-label fw-semibold">Departement</label>
+                    <select id="departement_id"
+                            name="departement_id" 
+                            data-selected="{{ request('departement_id') }}"
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>
                     </select>
@@ -240,8 +240,8 @@
             {{-- localisation --}}
             <small class="text-muted mb-2">
                 <i class="bi bi-geo-alt"></i>
-                {{ $publication->ville->nom ?? '' }},
-                {{ $publication->ville->region->pays->nom ?? '' }}
+                {{ $publication->departement->nom ?? '' }},
+                {{ $publication->departement->region->pays->nom ?? '' }}
             </small>
 
         {{-- prix --}}

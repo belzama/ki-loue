@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ContinentSeeder::class,
             PaysSeeder::class,
             RegionSeeder::class,
-            VilleSeeder::class,
+            DepartementSeeder::class,
             UserSeeder::class,
             CategorieSeeder::class,
             TypesDispositifSeeder::class,    

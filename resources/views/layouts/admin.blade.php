@@ -35,9 +35,9 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('admin.villes.index') }}" 
+                    <a href="{{ route('admin.departements.index') }}" 
                         class="nav-link">
-                        <i class="bi bi-building me-2"></i> Villes/Préfectures
+                        <i class="bi bi-building me-2"></i> Préfectures/Départements
                     </a>
                 </li>
                 <li class="nav-item">

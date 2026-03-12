@@ -10,7 +10,7 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\DeviseController;
 use App\Http\Controllers\PaysController;
 use App\Http\Controllers\RegionController;
-use App\Http\Controllers\VilleController;
+use App\Http\Controllers\departementController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategorieController;   
 use App\Http\Controllers\TypesDispositifController;
@@ -58,7 +58,7 @@ Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group
     Route::resource('devises', DeviseController::class);
     Route::resource('pays', PaysController::class)->parameters(['pays' => 'pays']);
     Route::resource('regions', RegionController::class);
-    Route::resource('villes', VilleController::class);
+    Route::resource('departements', departementController::class);
     Route::resource('users', UserController::class);
     Route::resource('categories', CategorieController::class);    
     Route::resource('types_dispositifs', TypesDispositifController::class);
@@ -115,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/pays/by-continent/{continent}', [LocalisationController::class, 'paysByContinent']);
 Route::get('/regions/by-pays/{pays}', [LocalisationController::class, 'regionsByPays']);
-Route::get('/villes/by-region/{region}', [LocalisationController::class, 'villesByRegion']);
+Route::get('/departements/by-region/{region}', [LocalisationController::class, 'departementsByRegion']);
 
 Route::get('/types_dispositif/by-categorie/{categorie}', [TypesDispositifController::class, 'typesByCategorie']);
 Route::get('/types_dispositif/search', [TypesDispositifController::class, 'search']);
