@@ -34,7 +34,7 @@
                     name="categorie_id"
                     data-child="types_dispositif_id"
                     data-url="{{ url('types_dispositif/by-categorie') }}/"
-                    class="form-select" required>
+                    class="form-select">
                 <option value="">Sélectionner</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}"
@@ -103,8 +103,8 @@
     {{-- Photos --}}
     <div class="mb-3">
         <label class="form-label">Photos</label>
-        <div id="photos-container" class="row g-3"></div>
-        <div class="invalid-feedback" id="error-photos-container"></div>
+        <div id="photos-container" name="photos" class="row g-3"></div>
+        <div class="invalid-feedback" id="error-photos"></div>
     </div>
 
     <div id="progressContainer" style="display:none; margin-bottom: 20px;">
@@ -272,6 +272,10 @@ $(document).ready(function(){
                 const inputId = `param_${paramId}`;
 
                 const wrapper = $('<div class="mb-3"></div>');
+                // Créez la div d'erreur dynamiquement
+                // L'ID doit matcher ce que le validateur JS cherche : error-params_ID
+                const errorDiv = $(`<div class="invalid-feedback" id="error-params_${paramId}"></div>`);
+                
                 let unit = param.numeric_value_unit ? ` (${param.numeric_value_unit})` : '';
                 let star = required ? ' <span class="text-danger">*</span>' : '';
                 const labelEl = $(`<label class="form-label" for="${inputId}">${labelText}${unit}${star}</label>`);
@@ -294,8 +298,7 @@ $(document).ready(function(){
                     if(param.value_type==='decimal') input.attr('step','0.01');
                 }
 
-                //if(required) input.prop('required', true);
-                wrapper.append(labelEl).append(input);
+                wrapper.append(labelEl).append(input).append(errorDiv); // Ajoutez errorDiv ici
                 container.append(wrapper);
             });
 
@@ -394,20 +397,34 @@ document.getElementById('dispositifForm').addEventListener('submit', function(e)
                     globalErrors.style.display = 'block';
 
                     for (let field in errors) {
-                        // Ajouter à la liste globale en haut
+                        // 1. Liste globale
                         let li = document.createElement('li');
                         li.innerText = errors[field][0];
                         globalList.appendChild(li);
 
-                        // Cibler le champ spécifique (ex: marque, modele)
-                        // Note : pour les photos.*, on cible l'ID photos-container
-                        let fieldId = field.replace('.', '_'); 
-                        let input = document.getElementById(field) || document.getElementsByName(field)[0];
-                        let errorFeedback = document.getElementById('error-' + field);
+                        if (field.startsWith('photos')) {
+                            let photoGlobalError = document.getElementById('error-photos');
+                            if (photoGlobalError) {
+                                photoGlobalError.innerText = errors[field][0];
+                                photoGlobalError.style.display = 'block';
+                            }
+                        }
+
+                        // 2. Ciblage local (on remplace les points par des underscores pour matcher les IDs HTML)
+                        let sanitizedField = field.replace(/\./g, '_'); 
+                        
+                        // On cherche l'input par son name ou son ID
+                        let input = document.getElementsByName(field)[0] || document.getElementById(field);
+                        
+                        // On cherche la div d'erreur par l'ID conventionnel error-nom_du_champ
+                        let errorFeedback = document.getElementById('error-' + sanitizedField) || 
+                                            document.getElementById('error-' + field);
 
                         if (input) {
                             input.classList.add('is-invalid');
+                            // Si c'est un paramètre dynamique, on peut aussi ajouter la classe à l'input même s'il n'a pas de div dédiée
                         }
+
                         if (errorFeedback) {
                             errorFeedback.innerText = errors[field][0];
                             errorFeedback.style.display = 'block';

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Validator;
+
 use App\Models\Devise;
 use App\Models\Pays;
 use App\Models\Region;
@@ -138,24 +140,39 @@ class PublicationController extends Controller
 
     public function store(Request $request)
     {
-        $dispositif = Dispositif::findOrFail($request->dispositif_id);
-        $user = $dispositif->user;
-
-        //validation du formulaire
-        $validated = $request->validate([
-            'dispositif_id' => 'required|exists:dispositifs,id',
-            'departement_id' => 'required|exists:departement,id',
-            'ville' => 'required|string|max:150',
+        $user = auth()->user();
+        
+        // 1. Règles de validation
+        $rules = [
+            'dispositif_id'  => 'required|exists:dispositifs,id',
+            'departement_id' => 'required|exists:departements,id',
+            'ville'          => 'required|string|max:150',
             'tarif_location' => 'required|numeric|min:1',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
-            'nb_jours' => 'required|integer|min:1|max:365',
-            'prix_publication' => 'required|numeric|min:0',
-            'bonus_accorde' => 'required|numeric|min:0',
-            'cout_publication' => 'required|numeric|min:0',
-        ]);
+            'devise_id'      => 'required|exists:devises,id',
+            'date_debut'     => 'required|date|after_or_equal:today',
+            'date_fin'       => 'required|date|after:date_debut',
+        ];
 
-        //Détermination du prix de publication
+        $attributes = [
+            'dispositif_id'  => 'Matériel',
+            'departement_id' => 'Préfecture/Département',
+            'ville'          => 'Ville/Localité',
+            'tarif_location' => 'Tarif journalier',
+            'devise_id'      => 'Devise',
+            'date_debut'     => 'Date de début',
+            'date_fin'       => 'Date de fin',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, [], $attributes);
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // 2. Calculs via Service
         $prix_publication = TarifService::calculPrixPublication(
             $user->pays_id,
             $request->tarif_location,
@@ -163,132 +180,93 @@ class PublicationController extends Controller
             $request->date_fin
         );
 
-        //Calcul du cout de publication
         $bonus_accorde = min($user->solde_bonus, $prix_publication);
         $cout_publication = $prix_publication - $bonus_accorde;
 
-        /*
-        ===========================
-        VERIFICATION SOLDE
-        ===========================
-        */
+        // 3. Vérification Solde
         if ($prix_publication > ($user->solde_reel + $user->solde_bonus)) {
-
             $montantARecharger = $prix_publication - ($user->solde_reel + $user->solde_bonus);
 
-            // On sauvegarde la demande en session
+            // CRITIQUE : On stocke en session ICI pour que ce soit dispo en AJAX ET en classique
             session([
-                'publication_pending' => $request->all()
+                'publication_pending' => $request->all(),
+                'montant_a_recharger' => $montantARecharger
             ]);
 
-            return redirect()
-                ->route('user.transactions.deposit', $user)
-                ->with('warning', 'Solde insuffisant pour publier.')
+            if ($request->ajax()) {
+                return response()->json([
+                    // On ajoute 'publication_info' dans le JSON pour plus de clarté
+                    'publication_info' => true,
+                    'errors' => ['solde' => ["Solde insuffisant. Manque : $montantARecharger"]],
+                    'redirect' => route('user.transactions.deposit', ['user' => $user->id])
+                ], 422);
+            }
+
+            return redirect()->route('user.transactions.deposit', ['user' => $user->id])
+                ->with('publication_info', true)
                 ->with('montant_a_recharger', $montantARecharger);
         }
 
-        DB::transaction(function () use (
-            $request,
-            $user,
-            $prix_publication,
-            $bonus_accorde,
-            $cout_publication
-        ) {
+        // 4. Transaction et Création
+        try {
+            DB::transaction(function () use ($request, $user, $prix_publication, $bonus_accorde, $cout_publication) {
+                
+                Publication::create([
+                    'dispositif_id'   => $request->dispositif_id,
+                    'departement_id'  => $request->departement_id,
+                    'ville'           => $request->ville,
+                    'devise_id'       => $request->devise_id,
+                    'tarif_location'  => $request->tarif_location,
+                    'prix_publication'=> $prix_publication,
+                    'bonus_accorde'   => $bonus_accorde,
+                    'cout_publication'=> $cout_publication,
+                    'date_debut'      => $request->date_debut,
+                    'date_fin'        => $request->date_fin,
+                    'statut'          => 1 // Actif par défaut
+                ]);
 
-            /*
-            ===========================
-            CREATION PUBLICATION
-            ===========================
-            */
-            Publication::create([
-                'dispositif_id'   => $request->dispositif_id,
-                'departement_id'        => $request->departement_id,
-                'ville'        => $request->ville,
-                'devise_id'       => $request->devise_id,
-                'tarif_location'  => $request->tarif_location,
-                'prix_publication'=> $prix_publication,
-                'bonus_accorde'   => $bonus_accorde,
-                'cout_publication'=> $cout_publication,
-                'date_debut'      => $request->date_debut,
-                'date_fin'        => $request->date_fin,
-            ]);
-
-            /*
-            ===========================
-            DEBIT BONUS
-            ===========================
-            */
-            if ($bonus_accorde > 0) {
-
-                TransactionService::execute(
-                    $user,
-                    $bonus_accorde,
-                    'retrait',
-                    'paiement',
-                    'Paiement publication (bonus)'
-                );
-            }
-
-            /*
-            ===========================
-            DEBIT SOLDE REEL
-            ===========================
-            */
-            if ($cout_publication > 0) {
-
-                TransactionService::execute(
-                    $user,
-                    $cout_publication,
-                    'retrait',
-                    'paiement',
-                    'Paiement publication'
-                );
-            }
-
-            /*
-            ===========================
-            COMMISSION SPONSOR
-            ===========================
-            */
-            if ($user->user) {
-
-                $commissionSponsor = $cout_publication * ($user->user->taux_commission / 100);
-
-                if ($commissionSponsor > 0) {
-
-                    TransactionService::execute(
-                        $user->user,
-                        $commissionSponsor,
-                        'depot',
-                        'bonus',
-                        'Commission sponsor publication'
-                    );
+                if ($bonus_accorde > 0) {
+                    TransactionService::execute($user, $bonus_accorde, 'retrait', 'paiement', 'Paiement publication (bonus)');
                 }
-            }
 
-            /*
-            ===========================
-            COMMISSION UTILISATEUR
-            ===========================
-            */
-            $commissionUser = $cout_publication * ($user->taux_commission_sponsor / 100);
+                if ($cout_publication > 0) {
+                    TransactionService::execute($user, $cout_publication, 'retrait', 'paiement', 'Paiement publication');
+                }
 
-            if ($commissionUser > 0) {
+                // Commissions (Sponsor et Perso)
+                $this->distributeCommissions($user, $cout_publication);
+            });
 
-                TransactionService::execute(
-                    $user,
-                    $commissionUser,
-                    'depot',
-                    'bonus',
-                    'Commission personnelle publication'
-                );
-            }
+            $msg = 'Publication créée avec succès.';
+            return $request->ajax() 
+                ? response()->json(['success' => true, 'message' => $msg, 'redirect' => route('user.publications.index')])
+                : redirect()->route('user.publications.index')->with('success', $msg);
 
-        });
+        } catch (\Exception $e) {
+            return $request->ajax()
+                ? response()->json(['errors' => ['server' => ["Erreur lors de la création : " . $e->getMessage()]]], 500)
+                : back()->with('error', 'Une erreur est survenue.');
+        }
+    }
 
-        return redirect()
-            ->route('user.publications.index')
-            ->with('success', 'Publication créée avec succès.');
+    /**
+     * Gère la distribution des commissions sponsor/utilisateur
+     */
+    private function distributeCommissions($user, $montantBase)
+    {
+        if ($montantBase <= 0) return;
+
+        // Sponsor (Parrain)
+        if ($user->user && $user->user->taux_commission > 0) {
+            $commSponsor = $montantBase * ($user->user->taux_commission / 100);
+            TransactionService::execute($user->user, $commSponsor, 'depot', 'bonus', 'Commission sponsor publication');
+        }
+
+        // Commission personnelle (Cashback)
+        if ($user->taux_commission_sponsor > 0) {
+            $commUser = $montantBase * ($user->taux_commission_sponsor / 100);
+            TransactionService::execute($user, $commUser, 'depot', 'bonus', 'Commission personnelle publication');
+        }
     }
 
     public function edit(Publication $publication)
@@ -310,29 +288,23 @@ class PublicationController extends Controller
      */
     public function update(Request $request, Publication $publication)
     {
-        $data = $request->validate([
-            //'dispositif_id' => 'required|exists:dispositifs,id',
+        $validator = Validator::make($request->all(), [
             'departement_id' => 'required|exists:departements,id',
-            /*'devise_id' => 'required|exists:devises,id',
-            'tarif_location' => 'required|numeric|min:0',
-            'prix_location' => 'required|numeric|min:0',
-            'bonus_accorde' => 'required|numeric|min:0',
-            'cout_location' => 'required|numeric|min:0',*/
+            'ville'          => 'required|string|max:150',
         ]);
 
-        // Vérifie que l'utilisateur possède le dispositif
-        /*$dispositif = Dispositif::findOrFail($data['dispositif_id']);
-        if ($dispositif->user_id !== Auth::id()) {
-            abort(403, 'Accès refusé');
-        }*/
+        if ($validator->fails()) {
+            return $request->ajax() 
+                ? response()->json(['errors' => $validator->errors()], 422) 
+                : back()->withErrors($validator);
+        }
 
-        $publication->update([
-            'departement_id' => $data['departement_id'],
-            // on ne modifie pas date_debut/date_fin pour une mise à jour classique
-        ]);
+        $publication->update($request->only(['departement_id', 'ville']));
 
-        return redirect()->route('user.publications.index')
-                         ->with('success', 'Publication mise à jour avec succès.');
+        $msg = 'Mise à jour réussie.';
+        return $request->ajax()
+            ? response()->json(['success' => true, 'message' => $msg, 'redirect' => route('user.publications.index')])
+            : redirect()->route('user.publications.index')->with('success', $msg);
     }
 
     public function destroy(Publication $publication)

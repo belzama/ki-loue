@@ -231,6 +231,7 @@
 {{-- Bootstrap JS --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>  
+<script src="{{ asset('js/laravel-form-handler.js') }}"></script>
 {{-- Custom JS --}}
 @stack('scripts')
 

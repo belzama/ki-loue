@@ -4,6 +4,20 @@
 
 @section('content')
 
+@php
+    // On cherche le symbole, sinon on met une valeur par défaut ou le code ISO
+    $devise = $user->pays->devise->symbol ?? ($user->pays->devise->code ?? 'Devise');
+@endphp
+
+@if(session('publication_pending'))
+    <div class="alert alert-info shadow-sm mb-4">
+        <h5><i class="fas fa-wallet me-2"></i> Finalisation de la publication</h5>
+        <p>Solde insuffisant pour publier. Veuillez recharger 
+           <strong>{{ session('montant_a_recharger') }} {{ $devise }}</strong>.
+        </p>
+    </div>
+@endif
+
 @if($errors->any())
 <div class="alert alert-danger">
     <ul class="mb-0">
@@ -177,32 +191,27 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
-    document.querySelectorAll('.mode-radio').forEach(radio => {
-
+    const radios = document.querySelectorAll('.mode-radio');
+    
+    radios.forEach(radio => {
         radio.addEventListener('change', function () {
-
-            document.querySelectorAll('.payment-container')
-                .forEach(div => div.classList.add('d-none'));
-
+            document.querySelectorAll('.payment-container').forEach(div => div.classList.add('d-none'));
             const type = this.dataset.type;
-
             if (type === 'Mobile Money') {
-                document.getElementById('container-mobile-money')
-                    .classList.remove('d-none');
-            }
-            else if (type === 'Visa Card') {
-                document.getElementById('container-visa')
-                    .classList.remove('d-none');
-            }
-            else {
-                document.getElementById('container-autres')
-                    .classList.remove('d-none');
+                document.getElementById('container-mobile-money').classList.remove('d-none');
+            } else if (type === 'Visa Card') {
+                document.getElementById('container-visa').classList.remove('d-none');
+            } else {
+                document.getElementById('container-autres').classList.remove('d-none');
             }
         });
-
     });
 
+    // Sélectionner automatiquement le premier mode s'il existe
+    if (radios.length > 0) {
+        radios[0].checked = true;
+        radios[0].dispatchEvent(new Event('change'));
+    }
 });
 </script>
 @endsection

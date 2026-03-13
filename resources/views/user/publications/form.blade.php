@@ -16,7 +16,8 @@
     </div>
 @endif
 
-<form method="POST"
+<form method="POST" 
+      id="publicationForm"
       action="{{ $isEdit ? route('user.publications.update', $publication) : route('user.publications.store') }}">
     @csrf
     @if($isEdit) @method('PUT') @endif
@@ -55,7 +56,7 @@
                 <select name="dispositif_id"
                         id="dispositif_id"
                         class="form-select"
-                        required>
+                        >
                     <option value="">Sélectionner</option>
 
                     @foreach($dispositifs as $d)
@@ -65,17 +66,16 @@
                         </option>
                     @endforeach
                 </select>
-
             @endif
         </div>
-
     @endif
+    <div class="invalid-feedback" id="error-dispositif_id"></div>
 
     {{-- LOCALISATION --}}
     <div class="row g-3 mb-3">
         <div class="col-md-4">
             <label>Pays</label>
-            <select id="continent_id" 
+            <select id="pays_id" 
                     name="pays_id"
                     data-child="region_id"
                     data-url="{{ url('regions/by-pays') }}/"
@@ -85,7 +85,8 @@
                     <option value="{{ $p->id }}" {{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') == $p->id ? 'selected' : '' }}>
                         {{ $p->nom }}</option>
                 @endforeach
-            </select>
+            </select>            
+            <div class="invalid-feedback" id="error-pays_id"></div>
         </div>
 
         <div class="col-md-4">
@@ -98,6 +99,7 @@
                     class="form-select">
                 <option value="">Sélectionner</option>
             </select>
+            <div class="invalid-feedback" id="error-region_id"></div>
         </div>
 
         <div class="col-md-4">
@@ -105,17 +107,19 @@
             <select id="departement_id" 
                     name="departement_id" 
                     data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
-                    class="form-select" required>
+                    class="form-select">
                 <option value="">Sélectionner</option>
             </select>
+            <div class="invalid-feedback" id="error-departement_id"></div>
         </div>
     </div>
     
     {{-- VILLE / LOCALITE --}}
     <div class="mb-3">
         <label>Ville/Localité <span class="text-danger">*</span></label>
-        <input type="text" name="ville" class="form-control"
-                   value="{{ old('ville', $publication->ville ?? '') }}" required>
+        <input type="text" id="ville" name="ville" class="form-control"
+                   value="{{ old('ville', $publication->ville ?? '') }}">
+        <div class="invalid-feedback" id="error-ville"></div>
     </div>
 
     @if (!$isEdit)
@@ -130,7 +134,8 @@
                     class="form-control"
                     value="{{ old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0) }}"
                     {{ $isEdit ? 'disabled' : '' }}
-                    required>
+                    >
+                    <div class="invalid-feedback" id="error-tarif_location"></div>
             </div>
 
             <div class="col-md-6">
@@ -138,7 +143,7 @@
                 <select name="devise_id"
                         class="form-select"
                         {{ $isEdit ? 'disabled' : '' }}
-                        required>
+                        >
                     <option value="">Sélectionner</option>
                     @foreach($devises as $devise)
                         <option value="{{ $devise->id }}"
@@ -147,6 +152,7 @@
                         </option>
                     @endforeach
                 </select>
+                <div class="invalid-feedback" id="error-devise_id"></div>
             </div>
         </div>
 
@@ -160,7 +166,8 @@
                     class="form-control"
                     value="{{ old('date_debut', $publication->date_debut ?? now()->toDateString()) }}"
                     {{ $isEdit ? 'disabled' : '' }}
-                    required>
+                    >
+                    <div class="invalid-feedback" id="error-date_debut"></div>
             </div>
 
             <div class="col-md-6">
@@ -170,7 +177,8 @@
                     id="date_fin"
                     class="form-control"
                     value="{{ old('date_fin', $publication->date_fin ?? now()->addDays($nbJourMinPub)->toDateString()) }}"
-                    require>
+                    >
+                    <div class="invalid-feedback" id="error-date_fin"></div>
             </div>
         </div>
 
@@ -178,19 +186,19 @@
         <div class="row g-3 mb-3">
             <div class="col-md-3">
                 <label>Durée (jours)</label>
-                <input type="text" id="nb_jours" name="nb_jours" class="form-control readonly-field" readonly>
+                <input type="text" id="nb_jours" name="nb_jours" class="form-control bg-light readonly-field" readonly>
             </div>
             <div class="col-md-3">
                 <label>Prix publication</label>
-                <input type="text" id="prix_publication" name="prix_publication" class="form-control readonly-field" readonly>
+                <input type="text" id="prix_publication" name="prix_publication" class="form-control bg-light readonly-field" readonly>
             </div>
             <div class="col-md-3">
                 <label>Bonus accordé</label>
-                <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control readonly-field" readonly>
+                <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control bg-light readonly-field" readonly>
             </div>
             <div class="col-md-3">
                 <label>Coût publication</label>
-                <input type="text" id="cout_publication" name="cout_publication" class="form-control readonly-field" readonly>
+                <input type="text" id="cout_publication" name="cout_publication" class="form-control bg-font-weight-bold readonly-field" readonly>
             </div>
         </div>
 
@@ -219,7 +227,7 @@
 
     {{-- ACTIONS --}}
     <div class="mt-3">
-        <button class="btn btn-success">
+        <button type="submit" class="btn btn-success">
             {{ $isEdit ? 'Enregistrer' : 'Publier' }}
         </button>
         <a href="{{ route('user.publications.index') }}" class="btn btn-secondary">Annuler</a>
@@ -239,7 +247,7 @@ const baseUrl = "{{ url('/') }}";
 
 const OLD_PAYS   = "{{ old('pays_id', $publication->dispositif->user->pays_id ?? $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
 const OLD_REGION = "{{ old('region_id',$publication->departement->region_id ?? $publication->region_id ?? '') }}";
-const OLD_VILLE  = "{{ old('departement_id', $publication->departement_id ?? '') }}";
+const OLD_DEPARTEMENT  = "{{ old('departement_id', $publication->departement_id ?? '') }}";
 
 const tarifInput = document.getElementById('tarif_location');
 const dateDebutInput = document.getElementById('date_debut');
@@ -328,49 +336,48 @@ function calculer()
     if (!tarifSaisi || !date_debut || !date_fin || tarifs.length === 0)
         return;
 
-    const tarifBase = Math.max(tarifSaisi, currentTarifMin);
-
     const jours = diffDays(date_debut, date_fin);
+    //const jours = Math.max(0, diffDays(date_debut, date_fin));
+    document.getElementById("nb_jours").value = jours;
 
     if (jours <= 0)
         return;
 
-    document.getElementById("nb_jours").value = jours;
-
-    let prix = 0;
-    let html = '';
+    let prixTotal = 0;
+    let htmlTranches = '';
+    const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
 
     tarifs.forEach(t => {
 
         if (jours < t.tranche_debut)
             return;
 
-        const joursTranche = Math.min(jours, t.tranche_fin) - t.tranche_debut + 1;
+        const joursDansTranche = Math.min(jours, t.tranche_fin) - t.tranche_debut + 1;
 
-        if (joursTranche > 0)
+        if (joursDansTranche > 0)
         {
-            const montant = joursTranche * (tarifBase * t.tranche_valeur);
+            const montantTranche = joursDansTranche * (baseCalcul * t.tranche_valeur);
 
-            prix += montant;
+            prixTotal += montantTranche;
 
-            html += `
+            htmlTranches += `
                 <tr>
                     <td>${t.tranche_debut} - ${t.tranche_fin}</td>
-                    <td>${joursTranche}</td>
+                    <td>${joursDansTranche}</td>
                     <td>${(t.tranche_valeur * 100).toFixed(2)} %</td>
-                    <td>${montant.toFixed(2)}</td>
+                    <td>${montantTranche.toFixed(2)}</td>
                 </tr>
             `;
         }
 
     });
 
-    document.getElementById("detail_tranches").innerHTML = html;
+    document.getElementById("detail_tranches").innerHTML = htmlTranches;
 
-    const bonus = Math.min(prix, SOLDE_BONUS);
-    const cout = prix - bonus;
+    const bonus = Math.min(prixTotal, SOLDE_BONUS);
+    const cout = prixTotal - bonus;
 
-    document.getElementById('prix_publication').value = prix.toFixed(2);
+    document.getElementById('prix_publication').value = prixTotal.toFixed(2);
     document.getElementById('bonus_accorde').value = bonus.toFixed(2);
     document.getElementById('cout_publication').value = cout.toFixed(2);
 }
@@ -379,42 +386,29 @@ function calculer()
 /* =================================
    Restaurer localisation
 ================================= */
-async function restoreLocalisation()
-{
+async function initLocalisation() {
+    const paysSelect = document.getElementById('pays_id');
+    const regionSelect = document.getElementById('region_id');
+    const deptSelect = document.getElementById('departement_id');
+
     if (!OLD_PAYS) return;
 
-    const paysSelect = document.getElementById('continent_id');
-    const regionSelect = document.getElementById('region_id');
-    const departementSelect = document.getElementById('departement_id');
-
-    paysSelect.value = OLD_PAYS;
-
-    // Charger régions
-    const res = await fetch(`${baseUrl}/regions/by-pays/${OLD_PAYS}`);
-    const regions = await res.json();
-
+    // 1. Charger Régions
+    const regions = await fetch(`${baseUrl}/regions/by-pays/${OLD_PAYS}`).then(r => r.json());
     regionSelect.innerHTML = '<option value="">Sélectionner</option>';
-
     regions.forEach(r => {
-        regionSelect.innerHTML += `<option value="${r.id}">${r.nom}</option>`;
+        const sel = r.id == OLD_REGION ? 'selected' : '';
+        regionSelect.innerHTML += `<option value="${r.id}" ${sel}>${r.nom}</option>`;
     });
 
-    if (OLD_REGION)
-    {
-        regionSelect.value = OLD_REGION;
-
-        // Charger departements
-        const res2 = await fetch(`${baseUrl}/departements/by-region/${OLD_REGION}`);
-        const departements = await res2.json();
-
-        departementSelect.innerHTML = '<option value="">Sélectionner</option>';
-
-        departements.forEach(v => {
-            departementSelect.innerHTML += `<option value="${v.id}">${v.nom}</option>`;
+    // 2. Charger Départements
+    if (OLD_REGION) {
+        const depts = await fetch(`${baseUrl}/departements/by-region/${OLD_REGION}`).then(r => r.json());
+        deptSelect.innerHTML = '<option value="">Sélectionner</option>';
+        depts.forEach(d => {
+            const sel = d.id == OLD_DEPT ? 'selected' : '';
+            deptSelect.innerHTML += `<option value="${d.id}" ${sel}>${d.nom}</option>`;
         });
-
-        if (OLD_VILLE)
-            departementSelect.value = OLD_VILLE;
     }
 }
 
@@ -475,13 +469,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chargerTarifs(PAYS_ID);
 
-    restoreLocalisation();
+    initLocalisation();
 
     appliquerContraintesDates();
 
     calculer();
 
 });
+
+/* =================================
+   Soumission du Formulaire (Unique)
+================================= */
+if (typeof publicationHandlerAttached === 'undefined') {
+    window.publicationHandlerAttached = true;
+
+    document.addEventListener('submit', async function(e) {
+        // On vérifie que c'est bien notre formulaire
+        if (e.target && e.target.id === 'publicationForm') {
+            e.preventDefault();
+            e.stopImmediatePropagation(); // Stop les autres scripts (comme ajax-form s'il restait des traces)
+
+            const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const formData = new FormData(form);
+
+            // 1. Réinitialisation
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            form.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.innerText = '';
+                el.style.display = 'none';
+            });
+
+            // 2. Verrouillage
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Envoi...';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json', // Précise au serveur qu'on veut du JSON
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Succès : Redirection vers le dépôt ou l'index
+                    window.location.href = result.redirect || "{{ route('user.publications.index') }}";
+                } 
+                else if (response.status === 422) {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+
+                    // CAS SPÉCIAL : Redirection forcée (ex: solde insuffisant)
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                        return;
+                    }
+
+                    // Affichage des erreurs sous les champs
+                    const errors = result.errors;
+                    for (const field in errors) {
+                        const sanitizedField = field.replace(/\./g, '_');
+                        // On cherche par ID ou par Name
+                        const input = document.getElementById(field) || document.getElementsByName(field)[0];
+                        const errorDiv = document.getElementById('error-' + sanitizedField);
+
+                        if (input) input.classList.add('is-invalid');
+                        if (errorDiv) {
+                            errorDiv.innerText = errors[field][0];
+                            errorDiv.style.display = 'block';
+                        }
+                    }
+                    
+                    const firstError = document.querySelector('.is-invalid');
+                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } 
+                else {
+                    throw new Error(result.message || 'Erreur serveur (500)');
+                }
+
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                console.error(error);
+                alert("Une erreur est survenue : " + error.message);
+            }
+        }
+    });
+}
 
 </script>
 @endsection
