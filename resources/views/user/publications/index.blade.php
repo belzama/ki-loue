@@ -6,7 +6,7 @@
 
 {{-- PAGE TITLE --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-journal-text me-2"></i> Mes publications</h4>
+    <h4><i class="bi bi-journal-text me-2"></i> Mes publications ({{$publications->total()}})</h4>
     <a href="{{ route('user.publications.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Nouvelle publication
     </a>
@@ -163,158 +163,125 @@
 </div>
 
 <div class="row g-4">
-
     @forelse($publications as $publication)
-
         <div class="col-lg-6 col-md-6">
             <div class="card shadow-sm border-0 h-100 publication-card">
-
-            {{-- Carousel photos --}}
-            <div id="carousel{{ $publication->id }}" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-
-                    @forelse($publication->dispositif->photos as $index => $photo)
-
-                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                            <img src="{{ asset('storage/'.$photo->path) }}"
-                                class="d-block w-100"
-                                style="height:220px; object-fit:cover;"
-                                alt="photo dispositif">
-                        </div>
-
-                    @empty
-
-                        <div class="carousel-item active">
-                            <img src="{{ asset('images/no-image.png') }}"
-                                class="d-block w-100"
-                                style="height:220px; object-fit:cover;">
-                        </div>
-
-                    @endforelse
-
-                </div>
-
-                @if($publication->dispositif->photos->count() > 1)
-
-                    <button class="carousel-control-prev"
-                        type="button"
-                        data-bs-target="#carousel{{ $publication->id }}"
-                        data-bs-slide="prev">
-
-                        <span class="carousel-control-prev-icon"></span>
-
-                    </button>
-
-                    <button class="carousel-control-next"
-                            type="button"
-                            data-bs-target="#carousel{{ $publication->id }}"
-                            data-bs-slide="next">
-
-                        <span class="carousel-control-next-icon"></span>
-
-                    </button>
-
-                @endif
                 
-                {{-- Badge Statut sur l'image --}}
-                <div class="position-absolute top-0 end-0 m-2">
-                    <span class="badge {{ $publication->dispositif->etat === 'Neuf' ? 'bg-success' : ($publication->dispositif->etat === 'Bon' ? 'bg-primary' : 'bg-warning') }}">
-                        {{ $publication->dispositif->etat }}
-                    </span>
+                {{-- Container Image avec Carrousel --}}
+                <div class="position-relative">
+                    <div id="carousel{{ $publication->id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @forelse($publication->dispositif->photos as $index => $photo)
+                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                    <img src="{{ asset('storage/'.$photo->path) }}" 
+                                         class="d-block w-100" 
+                                         style="height:240px; object-fit:cover;" 
+                                         alt="Matériel">
+                                </div>
+                            @empty
+                                <div class="carousel-item active">
+                                    <img src="{{ asset('images/no-image.png') }}" class="d-block w-100" style="height:240px; object-fit:cover;">
+                                </div>
+                            @endforelse
+                        </div>
+
+                        @if($publication->dispositif->photos->count() > 1)
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                        @endif
+                    </div>
+
+                    {{-- Badges flottants --}}
+                    <div class="position-absolute top-0 start-0 m-3 d-flex flex-column gap-2">
+                        <span class="badge shadow-sm {{ $publication->active ? 'bg-success' : 'bg-danger' }}">
+                            <i class="bi {{ $publication->active ? 'bi-check-circle' : 'bi-slash-circle' }} me-1"></i>
+                            {{ $publication->active ? 'En cours' : 'Expirée' }}
+                        </span>
+                    </div>
+                    
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge shadow-sm {{ $publication->dispositif->etat === 'Neuf' ? 'bg-primary' : 'bg-secondary' }}">
+                            {{ $publication->dispositif->etat }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    {{-- Catégorie et Titre --}}
+                    <div class="mb-2">
+                        <span class="text-primary fw-bold small text-uppercase tracking-wider">
+                            {{ $publication->dispositif->type_dispositif->categorie->nom ?? 'Matériel' }}
+                        </span>
+                        <h5 class="card-title mt-1 fw-bold text-dark">
+                            {{ $publication->dispositif->designation }}
+                        </h5>
+                    </div>
+
+                    {{-- Détails techniques --}}
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-geo-alt text-danger"></i>
+                        <span class="text-muted small">
+                            {{ $publication->departement->nom ?? '' }}, {{ $publication->departement->region->pays->nom ?? '' }}
+                        </span>
+                    </div>
+
+                    {{-- Prix et Période --}}
+                    <div class="d-flex justify-content-between align-items-end mt-auto pt-3 border-top">
+                        <div class="price-tag">
+                            <span class="text-success fw-bold fs-4">{{ number_format($publication->tarif_location,0,',',' ') }}</span>
+                            <span class="text-success fw-semibold small">{{ $publication->devise->symbol ?? 'FCFA' }}</span>
+                            <div class="text-muted x-small" style="font-size: 0.7rem;">PAR JOUR</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted mb-1"><i class="bi bi-calendar3 me-1"></i>Disponibilité</div>
+                            <span class="fw-bold small text-dark">
+                                {{ $publication->date_debut->format('d M') }} - {{ $publication->date_fin->format('d M Y') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Actions --}}
+                <div class="card-footer bg-white border-0 p-4 pt-0 d-flex gap-2">
+                    <a href="{{ route('user.publications.edit', $publication) }}" 
+                       class="btn btn-outline-dark action-btn flex-grow-1 btn-sm">
+                        <i class="bi bi-geo"></i> Déplacer
+                    </a>
+                    
+                    <form action="{{ route('user.publications.destroy', $publication) }}" 
+                          method="POST" 
+                          class="d-flex gap-2"
+                          onsubmit="return confirm('Confirmer l\'action ?')">
+                        @csrf
+                        @method('DELETE')
+                        
+                        {{-- Un seul bouton dynamique selon le statut --}}
+                        @if($publication->active)
+                            <button type="submit" class="btn btn-outline-danger action-btn btn-sm" title="Désactiver">
+                                <i class="bi bi-power"></i>
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-outline-success action-btn btn-sm" title="Réactiver">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                        @endif
+                    </form>
                 </div>
             </div>
-
-            <div class="card-body d-flex flex-column">
-            <div class="mb-2">
-                <small class="text-muted text-uppercase fw-bold">{{ $publication->dispositif->type_dispositif->categorie->nom ?? '-' }}</small>
-                <h6 class="mb-0">{{ $publication->dispositif->type_dispositif->nom ?? '-' }}</h6>
-            </div>
-            
-            <p class="card-text text-muted small mb-3">
-                {{ Str::limit($publication->dispositif->designation, 150) }} 
-                @if($publication->dispositif->numero_immatriculation)
-                    <span class="badge bg-light text-dark border"># {{ $publication->dispositif->numero_immatriculation }}</span>
-                @endif
-            </p>
-
-            {{-- localisation --}}
-            <small class="text-muted mb-2">
-                <i class="bi bi-geo-alt"></i>
-                {{ $publication->departement->nom ?? '' }},
-                {{ $publication->departement->region->pays->nom ?? '' }}
-            </small>
-
-        {{-- prix --}}
-        <div class="mt-2 fs-5 fw-bold text-success">
-            {{ number_format($publication->tarif_location,0,',',' ') }}
-            {{ $publication->devise->symbol ?? '' }}
-            <span class="text-muted fs-6">/ jour</span>
         </div>
-
-        {{-- période --}}
-            <small class="text-muted">
-            <i class="bi bi-calendar"></i>
-            Du {{ $publication->date_debut->format('d/m/Y') }}
-            au {{ $publication->date_fin->format('d/m/Y') }}
-
-            {{-- badges --}}
-            <div class="mb-2">
-                @php
-                    $statutText = $publication->active ? 'Encours' : 'Expirée';
-                    $statutColor = $publication->active ? 'bg-success' : 'bg-danger';
-                @endphp
-
-                <span class="badge {{ $statutColor }}">
-                    {{ $statutText }}
-                </span>
-
+    @empty
+        <div class="col-12 text-center py-5">
+            <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+                <i class="bi bi- megaphone fs-1 text-muted"></i>
             </div>
-        </small>
-
-        {{-- actions --}}
-        <div class="mt-auto pt-3 d-flex gap-2">
-
-            <a href="{{ route('user.publications.edit', $publication) }}"
-                class="btn btn-sm btn-outline-warning w-50">
-
-                <i class="bi bi-pencil-square"></i> Modifier
-
-            </a>
-
-            <form action="{{ route('user.publications.destroy', $publication) }}"
-                    method="POST"
-                    class="w-50"
-                    onsubmit="return confirm('Supprimer cette publication ?')">
-
-                @csrf
-                @method('DELETE')
-
-                <button class="btn btn-sm btn-outline-danger">
-
-                    <i class="bi bi-trash-fill" title="Supprimer"></i> 
-
-                </button>
-
-            </form>
-
+            <h5 class="text-muted">Aucune publication pour le moment</h5>
+            <a href="#" class="btn btn-primary mt-3">Créer ma première annonce</a>
         </div>
-
-    </div>
-    </div>
-</div>
-
-@empty
-
-<div class="col-12 text-center text-muted py-5">
-
-<i class="bi bi-folder-x fs-1"></i>
-<br>
-Aucune publication trouvée
-
-</div>
-
-@endforelse
-
+    @endforelse
 </div>
 
 {{-- Pagination --}}

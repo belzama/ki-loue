@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use Illuminate\Pagination\Paginator;
+
 use App\Models\Pays;
 use App\Models\Notification;
 use App\Observers\NotificationObserver;
@@ -33,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
         Notification::observe(NotificationObserver::class);
 
         View::share('langs', config('languages.list'));
+
+        Paginator::useBootstrapFour();
     });
     }
 }

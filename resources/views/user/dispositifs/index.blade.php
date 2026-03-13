@@ -4,7 +4,7 @@
 
 {{-- PAGE TITLE --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-truck me-2"></i> Mes matériels</h4>
+    <h4><i class="bi bi-truck me-2"></i> Mes matériels ({{ $dispositifs->total() }})</h4>
     <a href="{{ route('user.dispositifs.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Ajouter un matériel
     </a>
@@ -114,11 +114,10 @@
                 <div class="card-body d-flex flex-column">
                     <div class="mb-2">
                         <small class="text-muted text-uppercase fw-bold">{{ $dispositif->type_dispositif->categorie->nom ?? '-' }}</small>
-                        <h6 class="mb-0">{{ $dispositif->type_dispositif->nom ?? '-' }}</h6>
                     </div>
                     
                     <p class="card-text text-muted small mb-3">
-                        {{ Str::limit($dispositif->designation, 50) }} 
+                        {{ $dispositif->designation }} 
                         @if($dispositif->numero_immatriculation)
                             <span class="badge bg-light text-dark border"># {{ $dispositif->numero_immatriculation }}</span>
                         @endif

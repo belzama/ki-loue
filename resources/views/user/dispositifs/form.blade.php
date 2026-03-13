@@ -13,8 +13,14 @@
 </div>
 @endif
 
-<form action="{{ $isEdit ? route('user.dispositifs.update', $dispositif) : route('user.dispositifs.store') }}"
-      method="POST" enctype="multipart/form-data">
+<div id="global-errors" class="alert alert-danger" style="display:none;">
+    <ul class="mb-0" id="global-errors-list"></ul>
+</div>
+
+<form id="dispositifForm"
+      action="{{ $isEdit ? route('user.dispositifs.update', $dispositif) : route('user.dispositifs.store') }}"
+      method="POST" 
+      enctype="multipart/form-data">
     @csrf
     @if($isEdit)
         @method('PUT')
@@ -37,6 +43,7 @@
                     </option>
                 @endforeach
             </select>
+            <div class="invalid-feedback" id="error-categorie_id"></div>
         </div>
 
         <div class="col-md-6">
@@ -45,24 +52,27 @@
                     name="types_dispositif_id"
                     data-selected="{{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') }}"
                     class="form-select"
-                    required>
+                    >
                 <option value="">Sélectionner</option>
             </select>
+            <div class="invalid-feedback" id="error-types_dispositif_id"></div>
         </div>
     </div>
 
     {{-- Marque & modèle --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
-            <label class="form-label">Marque <span class="text-danger">*</span></label>
-            <input type="text" name="marque" class="form-control"
-                   value="{{ old('marque', $dispositif->marque ?? '') }}" required>
+            <label class="form-label">Marque</label>
+            <input type="text" id="marque" name="marque" class="form-control"
+                   value="{{ old('marque', $dispositif->marque ?? '') }}">  
+            <div class="invalid-feedback" id="error-marque"></div>  
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Modèle <span class="text-danger">*</span></label>
-            <input type="text" name="modele" class="form-control"
-                   value="{{ old('modele', $dispositif->modele ?? '') }}" required>
+            <label class="form-label">Modèle</label>
+            <input type="text" id="modele" name="modele" class="form-control"
+                   value="{{ old('modele', $dispositif->modele ?? '') }}">
+            <div class="invalid-feedback" id="error-modele"></div>
         </div>
     </div>
 
@@ -72,7 +82,7 @@
     {{-- Etat --}}
     <div class="mb-3">
         <label class="form-label">Etat <span class="text-danger">*</span></label>
-        <div class="d-flex gap-4">
+        <div id="etat" class="d-flex gap-4">
             @foreach(['Neuf','Bon','Révisé'] as $etat)
             <div class="form-check">
                 <input class="form-check-input"
@@ -87,17 +97,27 @@
             </div>
             @endforeach
         </div>
+        <div class="invalid-feedback" id="error-etat"></div>
     </div>
 
     {{-- Photos --}}
     <div class="mb-3">
         <label class="form-label">Photos</label>
         <div id="photos-container" class="row g-3"></div>
+        <div class="invalid-feedback" id="error-photos-container"></div>
+    </div>
+
+    <div id="progressContainer" style="display:none; margin-bottom: 20px;">
+        <div class="progress" style="height: 25px;">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                 role="progressbar" style="width: 0%;">0%</div>
+        </div>
+        <small id="progressStatus" class="text-muted text-center d-block">Téléchargement en cours...</small>
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-success">
-            {{ $isEdit ? 'Enregistrer' : 'Créer' }}
+        <button type="submit" id="submitBtn" class="btn btn-success">
+            {{ $isEdit ? 'Enregistrer les modifications' : 'Créer le dispositif' }}
         </button>
         <a href="{{ route('user.dispositifs.index') }}" class="btn btn-secondary">Annuler</a>
     </div>
@@ -161,7 +181,7 @@ $(document).ready(function(){
     }
 
     // Preview photo et mise à jour du hidden
-        window.previewPhoto = function(event, index){
+    window.previewPhoto = function(event, index){
 
         const file = event.target.files[0];
         if(!file) return;
@@ -274,7 +294,7 @@ $(document).ready(function(){
                     if(param.value_type==='decimal') input.attr('step','0.01');
                 }
 
-                if(required) input.prop('required', true);
+                //if(required) input.prop('required', true);
                 wrapper.append(labelEl).append(input);
                 container.append(wrapper);
             });
@@ -312,6 +332,107 @@ $(document).ready(function(){
         observer.observe(typeSelect[0],{childList:true});
     }
 
+});
+
+document.getElementById('dispositifForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    let form = this;
+    let formData = new FormData(form);
+    let xhr = new XMLHttpRequest();
+    let btn = document.getElementById('submitBtn');
+    let progressContainer = document.getElementById('progressContainer');
+    let progressBar = document.getElementById('progressBar');
+    let progressStatus = document.getElementById('progressStatus');
+
+    // Affichage de l'interface de progression
+    progressContainer.style.display = 'block';
+    btn.disabled = true;
+
+    xhr.open('POST', form.action, true);
+    
+    // Crucial pour que Laravel reconnaisse la requête AJAX et retourne du JSON
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            let percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            progressBar.innerText = percentComplete + '%';
+            
+            if(percentComplete === 100) {
+                progressStatus.innerText = "Finalisation et enregistrement sur le serveur...";
+                progressBar.classList.replace('bg-success', 'bg-info');
+            }
+        }
+    });
+
+    xhr.onload = function() {
+        let btn = document.getElementById('submitBtn');
+        let progressContainer = document.getElementById('progressContainer');
+        
+        if (xhr.status >= 200 && xhr.status < 300) {
+            window.location.href = "{{ route('user.dispositifs.index') }}";
+        } else {
+            btn.disabled = false;
+            progressContainer.style.display = 'none';
+
+            // 1. Nettoyer les anciennes erreurs
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.innerText = '');
+            let globalErrors = document.getElementById('global-errors');
+            let globalList = document.getElementById('global-errors-list');
+            globalErrors.style.display = 'none';
+            globalList.innerHTML = '';
+
+            try {
+                let response = JSON.parse(xhr.responseText);
+
+                if (xhr.status === 422) { // Erreurs de validation Laravel
+                    let errors = response.errors;
+                    
+                    globalErrors.style.display = 'block';
+
+                    for (let field in errors) {
+                        // Ajouter à la liste globale en haut
+                        let li = document.createElement('li');
+                        li.innerText = errors[field][0];
+                        globalList.appendChild(li);
+
+                        // Cibler le champ spécifique (ex: marque, modele)
+                        // Note : pour les photos.*, on cible l'ID photos-container
+                        let fieldId = field.replace('.', '_'); 
+                        let input = document.getElementById(field) || document.getElementsByName(field)[0];
+                        let errorFeedback = document.getElementById('error-' + field);
+
+                        if (input) {
+                            input.classList.add('is-invalid');
+                        }
+                        if (errorFeedback) {
+                            errorFeedback.innerText = errors[field][0];
+                            errorFeedback.style.display = 'block';
+                        }
+                    }
+                    // Scroller vers le haut pour voir les erreurs
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                } else {
+                    alert("Erreur système : " + (response.message || "Erreur inconnue"));
+                }
+            } catch (e) {
+                console.error("Erreur brute :", xhr.responseText);
+                alert("Le serveur a renvoyé une erreur critique (voir console).");
+            }
+        }
+    };
+
+    xhr.onerror = function() {
+        alert("Erreur réseau ou connexion interrompue.");
+        btn.disabled = false;
+        progressContainer.style.display = 'none';
+    };
+
+    xhr.send(formData);
 });
 </script>
 @endsection

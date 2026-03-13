@@ -24,7 +24,7 @@
         </select>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-8">
         <label>Nom <span class="text-danger">*</span></label>
         <input type="text" name="nom" class="form-control" 
             value="{{ old('nom', $region->nom ?? '') }}" required>

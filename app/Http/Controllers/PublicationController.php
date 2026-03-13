@@ -296,9 +296,6 @@ class PublicationController extends Controller
         $pays = Pays::orderBy('nom')->get();
         $devises = Devise::all();
         $dispositifs = Dispositif::all(); // ou seulement ceux de l'utilisateur
-        $tarifs = Tarif::with('pays')
-            ->where('pays_id', $publication->dispositif->user->pays_id)
-            ->get();
 
         return view('user.publications.edit', compact(
             'publication',

@@ -26,7 +26,7 @@ class RegionController extends Controller
     {
         $validated = $request->validate([
             'pays_id' => 'required|exists:pays,id',
-            'nom' => 'required|string|max:255',
+            'nom' => 'required|string|max:150',
         ]);
 
         Region::create($validated);

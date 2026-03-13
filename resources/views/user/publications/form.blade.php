@@ -115,105 +115,107 @@
     <div class="mb-3">
         <label>Ville/Localité <span class="text-danger">*</span></label>
         <input type="text" name="ville" class="form-control"
-                   value="{{ old('ville', $dispositif->ville ?? '') }}" required>
+                   value="{{ old('ville', $publication->ville ?? '') }}" required>
     </div>
 
-    {{-- TARIF & DEVISE --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <label>Tarif journalier <span class="text-danger">*</span></label>
-            <input type="number"
-                   step="0.01"
-                   name="tarif_location"
-                   id="tarif_location"
-                   class="form-control"
-                   value="{{ old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0) }}"
-                   {{ $isEdit ? 'disabled' : '' }}
-                   required>
-        </div>
-
-        <div class="col-md-6">
-            <label>Devise <span class="text-danger">*</span></label>
-            <select name="devise_id"
-                    class="form-select"
+    @if (!$isEdit)
+        {{-- TARIF & DEVISE --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label>Tarif journalier <span class="text-danger">*</span></label>
+                <input type="number"
+                    step="0.01"
+                    name="tarif_location"
+                    id="tarif_location"
+                    class="form-control"
+                    value="{{ old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0) }}"
                     {{ $isEdit ? 'disabled' : '' }}
                     required>
-                <option value="">Sélectionner</option>
-                @foreach($devises as $devise)
-                    <option value="{{ $devise->id }}"
-                        {{ old('devise_id', $publication->devise_id ?? $user->pays->devise_id ?? '') == $devise->id ? 'selected' : '' }}>
-                        {{ $devise->libelle }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    </div>
+            </div>
 
-    {{-- DATES --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <label>Date de début <span class="text-danger">*</span></label>
-            <input type="date"
-                   name="date_debut"
-                   id="date_debut"
-                   class="form-control"
-                   value="{{ old('date_debut', $publication->date_debut ?? now()->toDateString()) }}"
-                   {{ $isEdit ? 'disabled' : '' }}
-                   required>
+            <div class="col-md-6">
+                <label>Devise <span class="text-danger">*</span></label>
+                <select name="devise_id"
+                        class="form-select"
+                        {{ $isEdit ? 'disabled' : '' }}
+                        required>
+                    <option value="">Sélectionner</option>
+                    @foreach($devises as $devise)
+                        <option value="{{ $devise->id }}"
+                            {{ old('devise_id', $publication->devise_id ?? $user->pays->devise_id ?? '') == $devise->id ? 'selected' : '' }}>
+                            {{ $devise->libelle }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <label>Date de fin</label>
-            <input type="date"
-                   name="date_fin"
-                   id="date_fin"
-                   class="form-control"
-                   value="{{ old('date_fin', $publication->date_fin ?? now()->addDays($nbJourMinPub)->toDateString()) }}"
-                   require>
-        </div>
-    </div>
+        {{-- DATES --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label>Date de début <span class="text-danger">*</span></label>
+                <input type="date"
+                    name="date_debut"
+                    id="date_debut"
+                    class="form-control"
+                    value="{{ old('date_debut', $publication->date_debut ?? now()->toDateString()) }}"
+                    {{ $isEdit ? 'disabled' : '' }}
+                    required>
+            </div>
 
-    {{-- CALCUL --}}
-    <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <label>Durée (jours)</label>
-            <input type="text" id="nb_jours" name="nb_jours" class="form-control readonly-field" readonly>
-        </div>
-        <div class="col-md-3">
-            <label>Prix publication</label>
-            <input type="text" id="prix_publication" name="prix_publication" class="form-control readonly-field" readonly>
-        </div>
-        <div class="col-md-3">
-            <label>Bonus accordé</label>
-            <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control readonly-field" readonly>
-        </div>
-        <div class="col-md-3">
-            <label>Coût publication</label>
-            <input type="text" id="cout_publication" name="cout_publication" class="form-control readonly-field" readonly>
-        </div>
-    </div>
-
-    <div class="card mt-3">
-        <div class="card-header">
-            Détail du calcul
+            <div class="col-md-6">
+                <label>Date de fin</label>
+                <input type="date"
+                    name="date_fin"
+                    id="date_fin"
+                    class="form-control"
+                    value="{{ old('date_fin', $publication->date_fin ?? now()->addDays($nbJourMinPub)->toDateString()) }}"
+                    require>
+            </div>
         </div>
 
-        <div class="card-body p-0">
-            <table class="table table-sm mb-0">
-                <thead>
-                    <tr>
-                        <th>Tranche</th>
-                        <th>Jours</th>
-                        <th>Taux</th>
-                        <th>Montant</th>
-                    </tr>
-                </thead>
-
-                <tbody id="detail_tranches">
-                </tbody>
-            </table>
+        {{-- CALCUL --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <label>Durée (jours)</label>
+                <input type="text" id="nb_jours" name="nb_jours" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3">
+                <label>Prix publication</label>
+                <input type="text" id="prix_publication" name="prix_publication" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3">
+                <label>Bonus accordé</label>
+                <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3">
+                <label>Coût publication</label>
+                <input type="text" id="cout_publication" name="cout_publication" class="form-control readonly-field" readonly>
+            </div>
         </div>
-    </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                Détail du calcul
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tranche</th>
+                            <th>Jours</th>
+                            <th>Taux</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="detail_tranches">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
     {{-- ACTIONS --}}
     <div class="mt-3">
@@ -235,8 +237,8 @@ const SOLDE_BONUS = {{ $user->solde_bonus ?? 0 }};
 const PAYS_ID = {{ $user->pays_id }};
 const baseUrl = "{{ url('/') }}";
 
-const OLD_PAYS   = "{{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
-const OLD_REGION = "{{ old('region_id', $publication->region_id ?? '') }}";
+const OLD_PAYS   = "{{ old('pays_id', $publication->dispositif->user->pays_id ?? $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
+const OLD_REGION = "{{ old('region_id',$publication->departement->region_id ?? $publication->region_id ?? '') }}";
 const OLD_VILLE  = "{{ old('departement_id', $publication->departement_id ?? '') }}";
 
 const tarifInput = document.getElementById('tarif_location');

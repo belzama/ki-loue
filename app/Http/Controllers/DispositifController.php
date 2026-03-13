@@ -33,7 +33,7 @@ class DispositifController extends Controller
                 $q->where('types_dispositif_id', $request->types_dispositif_id);
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(12);
 
         return view('user.dispositifs.index', compact('categories', 'types', 'dispositifs'));
     }
@@ -50,11 +50,27 @@ class DispositifController extends Controller
         $data = $request->validate([
             'types_dispositif_id'    => 'required|exists:types_dispositifs,id',
             'numero_immatriculation' => 'nullable|string|max:150',
-            'marque'            => 'nullable|string|max:150',
-            'modele'            => 'nullable|string|max:150',
-            'description'            => 'nullable|string',
-            'etat'                   => 'required|in:Neuf,Bon,Révisé',
-            'photos'                 => 'required|array|min:1',        // <-- au moins 1 photo
+            'marque' => 'nullable|string|max:150',
+            'modele' => 'nullable|string|max:150',
+            'description' => 'nullable|string',
+            'etat' => 'required|in:Neuf,Bon,Révisé',
+            'photos' => [
+                'required',
+                'array',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    // Calcul du poids total en kilo-octets (KB)
+                    $totalSize = array_reduce($value, function ($sum, $file) {
+                        return $sum + ($file->getSize() / 1024);
+                    }, 0);
+
+                    $maxTotalSize = 51200; // Limite globale de 50 Mo
+
+                    if ($totalSize > $maxTotalSize) {
+                        $fail("La taille totale des photos ne doit pas dépasser " . ($maxTotalSize / 1024) . " Mo.");
+                    }
+                },
+            ],        // <-- au moins 1 photo
             'photos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
             'params'                 => 'nullable|array',
             'params.*'               => 'nullable|string',
@@ -104,6 +120,10 @@ class DispositifController extends Controller
             }
         }
 
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('user.dispositifs.index')]);
+        }
+
         return redirect()->route('user.dispositifs.index')->with('success','Dispositif créé avec succès.');
     }
 
@@ -146,7 +166,22 @@ class DispositifController extends Controller
             'modele' => 'nullable|string|max:150',
             'description' => 'nullable|string',
             'etat' => 'required|in:Neuf,Bon,Révisé',
-            'photos' => 'nullable|array',        // <-- au moins 1 photo
+            'photos' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    // Calcul du poids total en kilo-octets (KB)
+                    $totalSize = array_reduce($value, function ($sum, $file) {
+                        return $sum + ($file->getSize() / 1024);
+                    }, 0);
+
+                    $maxTotalSize = 51200; // Limite globale de 50 Mo
+
+                    if ($totalSize > $maxTotalSize) {
+                        $fail("La taille totale des photos ne doit pas dépasser " . ($maxTotalSize / 1024) . " Mo.");
+                    }
+                },
+            ],        
             'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
             'params' => 'nullable|array',
             'params.*' => 'nullable|string',
@@ -217,6 +252,10 @@ class DispositifController extends Controller
                     'is_cover' => $dispositif->photos()->count() == 0
                 ]);
             }
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('user.dispositifs.index')]);
         }
 
         return redirect()
