@@ -20,6 +20,7 @@ class CategorieSeeder extends Seeder
             'Matériels auxiliaires de chantier',
             'Matériels de démolition',
             'Matériels de production du béton',
+            'Matériels de levage et de manutention',
         ];
 
         foreach ($categories as $nom) {

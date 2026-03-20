@@ -17,6 +17,8 @@ class Pays extends Model
         'code',
         'indicatif',
         'nom',
+        'libelle_division',
+        'libelle_sous_division',
         'nationalite', 
         'langue_officielle',
         'nb_jour_min_pub',

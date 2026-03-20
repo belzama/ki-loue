@@ -284,16 +284,5 @@ return [
         'winner'                   => 'gagnant',
         'work'                     => 'travail',
         'year'                     => 'année',
-
-        'types_dispositif_id'    => 'Type de matériel',
-        'photos'                 => 'Photos',
-        'numero_immatriculation' => 'Numéro d\'immatriculation',
-        'marque'                 => 'Marque',
-        'modele'                 => 'Modèle',
-
-        
-        'dispositif_id'    => 'Matériel',
-        'departemenent_id'    => 'Préfecture/Département',
-        'tarif_location'         => 'Tarif de location',
     ],
 ];

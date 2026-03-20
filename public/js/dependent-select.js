@@ -1,69 +1,77 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    function resetSelect(select, placeholder = 'Sélectionner') {
+    function resetSelect(select, placeholder = 'Toutes') {
         select.innerHTML = `<option value="">${placeholder}</option>`;
     }
 
-    function loadOptions(parentSelect) {
+    function updateLabels(select) {
+        if (select.id !== 'pays_id') return;
+        const option = select.options[select.selectedIndex];
 
-        return new Promise((resolve, reject) => {
+        const division = option?.getAttribute('data-division') || 'Région';
+        const sousDivision = option?.getAttribute('data-sous-division') || 'Préfecture';
 
-            const childId = parentSelect.dataset.child;
-            const url = parentSelect.dataset.url;
+        document.getElementById('label_division').innerText = division;
+        document.getElementById('label_sous_division').innerText = sousDivision;
+    }
 
-            if (!childId || !url) {
-                resolve();
-                return;
-            }
+    async function loadOptions(parentSelect) {
+        const childId = parentSelect.dataset.child;
+        const url = parentSelect.dataset.url;
 
-            const childSelect = document.getElementById(childId);
-            if (!childSelect) {
-                resolve();
-                return;
-            }
+        if (!childId || !url) return null;
 
-            resetSelect(childSelect, 'Chargement...');
+        const child = document.getElementById(childId);
+        if (!child) return null;
 
-            if (!parentSelect.value) {
-                resetSelect(childSelect);
-                resolve();
-                return;
-            }
+        resetSelect(child, 'Chargement...');
 
-            fetch(url + parentSelect.value)
-                .then(response => response.json())
-                .then(data => {
+        if (!parentSelect.value) {
+            resetSelect(child);
+            return null;
+        }
 
-                    resetSelect(childSelect);
+        try {
+            const response = await fetch(url + parentSelect.value);
+            const data = await response.json();
 
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.nom;
-                        childSelect.appendChild(option);
-                    });
+            resetSelect(child);
 
-                    // 🔥 Appliquer la valeur sauvegardée automatiquement
-                    const selectedValue = childSelect.dataset.selected;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nom;
+                child.appendChild(option);
+            });
 
-                    if (selectedValue) {
-                        childSelect.value = selectedValue;
-                        childSelect.dataset.selected = '';
-                    }
+            // restauration valeur sélectionnée
+            const selected = child.dataset.selected;
+            if (selected) child.value = selected;
 
-                    resolve(childSelect);
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    resetSelect(childSelect, 'Erreur');
-                    reject(error);
-                });
+            return child;
 
-        });
+        } catch (e) {
+            console.error('Erreur AJAX:', e);
+            resetSelect(child, 'Erreur');
+            return null;
+        }
+    }
+
+    function clearCascade(select) {
+        let childId = select.dataset.child;
+
+        while (childId) {
+            const child = document.getElementById(childId);
+            if (!child) break;
+
+            child.dataset.selected = '';
+            resetSelect(child);
+
+            childId = child.dataset.child;
+        }
     }
 
     async function restoreChain(select) {
-
         let current = select;
 
         while (current && current.value && current.dataset.child) {
@@ -71,34 +79,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    const dependentSelects = document.querySelectorAll('select[data-child]');
-
-    // Gestion du change
-    dependentSelects.forEach(select => {
-        select.addEventListener('change', function () {
-
-            // Nettoyer les enfants
-            let childId = this.dataset.child;
-
-            while (childId) {
-                const child = document.getElementById(childId);
-                if (!child) break;
-
-                child.dataset.selected = '';
-                resetSelect(child);
-
-                childId = child.dataset.child;
-            }
-
-            loadOptions(this);
+    // EVENTS
+    document.querySelectorAll('select[data-child]').forEach(select => {
+        select.addEventListener('change', async function () {
+            updateLabels(this);   // 🔥 update labels immédiat
+            clearCascade(this);   // 🔥 reset cascade
+            await loadOptions(this); // 🔥 charger enfant
         });
     });
 
-    // 🔥 Restauration automatique après recherche
-    dependentSelects.forEach(select => {
-        if (select.value) {
-            restoreChain(select);
+    // INIT
+    const pays = document.getElementById('pays_id');
+
+    if (pays) {
+        updateLabels(pays);
+
+        if (pays.value) {
+            restoreChain(pays);
         }
-    });
+    }
 
 });

@@ -33,6 +33,20 @@
 
 <div class="row g-3 mb-3">
     <div class="col-md-6">
+        <label>Libelle division <span class="text-danger">*</span></label>
+        <input type="text" name="libelle_division" class="form-control" 
+            value="{{ old('libelle_division', $pays->libelle_division ?? '') }}" required>
+    </div>
+
+    <div class="col-md-6">
+        <label>Libellé sous division <span class="text-danger">*</span></label>
+        <input type="text" name="libelle_sous_division" class="form-control" 
+            value="{{ old('libelle_sous_division', $pays->libelle_sous_division ?? '') }}" required>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
         <label>Code ISO<span class="text-danger">*</span></label>
         <input type="text" name="code" class="form-control"
             value="{{ old('code', $pays->code ?? '') }}" required>

@@ -80,22 +80,26 @@
                     data-child="region_id"
                     data-url="{{ url('regions/by-pays') }}/"
                     class="form-select">
-                <option value="">Sélectionner</option>
+                <option value="" data-division="Région" data-sous-division="Préfecture">Sélectionner</option>
                 @foreach($pays as $p)
-                    <option value="{{ $p->id }}" {{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') == $p->id ? 'selected' : '' }}>
-                        {{ $p->nom }}</option>
+                    <option value="{{ $p->id }}" 
+                        data-division="{{ $p->libelle_division }}"
+                        data-sous-division="{{ $p->libelle_sous_division }}"
+                        {{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') == $p->id ? 'selected' : '' }}>
+                        {{ $p->nom }}
+                    </option>
                 @endforeach
             </select>            
             <div class="invalid-feedback" id="error-pays_id"></div>
         </div>
 
         <div class="col-md-4">
-            <label>Région</label>
+            <label id="label_division">{{ $dispositif->user->pays->libelle_division ?? $user->pays->libelle_division ?? 'Région' }}</label>                        
             <select id="region_id" 
                     name="region_id" 
                     data-child="departement_id"
                     data-url="{{ url('departements/by-region') }}/"
-                    data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
+                    data-selected="{{ old('region_id', $publication->region_id ?? '') }}"
                     class="form-select">
                 <option value="">Sélectionner</option>
             </select>
@@ -103,7 +107,7 @@
         </div>
 
         <div class="col-md-4">
-            <label>Préfecture/Département <span class="text-danger">*</span></label>
+            <label id="label_sous_division">{{ $dispositif->user->pays->libelle_sous_division ?? $user->pays->libelle_sous_division ?? 'Préfecture' }} <span class="text-danger">*</span></label>                        
             <select id="departement_id" 
                     name="departement_id" 
                     data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
@@ -171,7 +175,7 @@
             </div>
 
             <div class="col-md-6">
-                <label>Date de fin</label>
+                <label>Date de fin <span class="text-danger">*</span></label>
                 <input type="date"
                     name="date_fin"
                     id="date_fin"
@@ -202,7 +206,38 @@
             </div>
         </div>
 
-        <div class="card mt-3">
+        <div id="bloc_simulation" class="card mt-3">
+            <div class="card-header">
+                Profitez de la réduction sur la durée de publication
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date début</th>
+                            <th>Date fin</th>
+                            <th>Nb jours</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="simulation_tranches"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-3 mb-3">
+            <div class="d-flex justify-content-start">
+                <button id="btn_toggle_detail" type="button"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-eye"></i>
+                    <span>Voir le détail de calcul</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="bloc_detail_calcul" class="card mt-3"  style="display:none;">
             <div class="card-header">
                 Détail du calcul
             </div>
@@ -241,6 +276,26 @@
 {{-- JAVASCRIPT --}}
 <script>
 
+const bloc = document.getElementById("bloc_simulation");
+const tableBody = document.getElementById("simulation_tranches");
+
+const blocDetail = document.getElementById("bloc_detail_calcul");
+const btnDetail = document.getElementById("btn_toggle_detail");
+
+btnDetail?.addEventListener('click', () => {
+
+    if (blocDetail.style.display === "none" || blocDetail.style.display === "") {
+        blocDetail.style.display = "block";
+        btnDetail.innerText = "Masquer le détail de calcul";
+    } else {
+        blocDetail.style.display = "none";
+        btnDetail.innerText = "Voir le détail de calcul";
+    }
+});
+
+const blocSimulation = document.getElementById("bloc_simulation");
+const btnSimulation = document.getElementById("btn_toggle_simulation");
+
 const SOLDE_BONUS = {{ $user->solde_bonus ?? 0 }};
 const PAYS_ID = {{ $user->pays_id }};
 const baseUrl = "{{ url('/') }}";
@@ -256,76 +311,64 @@ const dateFinInput = document.getElementById('date_fin');
 let currentTarifMin = {{ $dispositif->type_dispositif->tarif_min ?? 0 }};
 let tarifs = [];
 
-
 /* =================================
    Charger les tarifs du pays
 ================================= */
 async function chargerTarifs(pays_id)
 {
     try {
-
         const res = await fetch(`${baseUrl}/pays/${pays_id}/tarifs`, {
             headers: { 'Accept': 'application/json' },
             credentials: 'same-origin'
         });
 
-        if (!res.ok)
+        if (!res.ok) 
             throw new Error("HTTP " + res.status);
 
         const data = await res.json();
-
         tarifs = Array.isArray(data) ? data : [];
+        
+        console.log("Tarifs chargés:", tarifs);
 
         calculer();
+        calculerSimulation(); // ✅ IMPORTANT
 
     } catch (e) {
-
         console.error("Erreur chargement tarifs :", e);
-
     }
 }
 
-
 /* =================================
-   Calcul nombre de jours
+   Diff jours
 ================================= */
 function diffDays(date1, date2)
 {
     const d1 = new Date(date1);
     const d2 = new Date(date2);
-
-    const diff = d2 - d1;
-
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
+    return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-
 /* =================================
-   Appliquer contraintes dates
+   Contraintes dates
 ================================= */
 function appliquerContraintesDates()
 {
     const debut = dateDebutInput?.value;
-
     if (!debut) return;
 
-    // Date minimum fin
     dateFinInput.min = debut;
 
-    // Date max = 365 jours
     const maxDate = new Date(debut);
     maxDate.setDate(maxDate.getDate() + 365);
 
     dateFinInput.max = maxDate.toISOString().split('T')[0];
 
-    // Si date fin invalide
     if (dateFinInput.value && dateFinInput.value < debut)
         dateFinInput.value = '';
 }
 
-
 /* =================================
-   Calcul publication
+   Calcul principal
 ================================= */
 function calculer()
 {
@@ -337,11 +380,9 @@ function calculer()
         return;
 
     const jours = diffDays(date_debut, date_fin);
-    //const jours = Math.max(0, diffDays(date_debut, date_fin));
     document.getElementById("nb_jours").value = jours;
 
-    if (jours <= 0)
-        return;
+    if (jours <= 0) return;
 
     let prixTotal = 0;
     let htmlTranches = '';
@@ -349,30 +390,35 @@ function calculer()
 
     tarifs.forEach(t => {
 
-        if (jours < t.tranche_debut)
-            return;
+        if (jours < t.tranche_debut) return;
 
         const joursDansTranche = Math.min(jours, t.tranche_fin) - t.tranche_debut + 1;
 
-        if (joursDansTranche > 0)
-        {
+        if (joursDansTranche > 0) {
             const montantTranche = joursDansTranche * (baseCalcul * t.tranche_valeur);
 
             prixTotal += montantTranche;
 
             htmlTranches += `
                 <tr>
-                    <td>${t.tranche_debut} - ${t.tranche_fin}</td>
+                    <td>${t.designation} (${t.tranche_debut} - ${t.tranche_fin})</td>
                     <td>${joursDansTranche}</td>
                     <td>${(t.tranche_valeur * 100).toFixed(2)} %</td>
                     <td>${montantTranche.toFixed(2)}</td>
                 </tr>
             `;
         }
-
     });
 
     document.getElementById("detail_tranches").innerHTML = htmlTranches;
+
+    // 🔥 gestion affichage détail
+    if (!htmlTranches) {
+        blocDetail.style.display = 'none';
+        btnDetail.style.display = 'none';
+    } else {
+        btnDetail.style.display = 'inline-block';
+    }
 
     const bonus = Math.min(prixTotal, SOLDE_BONUS);
     const cout = prixTotal - bonus;
@@ -380,189 +426,186 @@ function calculer()
     document.getElementById('prix_publication').value = prixTotal.toFixed(2);
     document.getElementById('bonus_accorde').value = bonus.toFixed(2);
     document.getElementById('cout_publication').value = cout.toFixed(2);
+
+    calculerSimulation();
 }
 
-
 /* =================================
-   Restaurer localisation
+   Simulation
 ================================= */
-async function initLocalisation() {
-    const paysSelect = document.getElementById('pays_id');
-    const regionSelect = document.getElementById('region_id');
-    const deptSelect = document.getElementById('departement_id');
+function getPaliersDynamiques() {
 
-    if (!OLD_PAYS) return;
+    const joursActuels = parseInt(document.getElementById("nb_jours")?.value) || 0;
 
-    // 1. Charger Régions
-    const regions = await fetch(`${baseUrl}/regions/by-pays/${OLD_PAYS}`).then(r => r.json());
-    regionSelect.innerHTML = '<option value="">Sélectionner</option>';
-    regions.forEach(r => {
-        const sel = r.id == OLD_REGION ? 'selected' : '';
-        regionSelect.innerHTML += `<option value="${r.id}" ${sel}>${r.nom}</option>`;
+    if (!joursActuels) return [];
+
+    const trancheActuelle = tarifs.find(t => 
+        joursActuels >= t.tranche_debut && joursActuels <= t.tranche_fin
+    );
+
+    const trancheMax = tarifs.find(t =>
+        31 >= t.tranche_debut && 31 <= t.tranche_fin
+    )?.tranche_fin ?? 31;
+
+    // Filtrer jusqu’à 31 jours
+    const tranchesFiltrees = tarifs.filter(t => t.tranche_fin <= trancheMax);
+
+    const paliers = tranchesFiltrees
+        .map(t => Math.min(t.tranche_fin, 31)) // 🔥 important
+        .filter(fin => !trancheActuelle || fin > trancheActuelle.tranche_fin);
+
+    return [...new Set(paliers)]; // éviter doublons
+}
+
+function calculerSimulation() {
+
+    const tarifSaisi = parseFloat(tarifInput?.value) || 0;
+    const date_debut = dateDebutInput?.value;
+
+    // 🔴 Conditions bloquantes
+    if (!tarifSaisi || !date_debut || tarifs.length === 0) {
+        bloc.style.display = 'none';
+        return;
+    }
+
+    const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
+
+    const paliers = getPaliersDynamiques();
+
+    console.log("DEBUG paliers:", paliers);
+
+    // 🔴 Aucun palier → on cache
+    if (!paliers || paliers.length === 0) {
+        bloc.style.display = 'none';
+        tableBody.innerHTML = '';
+        return;
+    }
+
+    bloc.style.display = 'block';
+
+    let html = '';
+    let meilleurPalier = null;
+    let maxEconomie = 0;
+
+    const dateDebutObj = new Date(date_debut);
+    const dateDebutStr = dateDebutObj.toLocaleDateString('fr-FR');
+
+    const resultats = [];
+
+    // 🔹 Calcul pour chaque palier
+    paliers.forEach(nbJours => {
+
+        let prixReduit = 0;
+
+        tarifs.forEach(t => {
+
+            // ignorer les tranches hors limite
+            if (t.tranche_debut > 31) return;
+
+            const trancheFinEffective = Math.min(t.tranche_fin, 31);
+            
+            // pas concerné par cette tranche
+            if (nbJours < t.tranche_debut) return;
+
+            const debut = t.tranche_debut;
+            const fin = trancheFinEffective;
+            
+            // si aucune intersection avec nbJours
+            if (nbJours < debut) return;
+
+            const joursDansTranche = Math.min(nbJours, fin) - debut + 1;
+
+            if (joursDansTranche > 0) {
+                prixReduit += joursDansTranche * (baseCalcul * t.tranche_valeur);
+            }
+        });
+
+        const prixNormal = nbJours * baseCalcul;
+        const economie = prixNormal - prixReduit;
+        const pourcentage = prixNormal > 0 ? (economie / prixNormal) * 100 : 0;
+
+        if (economie > maxEconomie) {
+            maxEconomie = economie;
+            meilleurPalier = nbJours;
+        }
+
+        const d = new Date(date_debut);
+        d.setDate(d.getDate() + nbJours);
+
+        resultats.push({
+            nbJours,
+            prixReduit,
+            prixNormal,
+            economie,
+            pourcentage,
+            dateFin: d.toLocaleDateString('fr-FR')
+        });
     });
 
-    // 2. Charger Départements
-    if (OLD_REGION) {
-        const depts = await fetch(`${baseUrl}/departements/by-region/${OLD_REGION}`).then(r => r.json());
-        deptSelect.innerHTML = '<option value="">Sélectionner</option>';
-        depts.forEach(d => {
-            const sel = d.id == OLD_DEPT ? 'selected' : '';
-            deptSelect.innerHTML += `<option value="${d.id}" ${sel}>${d.nom}</option>`;
-        });
-    }
+    // 🔹 Génération HTML
+    resultats.forEach(r => {
+
+        const isBest = r.nbJours === meilleurPalier;
+
+        html += `
+            <tr class="${isBest ? 'table-success fw-bold' : ''}">
+                <td>${dateDebutStr}</td>
+                <td>${r.dateFin}</td>
+                <td>
+                    ${r.nbJours}
+                    ${isBest ? '<span class="badge bg-success ms-1">🔥 Recommandé</span>' : ''}
+                </td>
+                <td>${r.prixReduit.toLocaleString()}</td>
+                <!--td class="text-success">
+                    -${r.pourcentage.toFixed(2)}%
+                </td-->
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
 }
 
-
 /* =================================
-   Événements
+   Events
 ================================= */
 
-tarifInput?.addEventListener('input', calculer);
+tarifInput?.addEventListener('input', () => {
+    calculer();
+    calculerSimulation();
+});
 
 dateDebutInput?.addEventListener('change', () => {
 
     if (!dateDebutInput.value) return;
 
     const d = new Date(dateDebutInput.value);
-
     d.setDate(d.getDate() + {{ $nbJourMinPub }});
-
     dateFinInput.value = d.toISOString().split('T')[0];
 
     appliquerContraintesDates();
 
     calculer();
+    calculerSimulation();
 });
 
 dateFinInput?.addEventListener('change', calculer);
 
-
 /* =================================
-   Changement dispositif
-================================= */
-
-const dispositifSelect = document.getElementById('dispositif_id');
-
-dispositifSelect?.addEventListener('change', function ()
-{
-    if (!this.value) return;
-
-    fetch(`${baseUrl}/dispositifs/${this.value}/tarif-min`)
-        .then(r => r.json())
-        .then(data => {
-
-            currentTarifMin = parseFloat(data.tarif_min) || 0;
-
-            tarifInput.min = currentTarifMin;
-            tarifInput.value = currentTarifMin;
-
-            calculer();
-        });
-});
-
-
-/* =================================
-   Initialisation
+   Init
 ================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    chargerTarifs(PAYS_ID);
+    if (bloc) bloc.style.display = 'none';
 
-    initLocalisation();
+    chargerTarifs(PAYS_ID);
 
     appliquerContraintesDates();
 
     calculer();
 
 });
-
-/* =================================
-   Soumission du Formulaire (Unique)
-================================= */
-if (typeof publicationHandlerAttached === 'undefined') {
-    window.publicationHandlerAttached = true;
-
-    document.addEventListener('submit', async function(e) {
-        // On vérifie que c'est bien notre formulaire
-        if (e.target && e.target.id === 'publicationForm') {
-            e.preventDefault();
-            e.stopImmediatePropagation(); // Stop les autres scripts (comme ajax-form s'il restait des traces)
-
-            const form = e.target;
-            const btn = form.querySelector('button[type="submit"]');
-            const formData = new FormData(form);
-
-            // 1. Réinitialisation
-            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            form.querySelectorAll('.invalid-feedback').forEach(el => {
-                el.innerText = '';
-                el.style.display = 'none';
-            });
-
-            // 2. Verrouillage
-            btn.disabled = true;
-            const originalText = btn.innerText;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Envoi...';
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json', // Précise au serveur qu'on veut du JSON
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    }
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    // Succès : Redirection vers le dépôt ou l'index
-                    window.location.href = result.redirect || "{{ route('user.publications.index') }}";
-                } 
-                else if (response.status === 422) {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-
-                    // CAS SPÉCIAL : Redirection forcée (ex: solde insuffisant)
-                    if (result.redirect) {
-                        window.location.href = result.redirect;
-                        return;
-                    }
-
-                    // Affichage des erreurs sous les champs
-                    const errors = result.errors;
-                    for (const field in errors) {
-                        const sanitizedField = field.replace(/\./g, '_');
-                        // On cherche par ID ou par Name
-                        const input = document.getElementById(field) || document.getElementsByName(field)[0];
-                        const errorDiv = document.getElementById('error-' + sanitizedField);
-
-                        if (input) input.classList.add('is-invalid');
-                        if (errorDiv) {
-                            errorDiv.innerText = errors[field][0];
-                            errorDiv.style.display = 'block';
-                        }
-                    }
-                    
-                    const firstError = document.querySelector('.is-invalid');
-                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } 
-                else {
-                    throw new Error(result.message || 'Erreur serveur (500)');
-                }
-
-            } catch (error) {
-                btn.disabled = false;
-                btn.innerText = originalText;
-                console.error(error);
-                alert("Une erreur est survenue : " + error.message);
-            }
-        }
-    });
-}
 
 </script>
 @endsection

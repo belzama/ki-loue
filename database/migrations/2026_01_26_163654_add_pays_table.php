@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('code', 5);
             $table->string('indicatif', 10);
             $table->string('nom');
+            $table->string('libelle_division')->default('Région');
+            $table->string('libelle_sous_division')->default('Préfecture');
             $table->string('nationalite');
             $table->string('langue_officielle');
             $table->integer('nb_jour_min_pub')->default(1);
