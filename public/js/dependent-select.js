@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (select.id !== 'pays_id') return;
         const option = select.options[select.selectedIndex];
 
+        if (!option) return;
+        
         const division = option?.getAttribute('data-division') || 'Région';
         const sousDivision = option?.getAttribute('data-sous-division') || 'Préfecture';
 
