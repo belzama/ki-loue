@@ -57,10 +57,11 @@
                         id="dispositif_id"
                         class="form-select"
                         >
-                    <option value="">Sélectionner</option>
+                    <option value=""data-tarif="0">Sélectionner</option>
 
                     @foreach($dispositifs as $d)
                         <option value="{{ $d->id }}"
+                                data-tarif="{{ $d->type_dispositif->tarif_min ?? 0 }}"
                             {{ old('dispositif_id') == $d->id ? 'selected' : '' }}>
                             {{ $d->designation }} ({{ $d->type_dispositif->nom ?? '' }})
                         </option>
@@ -282,6 +283,8 @@ const tableBody = document.getElementById("simulation_tranches");
 const blocDetail = document.getElementById("bloc_detail_calcul");
 const btnDetail = document.getElementById("btn_toggle_detail");
 
+const dispositifSelect = document.getElementById('dispositif_id');
+
 btnDetail?.addEventListener('click', () => {
 
     if (blocDetail.style.display === "none" || blocDetail.style.display === "") {
@@ -373,9 +376,17 @@ function appliquerContraintesDates()
 function calculer()
 {
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
+    const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
+    
+    // Si on est en création et qu'aucun tarif n'est encore dans l'input, on met le min
+    if (tarifInput && !tarifInput.value) {
+        tarifInput.value = currentTarifMin;
+    }
+
     const date_debut = dateDebutInput?.value;
     const date_fin = dateFinInput?.value;
-
+    
+    // Validation de base
     if (!tarifSaisi || !date_debut || !date_fin || tarifs.length === 0)
         return;
 
@@ -386,7 +397,6 @@ function calculer()
 
     let prixTotal = 0;
     let htmlTranches = '';
-    const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
 
     tarifs.forEach(t => {
 
@@ -571,6 +581,24 @@ function calculerSimulation() {
 ================================= */
 
 tarifInput?.addEventListener('input', () => {
+    calculer();
+    calculerSimulation();
+});
+
+// Écouteur sur le changement de matériel
+dispositifSelect?.addEventListener('change', function() {
+    // 1. Récupérer le tarif min du matériel sélectionné via l'attribut data
+    const selectedOption = this.options[this.selectedIndex];
+    const nouveauTarifMin = parseFloat(selectedOption.getAttribute('data-tarif')) || 0;
+    
+    // 2. Mettre à jour la variable globale et le champ de saisie du tarif
+    currentTarifMin = nouveauTarifMin;
+    if(tarifInput) {
+        tarifInput.value = currentTarifMin;
+    }
+
+    // 3. Déclencher les calculs
+    console.log("Matériel changé, nouveau tarif min:", currentTarifMin);
     calculer();
     calculerSimulation();
 });

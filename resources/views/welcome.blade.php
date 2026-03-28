@@ -2,7 +2,13 @@
 @extends('layouts.app')
 
 @section('nav-bar')
-    @include('partials.welcome-navbar')
+    @guest        
+        @include('partials.welcome-navbar')
+    @endguest
+
+    @auth
+        @include('partials.user-connected-navbar')
+    @endauth
 @endsection
 
 @section('main-content')

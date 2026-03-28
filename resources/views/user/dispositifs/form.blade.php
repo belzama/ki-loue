@@ -128,213 +128,131 @@
 <script src="{{ asset('js/dependent-select.js') }}"></script>
 
 <script>
-$(document).ready(function(){
-
+$(document).ready(function() {
+    // Utilisation du sélecteur natif pour les événements personnalisés
+    const typeSelectEl = document.getElementById('types_dispositif_id');
     const container = $('#params-container');
     const photosContainer = $('#photos-container');
     const baseUrl = "{{ url('/') }}";
 
-    const existingParams = {!! json_encode(
-        isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []
-    ) !!};
-
-    const existingPhotos = {!! json_encode(
-        isset($dispositif)
-            ? $dispositif->photos->map(function($p){
-                return ['id'=>$p->id,'url'=>asset('storage/'.$p->path)];
-            })->values()
-            : []
-    ) !!};
-
-    // Rendu des cases photos
-    function renderPhotoInputs(maxPhotos){
-        photosContainer.html('');
-
-        for(let i=0; i<maxPhotos; i++){
+    // Récupération sécurisée des données existantes (Blade)
+    const existingParams = {!! json_encode(isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []) !!};
+    const existingPhotos = {!! json_encode(isset($dispositif) ? $dispositif->photos->map(fn($p) => ['id'=>$p->id,'url'=>asset('storage/'.$p->path)])->values() : []) !!};
+    
+    // --- RENDU DES PHOTOS ---
+    function renderPhotoInputs(maxPhotos) {
+        photosContainer.empty();
+        for (let i = 0; i < maxPhotos; i++) {
             const photo = existingPhotos[i] ?? null;
-            const hiddenInput = photo ? `<input type="hidden" name="existing_photos[${i}]" value="${photo.id}">` : '';
-
-            const previewHtml = photo
+            const previewHtml = photo 
                 ? `<img id="preview_${i}" class="photo-preview" src="${photo.url}">`
-                : `<div id="preview_${i}" class="photo-empty">
-                    <i class="bi bi-image"></i>
-                </div>`;
+                : `<div id="preview_${i}" class="photo-empty"><i class="bi bi-image"></i></div>`;
 
-            const html = `
-            <div class="col-md-3">
-                <div class="photo-box">
-                    ${previewHtml}
-                    <div class="photo-buttons">
-                        <label class="btn btn-sm btn-primary mb-0">
-                            <i class="bi bi-pencil"></i>
-                            <input type="file" name="photos[${i}]" hidden accept="image/jpeg,image/png" onchange="previewPhoto(event,${i})">
-                        </label>
-                        ${i!==0 ? `<button type="button" class="btn btn-sm btn-danger remove-photo" data-index="${i}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>` : ''}
+            photosContainer.append(`
+                <div class="col-md-3">
+                    <div class="photo-box">
+                        ${previewHtml}
+                        <div class="photo-buttons">
+                            <label class="btn btn-sm btn-primary mb-0">
+                                <i class="bi bi-pencil"></i>
+                                <input type="file" name="photos[${i}]" hidden accept="image/jpeg,image/png" onchange="previewPhoto(event,${i})">
+                            </label>
+                            ${i !== 0 ? `<button type="button" class="btn btn-sm btn-danger remove-photo" data-index="${i}"><i class="bi bi-trash"></i></button>` : ''}
+                        </div>
+                        ${photo ? `<input type="hidden" name="existing_photos[${i}]" value="${photo.id}">` : ''}
                     </div>
-                    ${hiddenInput}
-                </div>
-            </div>`;
-            photosContainer.append(html);
+                </div>`);
         }
     }
 
-    // Preview photo et mise à jour du hidden
-    window.previewPhoto = function(event, index){
-
-        const file = event.target.files[0];
-        if(!file) return;
-
-        const allowedTypes = ['image/jpeg','image/png','image/jpg'];
-        const maxSize = 5 * 1024 * 1024; // 5MB
-
-        // supprimer ancienne erreur
-        $(`#error_photo_${index}`).remove();
-
-        // type
-        if(!allowedTypes.includes(file.type)){
-            showPhotoError(index,"Format invalide. Utilisez JPG ou PNG.");
-            event.target.value='';
+    // --- CHARGEMENT DES PARAMÈTRES ---
+    async function loadParams(typeId) {
+        console.log("Exécution de loadParams pour ID :", typeId);
+        
+        if (!typeId) {
+            container.empty();
+            photosContainer.empty();
             return;
         }
 
-        // taille
-        if(file.size > maxSize){
-            showPhotoError(index,"La photo dépasse 5MB.");
-            event.target.value='';
-            return;
-        }
-
-        // vérifier que c'est réellement une image
-        const img = new Image();
-
-        img.onload = function(){
-
-            const reader = new FileReader();
-            reader.onload = function(e){
-
-                const image = document.createElement('img');
-                image.src = e.target.result;
-                image.className = 'photo-preview';
-                image.id = 'preview_'+index;
-
-                const oldEl = document.getElementById('preview_'+index);
-                if(oldEl) oldEl.replaceWith(image);
-
-            };
-
-            reader.readAsDataURL(file);
-        };
-
-        img.onerror = function(){
-            showPhotoError(index,"Le fichier n'est pas une image valide.");
-            event.target.value='';
-        };
-
-        img.src = URL.createObjectURL(file);
-    }
-
-    // Supprimer une photo
-    $(document).on('click','.remove-photo',function(){
-        const index = $(this).data('index');
-        const emptyHtml = `<div id="preview_${index}" class="photo-empty d-flex justify-content-center align-items-center">
-                               <span>Aucune photo</span>
-                           </div>`;
-        $('#preview_'+index).replaceWith(emptyHtml);
-        $(`input[name="existing_photos[${index}]"]`).remove();
-        $(`input[name="photos[${index}]"]`).val('');
-    });
-
-    // Chargement des paramètres dynamiques
-    async function loadParams(typeId){
-        container.html('');
-        if(!typeId) return;
-
-        try{
+        try {
             const res = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
             const data = await res.json();
-            const params = data.params;
 
-            // Nombre de photos selon le type
-            const nbPhotos = data.nb_max_photo ?? {{ $dispositif->type_dispositif->nb_max_photo ?? 5 }};
-            renderPhotoInputs(nbPhotos);
+            // 1. Rendu des photos
+            renderPhotoInputs(data.nb_max_photo ?? 4);
 
-            // Affichage des params
-            params.forEach(param => {
-                const paramId = param.id ?? null;
-                if(!paramId) return;
+            // 2. Rendu des paramètres
+            container.empty();
+            if (data.params) {
+                data.params.forEach(param => {
+                    const value = existingParams[param.id] ?? ''; // On utilise 'value'
+                    const inputName = `params[${param.id}]`;
+                    const inputId = `param_${param.id}`;
+                    
+                    let inputHtml = '';
+                    if (param.list_values) {
+                        inputHtml = `<select class="form-select" name="${inputName}" id="${inputId}">
+                            <option value="">Sélectionner</option>
+                            ${param.list_values.split(',').map(v => {
+                                let val = v.trim();
+                                return `<option value="${val}" ${val == value ? 'selected' : ''}>${val}</option>`;
+                            }).join('')}
+                        </select>`;
+                    } else {
+                        let inputType = (['int', 'decimal'].includes(param.value_type)) ? 'number' : (param.value_type === 'date' ? 'date' : 'text');
+                        inputHtml = `<input type="${inputType}" class="form-control" name="${inputName}" id="${inputId}" value="${value}" ${param.value_type === 'decimal' ? 'step="0.01"' : ''}>`;
+                    }
 
-                const inputName = `params[${paramId}]`;
-                const labelText = param.label ?? param.name;
-                const required = param.required ?? false;
-                const value = existingParams[paramId] ?? '';
-                const inputId = `param_${paramId}`;
-
-                const wrapper = $('<div class="mb-3"></div>');
-                // Créez la div d'erreur dynamiquement
-                // L'ID doit matcher ce que le validateur JS cherche : error-params_ID
-                const errorDiv = $(`<div class="invalid-feedback" id="error-params_${paramId}"></div>`);
-                
-                let unit = param.numeric_value_unit ? ` (${param.numeric_value_unit})` : '';
-                let star = required ? ' <span class="text-danger">*</span>' : '';
-                const labelEl = $(`<label class="form-label" for="${inputId}">${labelText}${unit}${star}</label>`);
-
-                let input;
-                if(param.list_values){
-                    input = $('<select class="form-select"></select>').attr({name:inputName,id:inputId});
-                    input.append('<option value="">Sélectionner</option>');
-                    param.list_values.split(',').forEach(opt=>{
-                        opt = opt.trim();
-                        const option = $('<option>').val(opt).text(opt);
-                        if(opt == value) option.prop('selected', true);
-                        input.append(option);
-                    });
-                } else {
-                    let type = 'text';
-                    if(param.value_type==='int'||param.value_type==='decimal') type='number';
-                    if(param.value_type==='date') type='date';
-                    input = $('<input>', {type:type,class:'form-control',id:inputId,name:inputName,value:value});
-                    if(param.value_type==='decimal') input.attr('step','0.01');
-                }
-
-                wrapper.append(labelEl).append(input).append(errorDiv); // Ajoutez errorDiv ici
-                container.append(wrapper);
-            });
-
-        } catch(error){
-            console.error("Erreur chargement paramètres :", error);
-            container.html('<div class="alert alert-danger">Erreur chargement paramètres</div>');
+                    container.append(`
+                        <div class="mb-3">
+                            <label class="form-label" for="${inputId}">${param.label || param.name} ${param.required ? '<span class="text-danger">*</span>' : ''}</label>
+                            ${inputHtml}
+                            <div class="invalid-feedback" id="error-params_${param.id}"></div>
+                        </div>`);
+                });
+            }
+        } catch (e) { 
+            console.error("Erreur lors du chargement des paramètres :", e); 
         }
     }
 
-    function showPhotoError(index,message){
-
-        const errorHtml = `
-            <div id="error_photo_${index}" class="text-danger small mt-1">
-                ${message}
-            </div>
-        `;
-
-        $(`#preview_${index}`).closest('.photo-box').append(errorHtml);
-    }
-
-    // Gestion du select type → params
-    const typeSelect = $('#types_dispositif_id');
-    typeSelect.on('change', function(){ loadParams($(this).val()); });
-
-    // Préchargement édition
-    const selectedType = typeSelect.data('selected');
-    if(selectedType){
-        const observer = new MutationObserver(function(){
-            if(typeSelect.find(`option[value="${selectedType}"]`).length){
-                typeSelect.val(selectedType).trigger('change');
-                observer.disconnect();
-            }
+    // --- ÉVÉNEMENTS ---
+    if (typeSelectEl) {
+        // Capturer l'événement du script AJAX
+        typeSelectEl.addEventListener('select:ready', function(e) {
+            console.log("Signal 'select:ready' reçu !");
+            loadParams(e.detail.value);
         });
-        observer.observe(typeSelect[0],{childList:true});
-    }
 
+        // Capturer le changement manuel
+        typeSelectEl.addEventListener('change', function() {
+            loadParams(this.value);
+        });
+
+        // Init forcé si une valeur est déjà là (cas rare sans AJAX)
+        if (typeSelectEl.value) {
+            loadParams(typeSelectEl.value);
+        }
+    }
+});
+
+// Fonctions globales pour les photos
+window.previewPhoto = function(event, index) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        $(`#preview_${index}`).replaceWith(`<img id="preview_${index}" class="photo-preview" src="${e.target.result}">`);
+    };
+    reader.readAsDataURL(file);
+};
+
+$(document).on('click', '.remove-photo', function() {
+    const idx = $(this).data('index');
+    $(`#preview_${idx}`).replaceWith(`<div id="preview_${idx}" class="photo-empty"><i class="bi bi-image"></i></div>`);
+    $(`input[name="photos[${idx}]"]`).val('');
+    $(`input[name="existing_photos[${idx}]"]`).remove();
 });
 
 document.getElementById('dispositifForm').addEventListener('submit', function(e) {

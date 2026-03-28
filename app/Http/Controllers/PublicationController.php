@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; 
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\Devise;
 use App\Models\Pays;
@@ -22,8 +23,16 @@ class PublicationController extends Controller
 {   
     public function index(Request $request)
     {
+        $country = getUserCountry();
         $categories = Categorie::orderBy('nom')->get();
         $pays = Pays::orderBy('nom')->get();
+        
+        // 1. MISE À JOUR AUTOMATIQUE (Optionnelle)
+        // On désactive les publications dont la date de fin est dépassée
+        // Cela permet de garder une base de données cohérente
+        Publication::where('active', 1)
+            ->where('date_fin', '<', Carbon::today())
+            ->update(['active' => 0]);
 
         $query = Publication::with([
                 'dispositif.type_dispositif.categorie',
@@ -36,53 +45,47 @@ class PublicationController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTRES
+        | FILTRES AMÉLIORÉS
         |--------------------------------------------------------------------------
         */
 
+        // Filtre Statut (Actif / Expiré / Désactivé)
+        if ($request->filled('statut')) {
+            if ($request->statut == 'active') {
+                $query->where('statut', 1)->where('date_fin', '>=', Carbon::today());
+            } elseif ($request->statut == 'expired') {
+                $query->where('date_fin', '<', Carbon::today());
+            } else {
+                $query->where('statut', 0);
+            }
+        }
+        
         // Catégorie
-        $query->when($request->categorie_id, function ($q) use ($request) {
-            $q->whereHas('dispositif.type_dispositif', function ($qq) use ($request) {
-                $qq->where('categorie_id', $request->categorie_id);
-            });
+        $query->when($request->categorie_id, function ($q, $catId) {
+            $q->whereHas('dispositif.type_dispositif', fn($qq) => $qq->where('categorie_id', $catId));
         });
 
         // Type
-        $query->when($request->types_dispositif_id, function ($q) use ($request) {
-            $q->whereHas('dispositif', function ($qq) use ($request) {
-                $qq->where('type_dispositif_id', $request->types_dispositif_id);
-            });
+        $query->when($request->types_dispositif_id, function ($q, $typeId) {
+            $q->whereHas('dispositif', fn($qq) => $qq->where('type_dispositif_id', $typeId));
         });
 
         // Désignation
-        $query->when($request->designation, function ($q) use ($request) {
-            $q->whereHas('dispositif', function ($qq) use ($request) {
-                $qq->where('designation', 'like', '%' . $request->designation . '%');
-            });
+        $query->when($request->designation, function ($q, $designation) {
+            $q->whereHas('dispositif', fn($qq) => $qq->where('designation', 'like', "%{$designation}%"));
         });
 
-        // Statut
-        $query->when($request->statut !== null && $request->statut !== '', function ($q) use ($request) {
-            $q->where('statut', $request->statut);
+        // Localisation (Pays / Région / Dept)
+        $query->when($request->pays_id, function ($q, $paysId) {
+            $q->whereHas('departement.region', fn($qq) => $qq->where('pays_id', $paysId));
         });
 
-        // Pays (via publication -> departement -> region)
-        $query->when($request->pays_id, function ($q) use ($request) {
-            $q->whereHas('departement.region', function ($qq) use ($request) {
-                $qq->where('pays_id', $request->pays_id);
-            });
+        $query->when($request->region_id, function ($q, $regionId) {
+            $q->whereHas('departement', fn($qq) => $qq->where('region_id', $regionId));
         });
 
-        // Région (via publication -> departement)
-        $query->when($request->region_id, function ($q) use ($request) {
-            $q->whereHas('departement', function ($qq) use ($request) {
-                $qq->where('region_id', $request->region_id);
-            });
-        });
-
-        // Departement (directement sur publication)
-        $query->when($request->departement_id, function ($q) use ($request) {
-            $q->where('departement_id', $request->departement_id);
+        $query->when($request->departement_id, function ($q, $deptId) {
+            $q->where('departement_id', $deptId);
         });
 
         $publications = $query
@@ -91,6 +94,7 @@ class PublicationController extends Controller
             ->withQueryString();
 
         return view('user.publications.index', compact(
+            'country',
             'publications',
             'categories',
             'pays'
@@ -309,10 +313,19 @@ class PublicationController extends Controller
 
     public function destroy(Publication $publication)
     {
-        $publication->delete();
+        // Au lieu de supprimer (Delete), on peut faire un "Toggle" de statut
+        // comme suggéré par votre bouton dans la vue
+        $newStatut = $publication->active == 1 ? 0 : 1;
+        
+        // Si on réactive, on vérifie que la date n'est pas passée
+        if ($newStatut == 1 && $publication->date_fin->isPast()) {
+            return back()->with('error', 'Impossible de réactiver une publication expirée. Modifiez les dates d\'abord.');
+        }
 
-        return redirect()->route('user.publications.index')
-                        ->with('success', 'Publication supprimée avec succès.');
+        $publication->update(['active' => $newStatut]);
+
+        $message = $newStatut == 1 ? 'Publication réactivée.' : 'Publication désactivée.';
+        return redirect()->route('user.publications.index')->with('success', $message);
     }
 }
 

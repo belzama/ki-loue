@@ -23,4 +23,17 @@ class Publication extends Model
     public function departement() { return $this->belongsTo(Departement::class); }
     public function devise() { return $this->belongsTo(Devise::class); }
     public function reservations() { return $this->hasMany(Reservation::class); }
+
+    // Dans App\Models\Publication.php
+
+public function getIsExpiredAttribute()
+{
+    return $this->date_fin->isPast();
+}
+
+public function getIsActiveAttribute()
+{
+    // Une publication est active SEULEMENT si son statut est 1 ET qu'elle n'est pas expirée
+    return $this->active == 1 && !$this->is_expired;
+}
 }

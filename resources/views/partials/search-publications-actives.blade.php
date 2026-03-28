@@ -103,95 +103,79 @@
     {{-- LISTE --}}
     <div class="row g-4">
         @forelse($publications as $publication)
-            <div class="col-md-3">
-                <div class="card h-100 shadow-sm">
-
-                    {{-- Carousel photos --}}
-                    <div id="carousel{{ $publication->id }}" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-lift transition-all">
+                    
+                    {{-- Carousel --}}
+                    <div id="carousel{{ $publication->id }}" class="carousel slide card-img-top" data-bs-ride="carousel">
+                        <div class="carousel-inner rounded-top">
                             @forelse($publication->dispositif->photos as $index => $photo)
                                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                    <img src="{{ asset('storage/'.$photo->path) }}"
-                                        class="d-block w-100"
-                                        style="height:220px; object-fit:cover;"
-                                        alt="photo dispositif">
+                                    <img src="{{ asset('storage/'.$photo->path) }}" class="d-block w-100" style="height:200px; object-fit:cover;" alt="photo">
                                 </div>
                             @empty
                                 <div class="carousel-item active">
-                                    <img src="{{ asset('images/no-image.png') }}"
-                                        class="d-block w-100"
-                                        style="height:220px; object-fit:cover;">
+                                    <img src="{{ asset('images/no-image.png') }}" class="d-block w-100" style="height:200px; object-fit:cover;">
                                 </div>
                             @endforelse
-
                         </div>
-
                         @if($publication->dispositif->photos->count() > 1)
-                            <button class="carousel-control-prev" type="button"
-                                    data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" style="width: 1.2rem;"></span>
                             </button>
-                            <button class="carousel-control-next" type="button"
-                                    data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ $publication->id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" style="width: 1.2rem;"></span>
                             </button>
                         @endif
                     </div>
 
-                    {{-- Contenu --}}
-                    <div class="card-body">                        
-                        {{-- Catégorie / Type --}}
-                        <div class="mb-2">
+                    {{-- Corps de la carte --}}
+                    <div class="card-body p-3 d-flex flex-column">
+                        <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ $publication->dispositif->designation }}">
                             {{ $publication->dispositif->designation ?? '-' }}
-                        </div>
+                        </h6>
                         
-                        {{-- localisation --}}
-                        <div class="text-muted mb-2">
-                            <i class="bi bi-geo-alt"></i>
-                            {{ $publication->departement->nom ?? '' }},
-                            {{ $publication->departement->region->nom ?? '' }},
-                            {{ $publication->departement->region->pays->nom ?? '' }}
+                        <div class="d-flex align-items-start gap-1 mb-3 text-muted" style="font-size: 0.85rem; min-height: 40px;">
+                            <i class="bi bi-geo-alt-fill text-danger flex-shrink-0 mt-1"></i>
+                            <span>
+                                {{ $publication->departement->nom ?? '' }}, 
+                                {{ $publication->departement->region->nom ?? '' }},
+                                {{ $publication->departement->region->pays->nom ?? '' }}
+                            </span>
                         </div>
-                        
-                        {{-- prix --}}
-                        <p class="fw-bold text-success">
-                        <div class="mt-2 fs-5 fw-bold text-success">
-                            {{ number_format($publication->tarif_location,0,',',' ') }}
-                            {{ $publication->devise->symbol ?? '' }}
-                            <span class="text-muted fs-6">/ jour</span>
-                        </div>
-                        </p>
 
-                        {{-- Actions --}}
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('publications.show', $publication) }}"
-                            class="btn btn-outline-primary">
-                                Voir détails
-                            </a>                            
-
-                            <div class="d-grid gap-2">
-                                <button type="button"
-                                        class="btn btn-success contact-btn"
-                                        data-url="{{ route('reservations.store', $publication->id) }}">
-                                    Contacter
-                                </button>
+                        {{-- Prix --}}
+                        <div class="mt-auto pt-2 border-top">
+                            <div class="d-flex align-items-baseline gap-1">
+                                <span class="text-success fw-bold fs-4">{{ number_format($publication->tarif_location,0,',',' ') }}</span>
+                                <span class="text-success fw-semibold small">{{ $publication->devise->symbol ?? 'XOF' }}</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">/ JOUR</span>
                             </div>
                         </div>
+                    </div>
+
+                    {{-- Footer (Actions) : Placé à l'extérieur de la body pour un alignement propre --}}
+                    <div class="card-footer bg-white border-0 p-3 pt-0 d-flex gap-2">
+                        <a href="{{ route('publications.show', $publication) }}" class="btn btn-outline-dark flex-grow-1 btn-sm fw-medium">
+                            Détails
+                        </a>
+                        <button type="button" class="btn btn-success contact-btn btn-sm px-3 shadow-sm" data-url="{{ route('reservations.store', $publication->id) }}">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            Contacter
+                        </button>
                     </div>
                 </div>
             </div>
 
             @include('partials.contact-modal')
-
         @empty
-            <div class="col-12">
-                <div class="alert alert-info">
-                    Aucune publication trouvée
-                </div>
-            </div>
+            {{-- Ton bloc vide --}}
         @endforelse
     </div>
+
+<div class="d-flex justify-content-center mt-4">
+    {{ $publications->links() }}
+</div>
 
     <div class="mt-4">
         {{ $publications->links() }}

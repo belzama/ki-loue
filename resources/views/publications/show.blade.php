@@ -121,7 +121,7 @@
                     @if($publication->dispositif->modele)
                         <div class="row g-2">
                             <div class="col-md-4">
-                                <strong>Marque :</strong>
+                                <strong>Modèle :</strong>
                             </div>
                             <div class="col-md-8">
                                 {{ $publication->dispositif->modele ?? '-' }}
@@ -175,7 +175,7 @@
 
                     <div class="row g-2">
                         <div class="col-md-4">
-                            <strong>Région :</strong>
+                            <strong>{{ $publication->departement->region->pays->libelle_division }} :</strong>
                         </div>
                         <div class="col-md-8">
                             {{ $publication->departement->region->nom }}
@@ -184,7 +184,7 @@
 
                     <div class="row g-2">
                         <div class="col-md-4">
-                            <strong>Département :</strong>
+                            <strong>{{ $publication->departement->region->pays->libelle_sous_division }} :</strong>
                         </div>
                         <div class="col-md-8">
                             {{ $publication->departement->nom }}
@@ -193,7 +193,7 @@
 
                     <div class="row g-2">
                         <div class="col-md-4">
-                            <strong>Ville :</strong>
+                            <strong>Ville / Localité :</strong>
                         </div>
                         <div class="col-md-8">
                             {{ $publication->ville }}

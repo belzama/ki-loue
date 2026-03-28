@@ -126,16 +126,24 @@
                     {{-- Actions --}}
                     <div class="mt-auto pt-3 border-top d-flex justify-content-between">
                         <div class="btn-group">
-                            <a href="{{ route('user.dispositifs.show', $dispositif) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                            <a href="{{ route('user.dispositifs.edit', $dispositif) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                            <a href="{{ route('user.dispositifs.show', $dispositif) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a href="{{ route('user.dispositifs.edit', $dispositif) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
                             <a href="{{ route('user.publications.createByDispositif', $dispositif) }}" class="btn btn-sm btn-outline-success" title="Publier">
                                 <i class="bi bi-megaphone"></i>
+                                <span>Publier</span>
                             </a>
                         </div>
 
                         <form action="{{ route('user.dispositifs.destroy', $dispositif) }}" method="POST" onsubmit="return confirm('Confirmer la suppression ?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </form>
                     </div>
                 </div>

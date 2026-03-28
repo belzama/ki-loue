@@ -97,10 +97,12 @@
                             data-child="region_id"
                             data-url="{{ url('regions/by-pays') }}/"
                             class="form-select shadow-sm">
-                        <option value="">Tous</option>
+                        <option value="" data-division="Région" data-sous-division="Préfecture">Tous</option>
                         @foreach($pays as $p)
                             <option value="{{ $p->id }}"
-                                {{ request('pays_id') == $p->id ? 'selected' : '' }}>
+                                    data-division="{{ $p->libelle_division }}"
+                                    data-sous-division="{{ $p->libelle_sous_division }}"
+                                {{ (request('pays_id') == $p->id || (isset($country) && $country->id == $p->id)) ? 'selected' : '' }}>
                                 {{ $p->nom }}
                             </option>
                         @endforeach
@@ -108,7 +110,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label fw-semibold">Région</label>
+                    <label id="label_division" class="form-label fw-semibold">{{ $country?->libelle_division ?? 'Région' }}</label>
                     <select id="region_id"
                             name="region_id" 
                             data-child="departement_id"
@@ -120,7 +122,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label fw-semibold">Departement</label>
+                    <label id="label_sous_division" class="form-label fw-semibold">{{ $country?->libelle_sous_division ?? 'Préfecture' }}</label>
                     <select id="departement_id"
                             name="departement_id" 
                             data-selected="{{ request('departement_id') }}"
@@ -164,6 +166,12 @@
 
 <div class="row g-4">
     @forelse($publications as $publication)
+        
+        @php
+            $isExpired = $publication->date_fin->isPast();
+            $isActive = $publication->active == 1 && !$isExpired;
+        @endphp
+
         <div class="col-lg-6 col-md-6">
             <div class="card shadow-sm border-0 h-100 publication-card">
                 
@@ -197,9 +205,16 @@
 
                     {{-- Badges flottants --}}
                     <div class="position-absolute top-0 start-0 m-3 d-flex flex-column gap-2">
-                        <span class="badge shadow-sm {{ $publication->active ? 'bg-success' : 'bg-danger' }}">
-                            <i class="bi {{ $publication->active ? 'bi-check-circle' : 'bi-slash-circle' }} me-1"></i>
-                            {{ $publication->active ? 'En cours' : 'Expirée' }}
+                        {{-- Badge Statut --}}
+                        <span class="badge shadow-sm {{ $isActive ? 'bg-success' : ($isExpired ? 'bg-warning' : 'bg-danger') }}">
+                            <i class="bi {{ $isActive ? 'bi-check-circle' : ($isExpired ? 'bi-calendar-x' : 'bi-slash-circle') }} me-1"></i>
+                            @if($isExpired)
+                                Expirée
+                            @elseif($isActive)
+                                En cours
+                            @else
+                                Désactivée
+                            @endif
                         </span>
                     </div>
                     
@@ -247,10 +262,12 @@
 
                 {{-- Actions --}}
                 <div class="card-footer bg-white border-0 p-4 pt-0 d-flex gap-2">
-                    <a href="{{ route('user.publications.edit', $publication) }}" 
-                       class="btn btn-outline-dark action-btn flex-grow-1 btn-sm">
-                        <i class="bi bi-geo"></i> Déplacer
-                    </a>
+                    @if(!$isExpired && $publication->active)
+                        <a href="{{ route('user.publications.edit', $publication) }}" 
+                        class="btn btn-outline-dark action-btn flex-grow-1 btn-sm">
+                            <i class="bi bi-geo"></i> Modifier la localisation
+                        </a>
+                    @endif
                     
                     <form action="{{ route('user.publications.destroy', $publication) }}" 
                           method="POST" 
@@ -260,13 +277,15 @@
                         @method('DELETE')
                         
                         {{-- Un seul bouton dynamique selon le statut --}}
-                        @if($publication->active)
-                            <button type="submit" class="btn btn-outline-danger action-btn btn-sm" title="Désactiver">
+                        @if($isActive && !$isExpired)
+                            <button type="submit" class="btn btn-outline-danger action-btn" title="Désactiver">
                                 <i class="bi bi-power"></i>
+                                <span>Désactiver</span>
                             </button>
-                        @else
-                            <button type="submit" class="btn btn-outline-success action-btn btn-sm" title="Réactiver">
+                        @elseif(!$isActive && !$isExpired)
+                            <button type="submit" class="btn btn-outline-success action-btn" title="Réactiver">
                                 <i class="bi bi-play-fill"></i>
+                                <span>Réactiver</span>
                             </button>
                         @endif
                     </form>
@@ -278,8 +297,8 @@
             <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
                 <i class="bi bi- megaphone fs-1 text-muted"></i>
             </div>
-            <h5 class="text-muted">Aucune publication pour le moment</h5>
-            <a href="#" class="btn btn-primary mt-3">Créer ma première annonce</a>
+            <h5 class="text-muted">Aucune publication trouvée</h5>
+            <a href="{{ route('user.publications.create') }}" class="btn btn-primary mt-3">Publier une nouvelle annonce</a>
         </div>
     @endforelse
 </div>

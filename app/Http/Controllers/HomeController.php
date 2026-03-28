@@ -23,11 +23,8 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        $ip = ($request->ip() == '::1') ? '8.8.8.8' : $request->ip();
-        $position = Location::get($ip);
         // On cherche le pays, mais on prévoit un fallback (ex: 'FR' par défaut)
-        $countryCode = $position?->countryCode ?? 'TG';
-        $country = Pays::where('code', $countryCode)->first() ?? Pays::where('code', 'TG')->first(); 
+        $country = getUserCountry();
 
         // Requête de base avec eager loading
         $query = Publication::with([

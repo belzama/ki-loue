@@ -179,20 +179,46 @@ class DispositifController extends Controller
      */
     private function handlePhotoUpdates(Request $request, Dispositif $dispositif)
     {
-        $existingPhotoIds = $request->input('existing_photos', []);
+        $existingPhotoIds = $request->input('existing_photos', []); // [0 => "ID_A", 1 => "ID_B"]
+        $newFiles = $request->file('photos', []); // [1 => File_Objet]
+
+        // 1. SUPPRESSION : On enlève les photos qui ont été "supprimées" (clic sur la corbeille)
+        // On récupère les IDs actuellement en base pour ce dispositif
+        $currentPhotoIdsInDb = $dispositif->photos()->pluck('id')->toArray();
         
-        // Supprimer les photos qui ne sont plus dans la sélection
-        $photosToDelete = $dispositif->photos()->whereNotIn('id', array_filter($existingPhotoIds))->get();
-        foreach ($photosToDelete as $photo) {
-            Storage::disk('public')->delete($photo->path);
-            $photo->delete();
+        foreach ($currentPhotoIdsInDb as $dbId) {
+            // Si l'ID en base n'est plus présent dans le formulaire, on le supprime physiquement
+            if (!in_array($dbId, $existingPhotoIds)) {
+                $photoToDelete = $dispositif->photos()->find($dbId);
+                if ($photoToDelete) {
+                    Storage::disk('public')->delete($photoToDelete->path);
+                    $photoToDelete->delete();
+                }
+            }
         }
 
-        // Ajouter les nouvelles photos
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                $path = $file->store('dispositifs', 'public');
-                $dispositif->photos()->create(['path' => $path]);
+        // 2. REMPLACEMENT OU AJOUT : On boucle sur les fichiers envoyés
+        foreach ($newFiles as $index => $file) {
+            if ($file->isValid()) {
+                // Est-ce qu'il y avait une photo existante à cet index (Mode Modification) ?
+                $idToReplace = $existingPhotoIds[$index] ?? null;
+
+                if ($idToReplace) {
+                    // --- CAS : REMPLACEMENT ---
+                    $existingPhoto = $dispositif->photos()->find($idToReplace);
+                    if ($existingPhoto) {
+                        // On supprime l'ancien fichier du disque
+                        Storage::disk('public')->delete($existingPhoto->path);
+                        
+                        // On met à jour le chemin sur la MÊME ligne en base de données
+                        $path = $file->store('dispositifs', 'public');
+                        $existingPhoto->update(['path' => $path]);
+                    }
+                } else {
+                    // --- CAS : AJOUT PUR (Nouvelle photo) ---
+                    $path = $file->store('dispositifs', 'public');
+                    $dispositif->photos()->create(['path' => $path]);
+                }
             }
         }
     }
