@@ -50,13 +50,19 @@ class PublicationController extends Controller
         */
 
         // Filtre Statut (Actif / Expiré / Désactivé)
-        if ($request->filled('statut')) {
-            if ($request->statut == 'active') {
-                $query->where('statut', 1)->where('date_fin', '>=', Carbon::today());
-            } elseif ($request->statut == 'expired') {
-                $query->where('date_fin', '<', Carbon::today());
-            } else {
-                $query->where('statut', 0);
+        // On récupère la valeur de 'active', ou '1' par défaut si le paramètre est absent
+        $activeFilter = $request->input('active', '1');
+
+        // On applique le filtre sauf si l'utilisateur a choisi "Tous" (valeur vide dans le select)
+        if ($activeFilter !== null && $activeFilter !== '') {
+            if ($activeFilter == '1') {
+                // Uniquement en cours (active ET date non dépassée)
+                $query->where('active', 1)->where('date_fin', '>=', Carbon::today());
+            } elseif ($activeFilter == '0') {
+                // Uniquement expirées (active = 0 OU date dépassée)
+                $query->where(function($q) {
+                    $q->where('active', 0)->orWhere('date_fin', '<', Carbon::today());
+                });
             }
         }
         
@@ -86,6 +92,17 @@ class PublicationController extends Controller
 
         $query->when($request->departement_id, function ($q, $deptId) {
             $q->where('departement_id', $deptId);
+        });
+
+        // Filtre Date de début de publication
+        $query->when($request->date_debut_filtre, function ($q, $date) {
+            // On suppose que la colonne en base de données s'appelle 'created_at' ou 'date_debut'
+            $q->whereDate('created_at', '>=', $date);
+        });
+
+        // Filtre Date de fin de publication
+        $query->when($request->date_fin_filtre, function ($q, $date) {
+            $q->whereDate('created_at', '<=', $date);
         });
 
         $publications = $query

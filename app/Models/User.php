@@ -9,9 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
-use App\Models\Dispositif;
 use App\Models\Pays;
 use App\Models\User;
+use App\Models\Dispositif;
+use App\Models\Publication;
 use App\Models\Reservation;
 use App\Models\Notification;
 use App\Models\Transaction;
@@ -97,7 +98,17 @@ class User extends Authenticatable
     public function dispositifs()
     {
         return $this->hasMany(Dispositif::class);
-    }    
+    }   
+    
+    public function reservations() 
+    { 
+        return $this->hasMany(Reservation::class); 
+    }
+    
+    public function publications() 
+    { 
+        return $this->hasManyThrough(Publication::class, Dispositif::class); 
+    } 
 
     public function pays()
     {
@@ -113,12 +124,6 @@ class User extends Authenticatable
     public function filleuls()
     {
         return $this->hasMany(User::class, 'user_id');
-    }
-
-    
-    public function reservations() 
-    { 
-        return $this->hasMany(Reservation::class); 
     }
 
     public function notifications()

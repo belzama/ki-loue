@@ -66,7 +66,7 @@
                            name="designation"
                            value="{{ request('designation') }}"
                            class="form-control shadow-sm"
-                           placeholder="🔍 Rechercher par désignation...">
+                           placeholder="Rechercher par désignation...">
                 </div>
 
                 <div class="col-md-4">
@@ -88,7 +88,7 @@
             </div>
 
             {{-- Bloc 3 --}}
-            <div class="row g-4">
+            <div class="row g-4 mb-3">
 
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Pays</label>
@@ -129,6 +129,39 @@
                             class="form-select shadow-sm">
                         <option value="">Toutes</option>
                     </select>
+                </div>
+            </div>            
+
+            {{-- Bloc 4 : Statut et Période de publication --}}
+            <div class="row g-4 mb-3">                
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Statut</label>
+                    <select name="active" class="form-select shadow-sm">
+                        <option value="">Tous</option>
+                        <option value="1" {{ request('active') === '1' ? 'selected' : '' }}>
+                            🟢 Encours
+                        </option>
+                        <option value="0" {{ request('active') === '0' ? 'selected' : '' }}>
+                            🟡 Expirée
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Publié après le (Date début)</label>
+                    <input type="date" 
+                        name="date_debut_filtre" 
+                        value="{{ request('date_debut_filtre') }}" 
+                        class="form-control shadow-sm">
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Publié avant le (Date fin)</label>
+                    <input type="date" 
+                        name="date_fin_filtre" 
+                        value="{{ request('date_fin_filtre') }}" 
+                        class="form-control shadow-sm">
                 </div>
             </div>
 
@@ -240,7 +273,9 @@
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <i class="bi bi-geo-alt text-danger"></i>
                         <span class="text-muted small">
-                            {{ $publication->departement->nom ?? '' }}, {{ $publication->departement->region->pays->nom ?? '' }}
+                            {{ $publication->departement->region->pays->libelle_division ?? '' }} 
+                            {{ $publication->departement->nom ?? '' }}, 
+                            {{ $publication->departement->region->pays->nom ?? '' }}
                         </span>
                     </div>
 
@@ -257,6 +292,13 @@
                                 {{ $publication->date_debut->format('d M') }} - {{ $publication->date_fin->format('d M Y') }}
                             </span>
                         </div>
+                    </div>                    
+
+                    {{-- Date de publication --}}
+                    <div class="mb-2">
+                        <span class="text-danger fw-bold small tracking-wider">
+                            Publié le {{ $publication->created_at->format('d M Y') }}
+                        </span>
                     </div>
                 </div>
 

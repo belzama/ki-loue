@@ -136,7 +136,8 @@
                                 <strong>{{ $param->typeParam->label ?? ucfirst($param->name) }} :</strong>
                             </div>                            
                             <div class="col-md-8">
-                                {{ $param->value }}
+                                {{ $param->value }} 
+                                {{ $param->typeParam->numeric_value_unit }}
                             </div>
                         </div>
                     @endforeach

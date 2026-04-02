@@ -139,6 +139,7 @@
                             <i class="bi bi-geo-alt-fill text-danger flex-shrink-0 mt-1"></i>
                             <span>
                                 {{ $publication->departement->nom ?? '' }}, 
+                                {{ $publication->departement->region->pays->libelle_division ?? '' }} 
                                 {{ $publication->departement->region->nom ?? '' }},
                                 {{ $publication->departement->region->pays->nom ?? '' }}
                             </span>
@@ -148,7 +149,7 @@
                         <div class="mt-auto pt-2 border-top">
                             <div class="d-flex align-items-baseline gap-1">
                                 <span class="text-success fw-bold fs-4">{{ number_format($publication->tarif_location,0,',',' ') }}</span>
-                                <span class="text-success fw-semibold small">{{ $publication->devise->symbol ?? 'XOF' }}</span>
+                                <span class="text-success fw-semibold small">{{ $publication->devise->symbol ?? 'FCFA' }}</span>
                                 <span class="text-muted" style="font-size: 0.7rem;">/ JOUR</span>
                             </div>
                         </div>

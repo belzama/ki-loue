@@ -1,20 +1,4 @@
 <ul class="navbar-nav flex-grow-1 d-flex justify-content-center align-items-center">
-    
-    @if(auth()->user()->role === 'Admin')
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                <i class="bi bi-person me-2"></i>
-                <span>Mon compte</span>
-            </a>
-        </li>
-    @else
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('user.dashboard') }}">
-                <i class="bi bi-person me-2"></i>
-                <span>Mon compte</span>
-            </a>
-        </li>
-    @endif
 
     <li class="nav-item px-2">
         <a class="nav-link text-white d-inline-flex align-items-center" href="{{ url('/') }}">
@@ -36,6 +20,22 @@
             <span>Publications</span>
         </a>
     </li>
+    
+    @if(auth()->user()->role === 'Admin')
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                <i class="bi bi-person me-2"></i>
+                <span>Mon compte</span>
+            </a>
+        </li>
+    @else
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('user.dashboard') }}">
+                <i class="bi bi-person me-2"></i>
+                <span>Mon compte</span>
+            </a>
+        </li>
+    @endif
 </ul>
 
 <ul class="navbar-nav ms-auto align-items-center">    

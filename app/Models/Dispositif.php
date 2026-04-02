@@ -27,5 +27,6 @@ class Dispositif extends Model
     public function photos() { return $this->hasMany(DispositifPhoto::class); }
     public function cover() { return $this->hasOne(DispositifPhoto::class)->where('is_cover', true); }
     public function getMainPhotoAttribute() { return $this->cover ?: $this->photos->first(); }
-    public function publications() { return $this->hasMany(Publication::class); }
+    public function publications() { return $this->hasMany(Publication::class); }    
+    public function reservations() { return $this->hasManyThrough(Reservation::class, Publication::class); }
 }
