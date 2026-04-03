@@ -16,7 +16,7 @@ class TypesDispositifSeeder extends Seeder
             // ======================
             // TERRASSEMENT
             // ======================
-            'Matériels de terrassement' => [
+            /*'Matériels de terrassement' => [
                 ['nom' => 'Bulldozer', 'min' => 250000, 'max' => 800000, 'nom_dispositif_fields' => 'marque,modele'],
                 ['nom' => 'Niveleuse', 'min' => 200000, 'max' => 700000, 'nom_dispositif_fields' => 'marque,modele'],
                 ['nom' => 'Pelle mécanique sur chenilles', 'min' => 250000, 'max' => 800000, 'nom_dispositif_fields' => 'marque,modele'],
@@ -102,14 +102,14 @@ class TypesDispositifSeeder extends Seeder
                 ['nom' => 'Camion toupie', 'min' => 70000, 'max' => 200000, 'nom_dispositif_fields' => 'marque,modele,capacite_cuve'],
                 ['nom' => 'Pompe à béton mobile', 'min' => 100000, 'max' => 500000, 'nom_dispositif_fields' => 'marque,modele,debit'],
                 ['nom' => 'Pompe à béton sur camion', 'min' => 300000, 'max' => 1500000, 'nom_dispositif_fields' => 'marque,modele,portee_debit'],
-            ],
+            ],*/
 
             // ======================
             // LEVAGE ET MANUTENTION
             // ======================
             'Matériels de levage et de manutention' => [
-                ['nom' => 'Chariot élevateur', 'min' => 80000, 'max' => 350000], 'nom_dispositif_fields' => 'marque,modele,charge_levage',
-                ['nom' => 'Chariot télescopique', 'min' => 70000, 'max' => 250000, 'nom_dispositif_fields' => 'marque,modele,charge_levage'],
+                //['nom' => 'Chariot élevateur', 'min' => 80000, 'max' => 350000], 'nom_dispositif_fields' => 'marque,modele,charge_levage',
+                //['nom' => 'Chariot télescopique', 'min' => 70000, 'max' => 250000, 'nom_dispositif_fields' => 'marque,modele,charge_levage'],
                 ['nom' => 'Nacelle sur camion', 'min' => 100000, 'max' => 1200000, 'nom_dispositif_fields' => 'marque,modele,hauteur_bras'],
                 ['nom' => 'Monte-charge de chantier', 'min' => 100000, 'max' => 1000000, 'nom_dispositif_fields' => 'marque,modele,charge_utile'],
                 ['nom' => 'Treuil de levage', 'min' => 150000, 'max' => 1500000, 'nom_dispositif_fields' => 'marque,modele,charge_utile'],

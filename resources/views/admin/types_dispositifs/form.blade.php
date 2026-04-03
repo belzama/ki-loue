@@ -75,8 +75,13 @@
     + Ajouter un paramètre
 </button>
 
-<hr>
-<button type="submit" class="btn btn-success">Enregistrer</button>
+<div class="mt-3">
+    <button type="submit" class="btn btn-success">
+        Enregistrer
+    </button>
+
+    <a href="{{ route('admin.types_dispositifs.index') }}" class="btn btn-secondary">Annuler</a>
+</div>
 
 
 

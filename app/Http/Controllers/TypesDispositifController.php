@@ -60,10 +60,21 @@ class TypesDispositifController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(Request $request) // 1. On injecte la Request ici
     {
-        $types = TypesDispositif::with(['categorie','params'])->paginate(10);
-        return view('admin.types_dispositifs.index', compact('types'));
+        $categories = Categorie::orderBy('nom')->get();
+
+        $types = TypesDispositif::with(['categorie', 'params'])        
+            ->when($request->categorie_id, function ($q) use ($request) {
+                return $q->where('categorie_id', $request->categorie_id); // 2. $q au lieu de $q2
+            })
+            ->when($request->nom, function ($q) use ($request) {
+                return $q->where('nom', 'like', '%' . $request->nom . '%'); // Suggestion : 'like' est souvent mieux pour un nom
+            }) // 3. Fermeture correcte du second when
+            ->orderBy('nom')
+            ->paginate(10);
+
+        return view('admin.types_dispositifs.index', compact('categories', 'types'));
     }
 
     public function create()
