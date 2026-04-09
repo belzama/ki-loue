@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -20,13 +20,13 @@ use App\Services\TarifService;
 use App\Services\TransactionService;
 
 class PublicationController extends Controller
-{   
+{
     public function index(Request $request)
     {
         $country = getUserCountry();
         $categories = Categorie::orderBy('nom')->get();
         $pays = Pays::orderBy('nom')->get();
-        
+
         // 1. MISE À JOUR AUTOMATIQUE (Optionnelle)
         // On désactive les publications dont la date de fin est dépassée
         // Cela permet de garder une base de données cohérente
@@ -65,7 +65,7 @@ class PublicationController extends Controller
                 });
             }
         }
-        
+
         // Catégorie
         $query->when($request->categorie_id, function ($q, $catId) {
             $q->whereHas('dispositif.type_dispositif', fn($qq) => $qq->where('categorie_id', $catId));
@@ -162,14 +162,13 @@ class PublicationController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         // 1. Règles de validation
         $rules = [
             'dispositif_id'  => 'required|exists:dispositifs,id',
             'departement_id' => 'required|exists:departements,id',
             'ville'          => 'required|string|max:150',
             'tarif_location' => 'required|numeric|min:1',
-            'devise_id'      => 'required|exists:devises,id',
             'date_debut'     => 'required|date|after_or_equal:today',
             'date_fin'       => 'required|date|after:date_debut',
         ];
@@ -179,7 +178,6 @@ class PublicationController extends Controller
             'departement_id' => 'Préfecture/Département',
             'ville'          => 'Ville/Localité',
             'tarif_location' => 'Tarif journalier',
-            'devise_id'      => 'Devise',
             'date_debut'     => 'Date de début',
             'date_fin'       => 'Date de fin',
         ];
@@ -231,12 +229,12 @@ class PublicationController extends Controller
         // 4. Transaction et Création
         try {
             DB::transaction(function () use ($request, $user, $prix_publication, $bonus_accorde, $cout_publication) {
-                
+
                 Publication::create([
                     'dispositif_id'   => $request->dispositif_id,
                     'departement_id'  => $request->departement_id,
                     'ville'           => $request->ville,
-                    'devise_id'       => $request->devise_id,
+                    'devise_id'       => $user->pays->devise_id,
                     'tarif_location'  => $request->tarif_location,
                     'prix_publication'=> $prix_publication,
                     'bonus_accorde'   => $bonus_accorde,
@@ -259,7 +257,7 @@ class PublicationController extends Controller
             });
 
             $msg = 'Publication créée avec succès.';
-            return $request->ajax() 
+            return $request->ajax()
                 ? response()->json(['success' => true, 'message' => $msg, 'redirect' => route('user.publications.index')])
                 : redirect()->route('user.publications.index')->with('success', $msg);
 
@@ -315,8 +313,8 @@ class PublicationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $request->ajax() 
-                ? response()->json(['errors' => $validator->errors()], 422) 
+            return $request->ajax()
+                ? response()->json(['errors' => $validator->errors()], 422)
                 : back()->withErrors($validator);
         }
 
@@ -333,7 +331,7 @@ class PublicationController extends Controller
         // Au lieu de supprimer (Delete), on peut faire un "Toggle" de statut
         // comme suggéré par votre bouton dans la vue
         $newStatut = $publication->active == 1 ? 0 : 1;
-        
+
         // Si on réactive, on vérifie que la date n'est pas passée
         if ($newStatut == 1 && $publication->date_fin->isPast()) {
             return back()->with('error', 'Impossible de réactiver une publication expirée. Modifiez les dates d\'abord.');

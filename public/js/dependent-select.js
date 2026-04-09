@@ -91,4 +91,14 @@ document.addEventListener('DOMContentLoaded', function () {
             loadOptions(paysSelect);
         }
     }
+
+    // Forcer le chargement des types au démarrage si une catégorie existe
+    const catSelectEl = document.getElementById('categorie_id');
+    if (catSelectEl && catSelectEl.value) {
+        // Cette fonction vient de votre fichier dependent-select.js
+        // Elle va remplir le select des types, qui lui-même déclenchera 'select:ready'
+        if (typeof loadOptions === "function") {
+            loadOptions(catSelectEl);
+        }
+    }
 });

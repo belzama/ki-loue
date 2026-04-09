@@ -11,7 +11,7 @@ class TypeDispositifParamSeeder extends Seeder
     {
         $params = [
             // Terrassement
-            /*['type' => 'Bulldozer', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KW', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Bulldozer', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KW', 'type_v' => 'int', 'req' => false],
             ['type' => 'Niveleuse', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KW', 'type_v' => 'int', 'req' => false],
             ['type' => 'Pelle mécanique sur chenilles', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KW', 'type_v' => 'int', 'req' => false],
             ['type' => 'Pelle mécanique sur pneus', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KW', 'type_v' => 'int', 'req' => false],
@@ -76,10 +76,10 @@ class TypeDispositifParamSeeder extends Seeder
             ['type' => 'Camion toupie', 'name' => 'capacite_cuve', 'label' => 'Capacité cuve', 'unit' => 'm³', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Pompe à béton mobile', 'name' => 'debit', 'label' => 'Débit', 'unit' => 'm³/h', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Pompe à béton sur camion', 'name' => 'portee_debit', 'label' => 'Portée flèche/débit', 'unit' => 'Mètre/ m³/h', 'type_v' => 'decimal', 'req' => true],
-            */
+            
             // Levage et  de manutention
-            //['type' => 'Chariot élevateur', 'name' => 'charge_levage', 'label' => 'Charge de levage', 'unit' => 'Kg', 'type_v' => 'decimal', 'req' => true],
-            //['type' => 'Chariot télescopique', 'name' => 'charge_levage', 'label' => 'Charge de levage', 'unit' => 'Kg', 'type_v' => 'decimal', 'req' => true],
+            ['type' => 'Chariot élevateur', 'name' => 'charge_levage', 'label' => 'Charge de levage', 'unit' => 'Kg', 'type_v' => 'decimal', 'req' => true],
+            ['type' => 'Chariot télescopique', 'name' => 'charge_levage', 'label' => 'Charge de levage', 'unit' => 'Kg', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Nacelle sur camion', 'name' => 'hauteur_bras', 'label' => 'Hauteur de bras', 'unit' => 'Mètre', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Monte-charge de chantier', 'name' => 'charge_utile', 'label' => 'Charge utile', 'unit' => 'Kg', 'type_v' => 'int', 'req' => true],
             ['type' => 'Treuil de levage', 'name' => 'charge_utile', 'label' => 'Charge utile', 'unit' => 'Kg', 'type_v' => 'decimal', 'req' => true],

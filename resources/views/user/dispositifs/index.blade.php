@@ -15,9 +15,9 @@
     <form method="GET" action="{{ route('user.dispositifs.index') }}">
         <div class="row g-3 align-items-end">
             <div class="col-md-5">
-                <label class="form-label font-weight-bold">Catégorie</label>
-                <select id="categorie_id" 
-                        name="categorie_id" 
+                <label class="form-label fw-semibold">Catégorie</label>
+                <select id="categorie_id"
+                        name="categorie_id"
                         class="form-select">
                     <option value="">-- Toutes les catégories --</option>
                     @foreach($categories as $categorie)
@@ -29,9 +29,9 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label font-weight-bold">Type de matériel</label>
-                <select id="types_dispositif_id" 
-                        name="types_dispositif_id" 
+                <label class="form-label fw-semibold">Type de matériel</label>
+                <select id="types_dispositif_id"
+                        name="types_dispositif_id"
                         data-selected="{{ request('types_dispositif_id') }}"
                         class="form-select">
                     <option value="">-- Tous les types --</option>
@@ -102,7 +102,20 @@
 
                         @endif
                     </div>
-                    
+
+                    {{-- Badge Statut publication sur l'image --}}
+                    <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1">
+                        @if($dispositif->publicationEncours)
+                            <span class="badge bg-success shadow-sm">
+                                <i class="bi bi-check-circle me-1"></i> En ligne
+                            </span>
+                        @else
+                            <span class="badge bg-secondary shadow-sm">
+                                <i class="bi bi-pause-circle me-1"></i> Hors ligne
+                            </span>
+                        @endif
+                    </div>
+
                     {{-- Badge Statut sur l'image --}}
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge {{ $dispositif->etat === 'Neuf' ? 'bg-success' : ($dispositif->etat === 'Bon' ? 'bg-primary' : 'bg-warning') }}">
@@ -115,9 +128,9 @@
                     <div class="mb-2">
                         <small class="text-muted text-uppercase fw-bold">{{ $dispositif->type_dispositif->categorie->nom ?? '-' }}</small>
                     </div>
-                    
+
                     <p class="card-text text-muted small mb-3">
-                        {{ $dispositif->designation }} 
+                        {{ $dispositif->designation }}
                         @if($dispositif->numero_immatriculation)
                             <span class="badge bg-light text-dark border"># {{ $dispositif->numero_immatriculation }}</span>
                         @endif

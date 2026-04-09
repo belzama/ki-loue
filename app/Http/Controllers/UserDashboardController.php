@@ -16,12 +16,19 @@ class UserDashboardController extends Controller
         $today = Carbon::today();
         $user = auth()->user();
         $userId = $user->id;
-        
+
         return view('user.dashboard', [
             'user' => $user,
 
             // 📊 Dispositifs
             'totalMateriels' => Dispositif::where('user_id', $userId)->count(),
+            'totalEnLigne' => Dispositif::where('user_id', $userId)
+                ->whereHas('publications', function ($query) {
+                    $query->where('active', 1)
+                        ->where('date_debut', '<=', now())
+                        ->where('date_fin', '>=', now());
+                })
+                ->count(),
 
             // 📊 Publications
             'totalPublications' => Publication::whereHas('dispositif', function ($q) use ($userId) {
@@ -65,7 +72,12 @@ class UserDashboardController extends Controller
 
             // 🔝 Dispositifs de l’utilisateur
             'topDispositifs' => Dispositif::where('user_id', $userId)
-                ->withCount('reservations') // Utilise la relation hasManyThrough
+                ->withCount('reservations')
+                ->withSum(['publications as total_jours_publication' => function($query) {
+                    // COALESCE retourne 0 si la somme est NULL
+                    $query->select(DB::raw('COALESCE(SUM(DATEDIFF(LEAST(date_fin, CURRENT_DATE), date_debut)), 0)'))
+                        ->where('date_debut', '<=', now());
+                }], 'id')
                 ->orderByDesc('reservations_count')
                 ->limit(5)
                 ->get(),

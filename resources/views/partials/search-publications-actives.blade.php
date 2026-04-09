@@ -11,14 +11,14 @@
                         <div class="row g-3">
 
                             <div class="col-md-4">
-                                <label class="form-label">Pays</label>
+                                <label class="form-label fw-semibold">Pays</label>
                                 <select id="pays_id" name="pays_id"
                                         data-child="region_id"
                                         data-url="{{ url('regions/by-pays') }}/"
                                         class="form-select">
                                     <option value="" data-division="Région" data-sous-division="Préfecture">Tous</option>
                                     @foreach($pays as $p)
-                                        <option value="{{ $p->id }}" 
+                                        <option value="{{ $p->id }}"
                                             data-division="{{ $p->libelle_division }}"
                                             data-sous-division="{{ $p->libelle_sous_division }}"
                                             {{ (request('pays_id') == $p->id || (isset($country) && $country->id == $p->id)) ? 'selected' : '' }}>
@@ -29,8 +29,8 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label id="label_division" class="form-label">{{ $country?->libelle_division ?? 'Région' }}</label>
-                                <select id="region_id" name="region_id" 
+                                <label id="label_division" class="form-label fw-semibold">{{ $country?->libelle_division ?? 'Région' }}</label>
+                                <select id="region_id" name="region_id"
                                         data-child="departement_id"
                                         data-url="{{ url('departements/by-region') }}/"
                                         data-selected="{{ request('region_id') }}"
@@ -40,8 +40,8 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label id="label_sous_division" class="form-label">{{ $country?->libelle_sous_division ?? 'Préfecture' }}</label>
-                                <select id="departement_id" name="departement_id" 
+                                <label id="label_sous_division" class="form-label fw-semibold">{{ $country?->libelle_sous_division ?? 'Préfecture' }}</label>
+                                <select id="departement_id" name="departement_id"
                                         data-selected="{{ request('departement_id') }}"
                                         class="form-select">
                                     <option value="">Toutes</option>
@@ -49,15 +49,15 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Catégorie de matériel</label>
-                                <select id="categorie_id" 
+                                <label class="form-label fw-semibold">Catégorie de matériel</label>
+                                <select id="categorie_id"
                                         name="categorie_id"
                                         data-child="types_dispositif_id"
                                         data-url="{{ url('types_dispositif/by-categorie') }}/"
                                         class="form-select">
                                     <option value="">Tous</option>
                                     @foreach($categories as $cat)
-                                        <option value="{{ $cat->id }}" 
+                                        <option value="{{ $cat->id }}"
                                             {{ request('categorie_id') == $cat->id ? 'selected' : '' }}>
                                             {{ $cat->nom }}
                                         </option>
@@ -66,9 +66,9 @@
                             </div>
 
                             <div class="col-md-8">
-                                <label class="form-label">Type de matériel</label>
-                                <select id="types_dispositif_id" 
-                                        name="types_dispositif_id" 
+                                <label class="form-label fw-semibold">Type de matériel</label>
+                                <select id="types_dispositif_id"
+                                        name="types_dispositif_id"
                                         data-selected="{{ request('types_dispositif_id') }}"
                                         class="form-select">
                                     <option value="">Tous</option>
@@ -105,7 +105,7 @@
         @forelse($publications as $publication)
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm hover-lift transition-all">
-                    
+
                     {{-- Carousel --}}
                     <div id="carousel{{ $publication->id }}" class="carousel slide card-img-top" data-bs-ride="carousel">
                         <div class="carousel-inner rounded-top">
@@ -134,12 +134,12 @@
                         <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ $publication->dispositif->designation }}">
                             {{ $publication->dispositif->designation ?? '-' }}
                         </h6>
-                        
+
                         <div class="d-flex align-items-start gap-1 mb-3 text-muted" style="font-size: 0.85rem; min-height: 40px;">
                             <i class="bi bi-geo-alt-fill text-danger flex-shrink-0 mt-1"></i>
                             <span>
-                                {{ $publication->departement->nom ?? '' }}, 
-                                {{ $publication->departement->region->pays->libelle_division ?? '' }} 
+                                {{ $publication->departement->nom ?? '' }},
+                                {{ $publication->departement->region->pays->libelle_division ?? '' }}
                                 {{ $publication->departement->region->nom ?? '' }},
                                 {{ $publication->departement->region->pays->nom ?? '' }}
                             </span>

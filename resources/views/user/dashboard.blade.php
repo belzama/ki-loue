@@ -14,8 +14,8 @@
         </a>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
@@ -38,29 +38,14 @@
                             <i class="bi bi-megaphone fs-4"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="card-subtitle text-muted fw-semibold">Total publiés</h6>
-                            <h3 class="fw-bold mb-0">{{ $totalPublications }}</h3>
+                            <h6 class="card-subtitle text-muted fw-semibold">Matériels en ligne</h6>
+                            <h3 class="fw-bold mb-0">{{ $totalEnLigne }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="flex-shrink-0 bg-success-subtle text-success p-2 rounded-3">
-                            <i class="bi bi-check-circle fs-4"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="card-subtitle text-muted fw-semibold">Actifs</h6>
-                            <h3 class="fw-bold mb-0 text-success">{{ $activePublications }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 border-start border-danger border-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
@@ -68,8 +53,8 @@
                             <i class="bi bi-exclamation-triangle fs-4"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="card-subtitle text-muted fw-semibold">Expirés</h6>
-                            <h3 class="fw-bold mb-0 text-danger">{{ $expiredPublications }}</h3>
+                            <h6 class="card-subtitle text-muted fw-semibold">Matériels hors ligne</h6>
+                            <h3 class="fw-bold mb-0 text-success">{{ $totalMateriels - $totalEnLigne }}</h3>
                         </div>
                     </div>
                 </div>
@@ -88,14 +73,14 @@
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Solde réel</span>
                             <span class="fw-bold">
-                                {{ number_format($user->solde_reel, 0, ' ', ' ') }} 
+                                {{ number_format($user->solde_reel, 0, ' ', ' ') }}
                                 {{ $user->pays->devise->symbol ?? 'FCFA' }}
                             </span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Bonus</span>
                             <span class="fw-bold">
-                                + {{ number_format($user->solde_bonus, 0, ' ', ' ') }} 
+                                + {{ number_format($user->solde_bonus, 0, ' ', ' ') }}
                                 {{ $user->pays->devise->symbol ?? 'FCFA' }}
                             </span>
                         </div>
@@ -165,7 +150,7 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge rounded-pill bg-primary px-3">
-                                        {{ $d->reservations_count }}
+                                        {{ $d->reservations_count }} / {{ $d->total_jours_publication }} jours
                                     </span>
                                 </td>
                             </tr>

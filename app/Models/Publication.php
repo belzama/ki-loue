@@ -14,7 +14,7 @@ class Publication extends Model
         'date_debut' => 'date',
         'date_fin' => 'date',
     ];
-    
+
     protected $fillable = [
         'dispositif_id','departement_id','devise_id','ville','tarif_location','prix_publication','bonus_accorde','cout_publication','date_debut','date_fin','active'
     ];
@@ -26,14 +26,14 @@ class Publication extends Model
 
     // Dans App\Models\Publication.php
 
-public function getIsExpiredAttribute()
-{
-    return $this->date_fin->isPast();
-}
+    public function getIsExpiredAttribute()
+    {
+        return $this->date_fin->isPast();
+    }
 
-public function getIsActiveAttribute()
-{
-    // Une publication est active SEULEMENT si son statut est 1 ET qu'elle n'est pas expirée
-    return $this->active == 1 && !$this->is_expired;
-}
+    public function getIsActiveAttribute()
+    {
+        // Une publication est active SEULEMENT si son statut est 1 ET qu'elle n'est pas expirée
+        return $this->active == 1 && !$this->is_expired;
+    }
 }

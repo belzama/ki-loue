@@ -16,7 +16,7 @@
     </div>
 @endif
 
-<form method="POST" 
+<form method="POST"
       id="publicationForm"
       action="{{ $isEdit ? route('user.publications.update', $publication) : route('user.publications.store') }}">
     @csrf
@@ -35,7 +35,7 @@
     @else
 
         <div class="mb-3">
-            <label class="form-label">
+            <label class="form-label fw-bold">
                 Matériel <span class="text-danger">*</span>
             </label>
 
@@ -75,29 +75,29 @@
     {{-- LOCALISATION --}}
     <div class="row g-3 mb-3">
         <div class="col-md-4">
-            <label>Pays</label>
-            <select id="pays_id" 
+            <label class="form-label fw-semibold">Pays</label>
+            <select id="pays_id"
                     name="pays_id"
                     data-child="region_id"
                     data-url="{{ url('regions/by-pays') }}/"
                     class="form-select">
                 <option value="" data-division="Région" data-sous-division="Préfecture">Sélectionner</option>
                 @foreach($pays as $p)
-                    <option value="{{ $p->id }}" 
+                    <option value="{{ $p->id }}"
                         data-division="{{ $p->libelle_division }}"
                         data-sous-division="{{ $p->libelle_sous_division }}"
                         {{ old('pays_id', $dispositif->user->pays_id ?? $user->pays_id ?? '') == $p->id ? 'selected' : '' }}>
                         {{ $p->nom }}
                     </option>
                 @endforeach
-            </select>            
+            </select>
             <div class="invalid-feedback" id="error-pays_id"></div>
         </div>
 
         <div class="col-md-4">
-            <label id="label_division">{{ $dispositif->user->pays->libelle_division ?? $user->pays->libelle_division ?? 'Région' }}</label>                        
-            <select id="region_id" 
-                    name="region_id" 
+            <label class="form-label fw-semibold" id="label_division">{{ $dispositif->user->pays->libelle_division ?? $user->pays->libelle_division ?? 'Région' }}</label>
+            <select id="region_id"
+                    name="region_id"
                     data-child="departement_id"
                     data-url="{{ url('departements/by-region') }}/"
                     data-selected="{{ old('region_id', $publication->region_id ?? '') }}"
@@ -108,9 +108,9 @@
         </div>
 
         <div class="col-md-4">
-            <label id="label_sous_division">{{ $dispositif->user->pays->libelle_sous_division ?? $user->pays->libelle_sous_division ?? 'Préfecture' }} <span class="text-danger">*</span></label>                        
-            <select id="departement_id" 
-                    name="departement_id" 
+            <label class="form-label fw-semibold" id="label_sous_division">{{ $dispositif->user->pays->libelle_sous_division ?? $user->pays->libelle_sous_division ?? 'Préfecture' }} <span class="text-danger">*</span></label>
+            <select id="departement_id"
+                    name="departement_id"
                     data-selected="{{ old('departement_id', $publication->departement_id ?? '') }}"
                     class="form-select">
                 <option value="">Sélectionner</option>
@@ -118,53 +118,49 @@
             <div class="invalid-feedback" id="error-departement_id"></div>
         </div>
     </div>
-    
-    {{-- VILLE / LOCALITE --}}
-    <div class="mb-3">
-        <label>Ville/Localité <span class="text-danger">*</span></label>
-        <input type="text" id="ville" name="ville" class="form-control"
-                   value="{{ old('ville', $publication->ville ?? '') }}">
-        <div class="invalid-feedback" id="error-ville"></div>
+
+    {{-- VILLE / LOCALITE & TATIF--}}
+    <div class="row g-3 mb-3">
+        {{-- VILLE / LOCALITE --}}
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Ville/Localité <span class="text-danger">*</span></label>
+            <input type="text" id="ville" name="ville" class="form-control"
+                       value="{{ old('ville', $publication->ville ?? '') }}">
+            <div class="invalid-feedback" id="error-ville"></div>
+        </div>
+
+        {{-- TARIF & DEVISE --}}
+        @if (!$isEdit)
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Tarif journalier <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    {{-- Champ visuel avec formateur --}}
+                    <input type="text"
+                           id="tarif_location_mask"
+                           class="form-control fw-semibold"
+                           value="{{ number_format(old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0), 0, ',', ' ') }}"
+                        {{ $isEdit ? 'disabled' : '' }}>
+
+                    {{-- Champ réel envoyé au serveur --}}
+                    <input type="hidden"
+                           name="tarif_location"
+                           id="tarif_location"
+                           value="{{ old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0) }}">
+
+                    <span class="input-group-text fw-bold" id="display_devise">
+                            {{ $user->pays->devise->symbol ?? 'FCFA' }}
+                        </span>
+                </div>
+                <div class="invalid-feedback" id="error-tarif_location"></div>
+            </div>
+        @endif
     </div>
 
     @if (!$isEdit)
-        {{-- TARIF & DEVISE --}}
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label>Tarif journalier <span class="text-danger">*</span></label>
-                <input type="number"
-                    step="0.01"
-                    name="tarif_location"
-                    id="tarif_location"
-                    class="form-control"
-                    value="{{ old('tarif_location', $publication->tarif_location ?? $dispositif->type_dispositif->tarif_min ?? 0) }}"
-                    {{ $isEdit ? 'disabled' : '' }}
-                    >
-                    <div class="invalid-feedback" id="error-tarif_location"></div>
-            </div>
-
-            <div class="col-md-6">
-                <label>Devise <span class="text-danger">*</span></label>
-                <select name="devise_id"
-                        class="form-select"
-                        {{ $isEdit ? 'disabled' : '' }}
-                        >
-                    <option value="">Sélectionner</option>
-                    @foreach($devises as $devise)
-                        <option value="{{ $devise->id }}"
-                            {{ old('devise_id', $publication->devise_id ?? $user->pays->devise_id ?? '') == $devise->id ? 'selected' : '' }}>
-                            {{ $devise->libelle }}
-                        </option>
-                    @endforeach
-                </select>
-                <div class="invalid-feedback" id="error-devise_id"></div>
-            </div>
-        </div>
-
         {{-- DATES --}}
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label>Date de début <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">Date de début <span class="text-danger">*</span></label>
                 <input type="date"
                     name="date_debut"
                     id="date_debut"
@@ -176,7 +172,7 @@
             </div>
 
             <div class="col-md-6">
-                <label>Date de fin <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">Date de fin <span class="text-danger">*</span></label>
                 <input type="date"
                     name="date_fin"
                     id="date_fin"
@@ -190,20 +186,20 @@
         {{-- CALCUL --}}
         <div class="row g-3 mb-3">
             <div class="col-md-3">
-                <label>Durée (jours)</label>
-                <input type="text" id="nb_jours" name="nb_jours" class="form-control bg-light readonly-field" readonly>
+                <label class="form-label fw-semibold">Durée (jours)</label>
+                <input type="text" id="nb_jours" name="nb_jours" class="form-control bg-light readonly-field fw-bold" readonly>
             </div>
             <div class="col-md-3">
-                <label>Prix publication</label>
-                <input type="text" id="prix_publication" name="prix_publication" class="form-control bg-light readonly-field" readonly>
+                <label class="form-label fw-semibold">Prix publication</label>
+                <input type="text" id="prix_publication" name="prix_publication" class="form-control bg-light readonly-field fw-bold" readonly>
             </div>
             <div class="col-md-3">
-                <label>Bonus accordé</label>
-                <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control bg-light readonly-field" readonly>
+                <label class="form-label fw-semibold">Bonus accordé</label>
+                <input type="text" id="bonus_accorde" name="bonus_accorde" class="form-control bg-light readonly-field fw-bold" readonly>
             </div>
             <div class="col-md-3">
-                <label>Coût publication</label>
-                <input type="text" id="cout_publication" name="cout_publication" class="form-control bg-font-weight-bold readonly-field" readonly>
+                <label class="form-label fw-semibold">Coût publication</label>
+                <input type="text" id="cout_publication" name="cout_publication" class="form-control bg-font-weight-bold readonly-field fw-bold" readonly>
             </div>
         </div>
 
@@ -270,7 +266,7 @@
     </div>
 </form>
 
-
+@include('user.publications.confirm_modal')
 @section('scripts')
 <script src="{{ asset('js/dependent-select.js') }}"></script>
 
@@ -325,12 +321,12 @@ async function chargerTarifs(pays_id)
             credentials: 'same-origin'
         });
 
-        if (!res.ok) 
+        if (!res.ok)
             throw new Error("HTTP " + res.status);
 
         const data = await res.json();
         tarifs = Array.isArray(data) ? data : [];
-        
+
         console.log("Tarifs chargés:", tarifs);
 
         calculer();
@@ -371,13 +367,23 @@ function appliquerContraintesDates()
 }
 
 /* =================================
+   Formatage des milliers (Espace)
+================================= */
+function formatMoney(amount) {
+    return new Intl.NumberFormat('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+/* =================================
    Calcul principal
 ================================= */
 function calculer()
 {
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
     const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
-    
+
     // Si on est en création et qu'aucun tarif n'est encore dans l'input, on met le min
     if (tarifInput && !tarifInput.value) {
         tarifInput.value = currentTarifMin;
@@ -385,7 +391,7 @@ function calculer()
 
     const date_debut = dateDebutInput?.value;
     const date_fin = dateFinInput?.value;
-    
+
     // Validation de base
     if (!tarifSaisi || !date_debut || !date_fin || tarifs.length === 0)
         return;
@@ -414,7 +420,7 @@ function calculer()
                     <td>${t.designation} (${t.tranche_debut} - ${t.tranche_fin})</td>
                     <td>${joursDansTranche}</td>
                     <td>${(t.tranche_valeur * 100).toFixed(2)} %</td>
-                    <td>${montantTranche.toFixed(2)}</td>
+                    <td>${formatMoney(montantTranche)}</td>
                 </tr>
             `;
         }
@@ -433,9 +439,9 @@ function calculer()
     const bonus = Math.min(prixTotal, SOLDE_BONUS);
     const cout = prixTotal - bonus;
 
-    document.getElementById('prix_publication').value = prixTotal.toFixed(2);
-    document.getElementById('bonus_accorde').value = bonus.toFixed(2);
-    document.getElementById('cout_publication').value = cout.toFixed(2);
+    document.getElementById('prix_publication').value = formatMoney(prixTotal);
+    document.getElementById('bonus_accorde').value = formatMoney(bonus);
+    document.getElementById('cout_publication').value = formatMoney(cout);
 
     calculerSimulation();
 }
@@ -449,7 +455,7 @@ function getPaliersDynamiques() {
 
     if (!joursActuels) return [];
 
-    const trancheActuelle = tarifs.find(t => 
+    const trancheActuelle = tarifs.find(t =>
         joursActuels >= t.tranche_debut && joursActuels <= t.tranche_fin
     );
 
@@ -468,109 +474,95 @@ function getPaliersDynamiques() {
 }
 
 function calculerSimulation() {
-
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
     const date_debut = dateDebutInput?.value;
+    const joursActuels = parseInt(document.getElementById("nb_jours")?.value) || 0;
 
-    // 🔴 Conditions bloquantes
-    if (!tarifSaisi || !date_debut || tarifs.length === 0) {
-        bloc.style.display = 'none';
+    if (!tarifSaisi || !date_debut || tarifs.length === 0 || joursActuels <= 0) {
+        if(bloc) bloc.style.display = 'none';
         return;
     }
 
     const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
 
-    const paliers = getPaliersDynamiques();
+    // 1. Trouver la tranche actuelle
+    const trancheActuelle = tarifs.find(t => joursActuels >= t.tranche_debut && joursActuels <= t.tranche_fin);
 
-    console.log("DEBUG paliers:", paliers);
+    // 2. Identifier la toute dernière tranche pour ne pas l'ignorer
+    const maxTrancheGlobale = Math.max(...tarifs.map(t => t.tranche_fin));
 
-    // 🔴 Aucun palier → on cache
-    if (!paliers || paliers.length === 0) {
+    let paliers = [];
+
+    // Ajout de la fin de la tranche actuelle si on n'y est pas encore (Point 1 & 2)
+    if (trancheActuelle && joursActuels < trancheActuelle.tranche_fin) {
+        paliers.push(trancheActuelle.tranche_fin);
+    }
+
+    // Ajout des fins de toutes les tranches supérieures (incluant la dernière)
+    tarifs.forEach(t => {
+        if (t.tranche_fin > (trancheActuelle?.tranche_fin || joursActuels)) {
+            paliers.push(t.tranche_fin);
+        }
+    });
+
+    // Supprimer les doublons et trier
+    paliers = [...new Set(paliers)].sort((a, b) => a - b);
+
+    if (paliers.length === 0) {
         bloc.style.display = 'none';
-        tableBody.innerHTML = '';
         return;
     }
 
     bloc.style.display = 'block';
-
     let html = '';
-    let meilleurPalier = null;
-    let maxEconomie = 0;
+    let resultats = [];
 
-    const dateDebutObj = new Date(date_debut);
-    const dateDebutStr = dateDebutObj.toLocaleDateString('fr-FR');
-
-    const resultats = [];
-
-    // 🔹 Calcul pour chaque palier
     paliers.forEach(nbJours => {
-
         let prixReduit = 0;
-
         tarifs.forEach(t => {
-
-            // ignorer les tranches hors limite
-            if (t.tranche_debut > 31) return;
-
-            const trancheFinEffective = Math.min(t.tranche_fin, 31);
-            
-            // pas concerné par cette tranche
             if (nbJours < t.tranche_debut) return;
-
-            const debut = t.tranche_debut;
-            const fin = trancheFinEffective;
-            
-            // si aucune intersection avec nbJours
-            if (nbJours < debut) return;
-
-            const joursDansTranche = Math.min(nbJours, fin) - debut + 1;
-
+            const joursDansTranche = Math.min(nbJours, t.tranche_fin) - t.tranche_debut + 1;
             if (joursDansTranche > 0) {
                 prixReduit += joursDansTranche * (baseCalcul * t.tranche_valeur);
             }
         });
 
-        const prixNormal = nbJours * baseCalcul;
-        const economie = prixNormal - prixReduit;
-        const pourcentage = prixNormal > 0 ? (economie / prixNormal) * 100 : 0;
-
-        if (economie > maxEconomie) {
-            maxEconomie = economie;
-            meilleurPalier = nbJours;
-        }
-
+        const prixParJour = prixReduit / nbJours;
         const d = new Date(date_debut);
         d.setDate(d.getDate() + nbJours);
 
         resultats.push({
             nbJours,
             prixReduit,
-            prixNormal,
-            economie,
-            pourcentage,
+            prixParJour,
+            isFinTrancheActuelle: (trancheActuelle && nbJours === trancheActuelle.tranche_fin),
             dateFin: d.toLocaleDateString('fr-FR')
         });
     });
 
-    // 🔹 Génération HTML
-    resultats.forEach(r => {
+    // 3. Identifier le meilleur choix (coût journalier le plus bas)
+    const meilleurPrixParJour = Math.min(...resultats.map(r => r.prixParJour));
 
-        const isBest = r.nbJours === meilleurPalier;
+    resultats.forEach(r => {
+        const isMeilleur = r.prixParJour === meilleurPrixParJour;
+        let rowClass = '';
+        let badge = '';
+
+        if (r.isFinTrancheActuelle) {
+            rowClass = 'table-warning';
+            badge = '<span class="badge bg-warning text-dark ms-1">Fin de tranche actuelle</span>';
+        } else if (isMeilleur) {
+            rowClass = 'table-success fw-semibold';
+            badge = '<span class="badge bg-success ms-1">✨ Meilleur rapport prix/jour</span>';
+        }
 
         html += `
-            <tr class="${isBest ? 'table-success fw-bold' : ''}">
-                <td>${dateDebutStr}</td>
+            <tr class="${rowClass}">
+                <td>${new Date(date_debut).toLocaleDateString('fr-FR')}</td>
                 <td>${r.dateFin}</td>
-                <td>
-                    ${r.nbJours}
-                    ${isBest ? '<span class="badge bg-success ms-1">🔥 Recommandé</span>' : ''}
-                </td>
-                <td>${r.prixReduit.toLocaleString()}</td>
-                <!--td class="text-success">
-                    -${r.pourcentage.toFixed(2)}%
-                </td-->
-            </tr>
-        `;
+                <td>${r.nbJours} jours ${badge}</td>
+                <td class="fw-semibold">${formatMoney(r.prixReduit)}</td>
+            </tr>`;
     });
 
     tableBody.innerHTML = html;
@@ -585,20 +577,44 @@ tarifInput?.addEventListener('input', () => {
     calculerSimulation();
 });
 
-// Écouteur sur le changement de matériel
+const maskInput = document.getElementById('tarif_location_mask');
+const realInput = document.getElementById('tarif_location');
+
+if (maskInput) {
+    maskInput.addEventListener('input', function(e) {
+        // 1. On ne garde que les chiffres
+        let rawValue = this.value.replace(/\D/g, '');
+
+        // 2. On met à jour le champ caché (pour le serveur et vos calculs JS)
+        realInput.value = rawValue;
+
+        // 3. On formate l'affichage du masque
+        if (rawValue) {
+            this.value = new Intl.NumberFormat('fr-FR').format(rawValue);
+        } else {
+            this.value = '';
+        }
+
+        // 4. On relance les calculs de simulation
+        if (typeof calculer === "function") {
+            calculer();
+            calculerSimulation();
+        }
+    });
+}
+
+// Mise à jour lors du changement de matériel (Select)
 dispositifSelect?.addEventListener('change', function() {
-    // 1. Récupérer le tarif min du matériel sélectionné via l'attribut data
     const selectedOption = this.options[this.selectedIndex];
     const nouveauTarifMin = parseFloat(selectedOption.getAttribute('data-tarif')) || 0;
-    
-    // 2. Mettre à jour la variable globale et le champ de saisie du tarif
+
     currentTarifMin = nouveauTarifMin;
-    if(tarifInput) {
-        tarifInput.value = currentTarifMin;
+
+    if(maskInput) {
+        maskInput.value = new Intl.NumberFormat('fr-FR').format(nouveauTarifMin);
+        realInput.value = nouveauTarifMin;
     }
 
-    // 3. Déclencher les calculs
-    console.log("Matériel changé, nouveau tarif min:", currentTarifMin);
     calculer();
     calculerSimulation();
 });
@@ -633,6 +649,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     calculer();
 
+});
+
+/* =================================
+   Gestion du Modal de Confirmation
+================================= */
+document.getElementById('publicationForm').addEventListener('submit', function(e) {
+    // Si c'est un mode édition, on laisse passer sans modal ou on adapte
+    if ("{{ $isEdit }}" == "1") return;
+
+    e.preventDefault(); // On bloque l'envoi direct
+
+    // Remplir le résumé dans le modal
+    document.getElementById('resume_jours').innerText = document.getElementById('nb_jours').value + " jours";
+    document.getElementById('resume_prix').innerText = document.getElementById('prix_publication').value;
+    document.getElementById('resume_bonus').innerText = "-" + document.getElementById('bonus_accorde').value;
+    document.getElementById('resume_cout').innerText = document.getElementById('cout_publication').value;
+
+    const myModal = new bootstrap.Modal(document.getElementById('confirmPubModal'));
+    myModal.show();
+});
+
+// Action finale du bouton dans le modal
+document.getElementById('confirmFinalBtn').addEventListener('click', function() {
+    document.getElementById('publicationForm').submit();
 });
 
 </script>
