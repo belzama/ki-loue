@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TypeDispositifParam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +49,7 @@ class DispositifController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validation stricte
+        // 1. VALIDATION
         $validatedData = $request->validate([
             'types_dispositif_id'    => 'required|exists:types_dispositifs,id',
             'numero_immatriculation' => 'nullable|string|max:150',
@@ -56,46 +57,82 @@ class DispositifController extends Controller
             'modele'                 => 'nullable|string|max:150',
             'description'            => 'nullable|string',
             'etat'                   => 'required|in:Neuf,Bon,Révisé',
-            'photos'                 => 'required|array|min:1',
-            'photos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
-            'params'                 => 'nullable|array',
-            'params.*'               => 'nullable|string',
+
+            'photos'   => 'required|array|min:1',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
+
+            // 🔥 NOUVEAU FORMAT PARAMS
+            'params' => ['nullable', 'array'],
+            'params.*.value' => ['nullable'],
+            'params.*.unit'  => ['nullable', 'string'],
         ]);
 
         return DB::transaction(function () use ($request, $validatedData) {
-            // 2. Génération de la désignation
-            $typeDispositif = TypesDispositif::findOrFail($validatedData['types_dispositif_id']);
-            $designation = $this->generateDesignation($typeDispositif, $request->all());
 
-            // 3. Création du dispositif
+            // 2. TYPE
+            $typeDispositif = TypesDispositif::findOrFail($validatedData['types_dispositif_id']);
+
+            // 3. META PARAMS
+            $paramMeta = TypeDispositifParam::whereIn(
+                'id',
+                array_keys($request->input('params', []))
+            )->get()->keyBy('id');
+
+            // 4. DESIGNATION
+            $designation = $this->generateDesignation(
+                $typeDispositif,
+                $request->all(),
+                [
+                    'params' => $request->input('params', []),
+                    'param_meta' => $paramMeta
+                ]
+            );
+
+            // 5. CREATE DISPOSITIF
             $dispositif = Dispositif::create(array_merge($validatedData, [
                 'user_id'     => Auth::id(),
                 'designation' => $designation
             ]));
 
-            // 4. Enregistrement des paramètres dynamiques
+            // ======================================================
+            // 6. SAVE PARAMS (CORRIGÉ ICI)
+            // ======================================================
             if ($request->filled('params')) {
-                foreach ($request->params as $paramId => $value) {
-                    if (is_numeric($paramId) && !empty($value)) {
-                        $dispositif->params()->create([
-                            'type_dispositif_param_id' => $paramId,
-                            'value'                    => $value
-                        ]);
-                    }
+
+                foreach ($request->input('params') as $paramId => $param) {
+
+                    if (!is_numeric($paramId)) continue;
+
+                    $value = $param['value'] ?? null;
+
+                    if ($value === null || $value === '') continue;
+
+                    $dispositif->params()->create([
+                        'type_dispositif_param_id' => $paramId,
+                        'value' => $value
+                    ]);
                 }
             }
 
-            // 5. Gestion des photos
+            // 7. PHOTOS
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $photo) {
                     $path = $photo->store('dispositifs', 'public');
-                    $dispositif->photos()->create(['path' => $path]);
+
+                    $dispositif->photos()->create([
+                        'path' => $path
+                    ]);
                 }
             }
 
             $msg = 'Dispositif créé avec succès.';
+
             return $request->ajax()
-                ? response()->json(['success' => true, 'message' => $msg, 'redirect' => route('user.dispositifs.index')])
+                ? response()->json([
+                    'success' => true,
+                    'message' => $msg,
+                    'redirect' => route('user.dispositifs.index')
+                ])
                 : redirect()->route('user.dispositifs.index')->with('success', $msg);
         });
     }
@@ -161,16 +198,52 @@ class DispositifController extends Controller
     /**
      * Helper pour générer le nom du matériel proprement
      */
-    private function generateDesignation($type, $data)
+    private function generateDesignation($type, $requestData, $extraData = [])
     {
         $parts = [];
+
+        // 🔹 valeurs des params (id => value)
+        $params = $extraData['params'] ?? [];
+
+        // 🔹 mapping des paramètres DB (id => object)
+        $paramMeta = $extraData['param_meta'] ?? [];
+
+        // ======================================================
+        // 1. CHAMPS SIMPLES (marque, model, etc.)
+        // ======================================================
         if (!empty($type->nom_dispositif_fields)) {
-            $fields = explode(',', $type->nom_dispositif_fields);
+
+            $fields = array_map('trim', explode(',', $type->nom_dispositif_fields));
+
             foreach ($fields as $field) {
-                $val = trim($data[trim($field)] ?? '');
-                if ($val) $parts[] = $val;
+
+                $value = $requestData[$field] ?? null;
+
+                if (!empty($value)) {
+                    $parts[] = trim($value);
+                }
             }
         }
+
+        // ======================================================
+        // 2. PARAMÈTRES DYNAMIQUES (volume, etc.)
+        // ======================================================
+        foreach ($params as $paramId => $paramData) {
+
+            if (empty($paramData['value'])) continue;
+
+            $value = trim((string) $paramData['value']);
+
+            // récupération métadonnée (unit)
+            $meta = $paramMeta[$paramId] ?? null;
+            $unit = $meta->numeric_value_unit ?? null;
+
+            $parts[] = $unit ? "{$value} {$unit}" : $value;
+        }
+
+        // ======================================================
+        // 3. RESULTAT FINAL
+        // ======================================================
         return trim($type->nom . ' ' . implode(' ', $parts));
     }
 
@@ -185,7 +258,7 @@ class DispositifController extends Controller
         // 1. SUPPRESSION : On enlève les photos qui ont été "supprimées" (clic sur la corbeille)
         // On récupère les IDs actuellement en base pour ce dispositif
         $currentPhotoIdsInDb = $dispositif->photos()->pluck('id')->toArray();
-        
+
         foreach ($currentPhotoIdsInDb as $dbId) {
             // Si l'ID en base n'est plus présent dans le formulaire, on le supprime physiquement
             if (!in_array($dbId, $existingPhotoIds)) {
@@ -209,7 +282,7 @@ class DispositifController extends Controller
                     if ($existingPhoto) {
                         // On supprime l'ancien fichier du disque
                         Storage::disk('public')->delete($existingPhoto->path);
-                        
+
                         // On met à jour le chemin sur la MÊME ligne en base de données
                         $path = $file->store('dispositifs', 'public');
                         $existingPhoto->update(['path' => $path]);
@@ -249,7 +322,7 @@ class DispositifController extends Controller
         return redirect()->route('user.dispositifs.index')->with('success', 'Dispositif supprimé avec succès');
     }
 
-    public function getTarifMin(Dispositif $dispositif) 
+    public function getTarifMin(Dispositif $dispositif)
     {
         return response()->json([
             'tarif_min' => $dispositif->type_dispositif->tarif_min

@@ -358,7 +358,7 @@ function appliquerContraintesDates()
     dateFinInput.min = debut;
 
     const maxDate = new Date(debut);
-    maxDate.setDate(maxDate.getDate() + 365);
+    maxDate.setDate(maxDate.getDate() + 31);
 
     dateFinInput.max = maxDate.toISOString().split('T')[0];
 

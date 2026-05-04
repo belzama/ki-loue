@@ -2,15 +2,14 @@
     $isEdit = isset($dispositif);
 @endphp
 
-{{-- Affichage erreurs --}}
 @if($errors->any())
-<div class="alert alert-danger">
-    <ul class="mb-0">
-        @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
 @endif
 
 <div id="global-errors" class="alert alert-danger" style="display:none;">
@@ -21,15 +20,16 @@
       action="{{ $isEdit ? route('user.dispositifs.update', $dispositif) : route('user.dispositifs.store') }}"
       method="POST"
       enctype="multipart/form-data">
+
     @csrf
     @if($isEdit)
         @method('PUT')
     @endif
 
-    {{-- Catégorie & Type --}}
+    {{-- CATEGORIE / TYPE --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
-            <label class="form-label fw-semibold">Catégorie de matériel <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Catégorie <span class="text-danger">*</span></label>
             <select id="categorie_id"
                     name="categorie_id"
                     data-child="types_dispositif_id"
@@ -47,83 +47,73 @@
         </div>
 
         <div class="col-md-6">
-            <label class="form-label fw-semibold">Type de matériel <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
             <select id="types_dispositif_id"
                     name="types_dispositif_id"
                     data-selected="{{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') }}"
-                    class="form-select"
-                    >
+                    class="form-select">
                 <option value="">Sélectionner</option>
             </select>
             <div class="invalid-feedback" id="error-types_dispositif_id"></div>
         </div>
     </div>
 
-    {{-- Marque & modèle --}}
+    {{-- MARQUE / MODELE --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <label class="form-label fw-semibold">Marque</label>
             <input type="text" id="marque" name="marque" class="form-control"
                    value="{{ old('marque', $dispositif->marque ?? '') }}">
-            <div class="invalid-feedback" id="error-marque"></div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label fw-semibold">Modèle</label>
             <input type="text" id="modele" name="modele" class="form-control"
                    value="{{ old('modele', $dispositif->modele ?? '') }}">
-            <div class="invalid-feedback" id="error-modele"></div>
         </div>
     </div>
 
-    {{-- Paramètres dynamiques --}}
+    {{-- PARAMETRES DYNAMIQUES --}}
     <div id="params-container" class="mt-3"></div>
 
-    {{-- Etat --}}
+    {{-- ETAT --}}
     <div class="mb-3">
         <label class="form-label fw-semibold">Etat <span class="text-danger">*</span></label>
-        <div id="etat" class="d-flex gap-4">
+        <div class="d-flex gap-4">
             @foreach(['Neuf','Bon','Révisé'] as $etat)
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="etat"
-                       id="etat_{{ strtolower($etat) }}"
-                       value="{{ $etat }}"
-                       {{ old('etat',$dispositif->etat ?? 'Neuf') == $etat ? 'checked' : '' }}>
-                <label class="form-check-label" for="etat_{{ strtolower($etat) }}">
-                    {{ $etat }}
-                </label>
-            </div>
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="etat"
+                           value="{{ $etat }}"
+                        {{ old('etat',$dispositif->etat ?? 'Neuf') == $etat ? 'checked' : '' }}>
+                    <label class="form-check-label">{{ $etat }}</label>
+                </div>
             @endforeach
         </div>
-        <div class="invalid-feedback" id="error-etat"></div>
     </div>
 
-    {{-- Photos --}}
+    {{-- PHOTOS --}}
     <div class="mb-3">
         <label class="form-label fw-semibold">Photos</label>
-        <div id="photos-container" name="photos" class="row g-3"></div>
-        <div class="invalid-feedback" id="error-photos"></div>
+        <div id="photos-container" class="row g-3"></div>
     </div>
 
-    <div id="progressContainer" style="display:none; margin-bottom: 20px;">
-        <div class="progress" style="height: 25px;">
-            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                 role="progressbar" style="width: 0%;">0%</div>
+    {{-- PROGRESS --}}
+    <div id="progressContainer" style="display:none;">
+        <div class="progress" style="height:25px;">
+            <div id="progressBar" class="progress-bar bg-success">0%</div>
         </div>
-        <small id="progressStatus" class="text-muted text-center d-block">Téléchargement en cours...</small>
     </div>
 
-    <div class="mt-3">
-        <button type="submit" id="submitBtn" class="btn btn-success">
-            {{ $isEdit ? 'Enregistrer les modifications' : 'Créer le matériel' }}
-        </button>
-        <a href="{{ route('user.dispositifs.index') }}" class="btn btn-secondary">Annuler</a>
-    </div>
+    <button type="submit" id="submitBtn" class="btn btn-success">
+        {{ $isEdit ? 'Modifier' : 'Créer' }}
+    </button>
+
 </form>
 
 @include('user.dispositifs.confirm_modal')
+
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="{{ asset('js/dependent-select.js') }}"></script>
@@ -138,8 +128,24 @@
         const baseUrl = "{{ url('/') }}";
 
         // Données existantes (Blade)
-        const existingParams = {!! json_encode(isset($dispositif) ? $dispositif->params->pluck('value','type_dispositif_param_id') : []) !!};
-        const existingPhotos = {!! json_encode(isset($dispositif) ? $dispositif->photos->map(fn($p) => ['id'=>$p->id,'url'=>asset('storage/'.$p->path)])->values() : []) !!};
+        const existingParams = {!! json_encode(
+            isset($dispositif)
+                ? $dispositif->params->mapWithKeys(function ($p) {
+                    return [$p->type_dispositif_param_id => [
+                        'value' => $p->value,
+                        'unit' => $p->typeDispositifParam->numeric_value_unit ?? null
+                    ]];
+                })
+                : []
+        ) !!};
+
+        const existingPhotos = {!! json_encode(
+            isset($dispositif)
+            ? $dispositif->photos->map(fn($p) => [
+                'id'=>$p->id,
+                'url'=>asset('storage/'.$p->path)
+                ])->values() : []
+        ) !!};
 
         // --- 1. RENDU DES PHOTOS ---
         function renderPhotoInputs(maxPhotos) {
@@ -169,77 +175,75 @@
 
         // --- 2. CHARGEMENT DYNAMIQUE (API) ---
         async function loadParams(typeId) {
+
             if (!typeId) {
                 container.empty();
-                photosContainer.empty();
                 return;
             }
 
-            // Affichage du loader
-            const loaderHtml = `
-            <div class="text-center my-3 loader-dynamic">
-                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                <span class="ms-2 text-muted small">Chargement des spécifications...</span>
-            </div>`;
-            container.html(loaderHtml);
-            photosContainer.html(loaderHtml);
+            container.html(`<div>Chargement...</div>`);
 
             try {
                 const res = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
-                if (!res.ok) throw new Error('Erreur réseau');
                 const data = await res.json();
 
-                // Rendu Photos
                 renderPhotoInputs(data.nb_max_photo ?? 4);
 
-                // Rendu Paramètres
                 container.empty();
-                if (data.params && data.params.length > 0) {
-                    data.params.forEach(param => {
-                        const value = existingParams[param.id] ?? '';
-                        const inputName = `params[${param.id}]`;
-                        const inputId = `param_${param.id}`;
-                        let inputHtml = '';
 
-                        if (param.list_values) {
-                            inputHtml = `<select class="form-select" name="${inputName}" id="${inputId}">
-                            <option value="">Sélectionner</option>
-                            ${param.list_values.split(',').map(v => {
-                                let val = v.trim();
-                                return `<option value="${val}" ${val == value ? 'selected' : ''}>${val}</option>`;
-                            }).join('')}
-                        </select>`;
-                        } else {
-                            let inputType = (['int', 'decimal'].includes(param.value_type)) ? 'number' : (param.value_type === 'date' ? 'date' : 'text');
-                            if (param.numeric_value_unit) {
-                                inputHtml = `<div class="input-group">
-                                <input type="${inputType}" class="form-control" name="${inputName}" id="${inputId}" value="${value}" ${param.value_type === 'decimal' ? 'step="0.01"' : ''}>
-                                <span class="input-group-text">${param.numeric_value_unit}</span>
-                            </div>`;
-                            } else {
-                                inputHtml = `<input type="${inputType}" class="form-control" name="${inputName}" id="${inputId}" value="${value}" ${param.value_type === 'decimal' ? 'step="0.01"' : ''}>`;
-                            }
-                        }
+                data.params.forEach(param => {
 
-                        container.append(`
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold" for="${inputId}">
-                                ${param.label || param.name}
-                                ${(param.numeric_value_unit && param.numeric_value_unit !== 'null')
-                                                ? `<span class="text-muted small">(${param.numeric_value_unit})</span>`
-                                                : ''}
-                                ${param.required ? '<span class="text-danger">*</span>' : ''}
-                            </label>
-                            ${inputHtml}
-                            <div class="invalid-feedback" id="error-params_${param.id}"></div>
-                        </div>`);
-                    });
-                } else {
-                    container.html('<p class="text-muted small">Aucun paramètre spécifique.</p>');
-                }
+                    const paramData = existingParams[param.id] ?? {};
+                    const value = paramData.value ?? '';
+                    const unit = param.numeric_value_unit ?? null;
+
+                    const inputId = `param_${param.id}`;
+                    const isNumeric = ['int','decimal'].includes(param.value_type);
+
+                    let inputName = `params[${param.id}][value]`;
+                    let inputHtml = '';
+
+                    if (param.list_values) {
+
+                        inputHtml = `
+                    <select name="${inputName}" class="form-select">
+                        <option value="">Sélectionner</option>
+                        ${param.list_values.split(',').map(v =>
+                            `<option value="${v.trim()}" ${v.trim()==value?'selected':''}>${v.trim()}</option>`
+                        ).join('')}
+                    </select>`;
+
+                    } else {
+
+                        let type = isNumeric ? 'number' :
+                            param.value_type === 'date' ? 'date' :
+                                param.value_type === 'datetime' ? 'datetime-local' : 'text';
+
+                        inputHtml = `
+                    <div class="input-group">
+                        <input type="${type}"
+                               class="form-control"
+                               name="${inputName}"
+                               value="${value}"
+                               ${param.value_type==='decimal'?'step="0.01"':''}>
+                        ${unit ? `<span class="input-group-text">${unit}</span>` : ''}
+                    </div>
+
+                    ${unit ? `<input type="hidden" name="params[${param.id}][unit]" value="${unit}">` : ''}`;
+                    }
+
+                    container.append(`
+                <div class="mb-3">
+                    <label class="form-label">
+                        ${param.label || param.name}
+                        ${unit ? `(${unit})` : ''}
+                    </label>
+                    ${inputHtml}
+                </div>`);
+                });
+
             } catch (e) {
-                container.html('<p class="text-danger">Erreur de chargement.</p>');
-                photosContainer.empty();
+                container.html(`<div class="text-danger">Erreur chargement</div>`);
             }
         }
 

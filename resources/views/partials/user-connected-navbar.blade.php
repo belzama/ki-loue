@@ -20,7 +20,7 @@
             <span>Publications</span>
         </a>
     </li>
-    
+
     @if(auth()->user()->role === 'Admin')
         <li class="nav-item">
             <a class="nav-link" href="{{ route('admin.dashboard') }}">
@@ -36,9 +36,27 @@
             </a>
         </li>
     @endif
+
+    @php
+        $count = auth()
+        ->user()->notifications()
+        ->where('read', false)
+        ->count();
+    @endphp
+
+    @if($count > 0)
+        <li class="nav-item px-2 position-relative">
+            <a class="nav-link text-white d-inline-flex align-items-center" href="{{-- route('notifications.index') --}}">
+                <i class="bi bi-bell me-2"></i>
+                    <span class="badge rounded-pill bg-danger">
+                    {{ $count }}
+                </span>
+            </a>
+        </li>
+    @endif
 </ul>
 
-<ul class="navbar-nav ms-auto align-items-center">    
+<ul class="navbar-nav ms-auto align-items-center">
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle text-white d-flex align-items-center"
             href="#"
@@ -51,13 +69,13 @@
 
             <div class="lh-sm">
                 <div class="fw-semibold">
-                    {{ auth()->user()->nom ?? '' }} 
-                    {{ auth()->user()->prenom ?? '' }} 
+                    {{ auth()->user()->nom ?? '' }}
+                    {{ auth()->user()->prenom ?? '' }}
                 </div>
 
                 <div class="fw-bold">
                     <small class="text-white">
-                        {{ auth()->user()->raison_sociale ?? auth()->user()->email }} 
+                        {{ auth()->user()->raison_sociale ?? auth()->user()->email }}
                     </small>
                 </div>
 
@@ -72,7 +90,7 @@
             </div>
         </a>
 
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 260px;">                                
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 260px;">
             {{-- HEADER WALLET --}}
             <li class="px-3 py-3 bg-light border-bottom">
 
@@ -92,7 +110,7 @@
                             {{ auth()->user()->pays->devise->symbol }}
                         </span>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Solde disponible</span>
 
@@ -122,12 +140,12 @@
                 </a>
             </li>
 
-            <li>
-                <a class="dropdown-item py-2" href="{{-- route('settings.index') --}}">
+            {{--<li>
+                <a class="dropdown-item py-2" href="--}}{{-- route('settings.index') --}}{{--">
                     <i class="bi bi-gear me-2 text-muted"></i>
                     Paramètres
                 </a>
-            </li>
+            </li>--}}
 
             <li><hr class="dropdown-divider"></li>
 
