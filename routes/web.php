@@ -27,7 +27,8 @@ Route::get('/change-pays/{pays}', [PaysController::class, 'change'])->name('chan
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/publications', [HomeController::class, 'showCatalogue'])->name('catalogue.index');
+Route::get('/publications', [HomeController::class, 'showCatalogue'])
+    ->name('catalogue.index');
 // Afficher une publication spécifique
 Route::get('/publications/{publication}', [HomeController::class, 'show'])
     ->name('publications.show');
