@@ -65,13 +65,18 @@ class TransactionController extends Controller
             'montant' => 'required|numeric|min:100'
         ]);
 
+        $user = Auth::user();
+
         TransactionService::execute(
-            Auth::user(),
+            $user,
             $request->montant,
             'depot',
             'recharge',
             'Recharge du compte'
         );
+
+        // Recharger le solde mis à jour
+        $user->refresh();
 
         /*
         ===========================
@@ -85,6 +90,40 @@ class TransactionController extends Controller
 
             return app(\App\Http\Controllers\PublicationController::class)
                     ->store(new Request($data));
+        }
+
+        /*
+        ===========================
+        REPRISE ABONNEMENT EN ATTENTE
+        ===========================
+        */
+        if (session()->has('abonnement_pending')) {
+
+            $data    = session('abonnement_pending');
+            $montant = (float) ($data['montant'] ?? 0);
+
+            session()->forget(['abonnement_pending', 'montant_a_recharger']);
+
+            // Vérifier que le solde est désormais suffisant
+            if ($montant <= ($user->solde_reel + $user->solde_bonus)) {
+                try {
+                    app(\App\Http\Controllers\AbonnementController::class)
+                        ->createAbonnement($user, $data);
+
+                    return redirect()->route('user.abonnements.index')
+                        ->with('success', 'Recharge effectuée et abonnement créé avec succès.');
+
+                } catch (\Exception $e) {
+                    return redirect()->back()
+                        ->with('error', "Recharge effectuée, mais erreur lors de la création de l'abonnement : " . $e->getMessage());
+                }
+            }
+
+            // Solde toujours insuffisant
+            $manque = $montant - ($user->solde_reel + $user->solde_bonus);
+
+            return redirect()->back()
+                ->with('warning', "Recharge effectuée, mais le solde reste insuffisant pour finaliser l'abonnement. Il manque encore " . number_format($manque, 0, ',', ' ') . " FCFA.");
         }
         
         return redirect()->back()

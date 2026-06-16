@@ -105,14 +105,20 @@
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
+        <label>Taux du tarif abonnement <span class="text-danger">*</span></label>
+        <input type="number" step="0.01" name="taux_tarif_abonnement" class="form-control"
+            value="{{ old('taux_tarif_abonnement', $user->taux_tarif_abonnement ?? '') }}" required>
+    </div>
+
+    <div class="col-md-4">
         <label>Taux de commission <span class="text-danger">*</span></label>
         <input type="number" step="0.01" name="taux_commission" class="form-control"
             value="{{ old('taux_commission', $user->taux_commission ?? '') }}" required>
     </div>
 
-    <div class="col-md-6">
-        <label>Taux de commission de parrainage <span class="text-danger">*</span></label>
+    <div class="col-md-4">
+        <label>Taux de commission parrainage <span class="text-danger">*</span></label>
         <input type="number" step="0.01" name="taux_commission_sponsor" class="form-control"
             value="{{ old('taux_commission_sponsor', $user->taux_commission_sponsor ?? '') }}" required>
     </div>

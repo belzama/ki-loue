@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('periodicites', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->string('image_link');
+            $table->string('libelle');
+            $table->string('couleur')->default('bg-primary');
+            $table->integer('nb_jour');
+            $table->integer('qte');
+            $table->double('taux_remise', 5, 2);
             $table->timestamps();
         });
     }
@@ -24,7 +26,7 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-    {        
-        Schema::dropIfExists('categories');
+    {
+        Schema::dropIfExists('periodicites');
     }
 };

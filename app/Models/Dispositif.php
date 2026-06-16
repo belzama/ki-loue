@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Publication;
 use App\Models\DispositifParam;
 use App\Models\DispositifPhoto;
+use App\Models\Abonnement;
 
 class Dispositif extends Model
 {
@@ -19,7 +20,10 @@ class Dispositif extends Model
         'modele',
         'designation',
         'description',
-        'etat'];
+        'etat',
+        'tarif_min',
+        'tarif_max'
+    ];
 
     public function type_dispositif() {
         return $this->belongsTo(TypesDispositif::class, 'types_dispositif_id');
@@ -36,6 +40,19 @@ class Dispositif extends Model
     public function photos() {
         return $this->hasMany(DispositifPhoto::class);
     }
+
+    public function abonnements() {
+        return $this->hasMany(Abonnement::class);
+    }
+    
+    public function abonnementActif()
+    {
+        return $this->hasOne(Abonnement::class)
+            ->where('actif', 1)
+            ->whereDate('date_fin', '>=', now())
+            ->latest('date_fin');
+    }
+    
     public function cover() {
         return $this->hasOne(DispositifPhoto::class)
             ->where('is_cover', true);

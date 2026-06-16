@@ -5,16 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Ki-loue')</title>
+    <title>@yield('title', 'Rentalpark')</title>
 
     {{-- Bootstrap CSS --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     {{-- Icons Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/css/intlTelInput.css" rel="stylesheet">
 
     {{-- Custom CSS --}}
@@ -141,7 +141,7 @@
             display: flex;
             gap: 5px;
         }
-        
+
         .publication-card{
             transition: all .25s ease;
             border-radius:12px;
@@ -171,7 +171,7 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        .card:hover .carousel-control-prev, 
+        .card:hover .carousel-control-prev,
         .card:hover .carousel-control-next {
             opacity: 1;
         }
@@ -187,27 +187,219 @@
         .transition-all {
             transition: all 0.3s ease-in-out;
         }
+
+        .bg-blue-custom {
+            background: #29235c;
+        }
+
+        .section {
+            padding: 64px 0;
+        }
+        .section.gray {
+            background: #e9ecef;
+        }
+        .section.orange {
+            background: #f39200;
+        }
+        .section.bg-img {
+            background: linear-gradient(rgba(238, 173, 75, 0.42), rgba(243,146,0,0.85)), 
+                url('{{ asset("images/hero-btp.jpg") }}') center/cover no-repeat;
+        }
+        .section.blue {
+            background: #29235c;
+        }
+        .section-header {
+            max-width: 1280px;
+            margin: 0 auto 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #29235c;
+        }
+        .section-title span {
+            color: #f39200;
+        }
+        .section-sub {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        .see-all {
+            font-weight: 600;
+            font-size: 14px;
+            color: #29235c;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .see-all:hover {
+            color: #f39200;
+        }
+        .cats-container {
+            background: #fad96dff;
+            border: 1px solid #fad96dff;
+            border-radius: 20px;
+            margin: 10px;
+            padding-bottom: 10px;
+            opacity: 0.8;
+        }
+        .cats-grid {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+        }
+        .cat-card {
+            background: #f39200;
+            border: 1px solid #f39200;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all .25s;
+            position: relative;
+            overflow: hidden;
+            color: inherit;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 90px;
+        }
+        .cat-card:hover {
+            border-color: #29235c;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .cat-icon {
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-shrink: 0;
+            width: 80px;
+        }
+        .cat-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #29235c;
+            margin-bottom: 4px;
+        }
+        .cat-count {
+            font-size: 12px;
+            color: white;
+        }
+
+        @media (max-width: 992px) {
+            .cats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 576px) {
+            .cats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Layout deux colonnes */
+        .catalogue-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 1.5rem;
+        }
+
+        /* Sidebar */
+        .catalogue-sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.25rem;
+            position: sticky;
+            top: 1.5rem;          /* colle au viewport lors du scroll */
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .category-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .category-item a {
+            display: block;
+            padding: 0.45rem 0.6rem;
+            border-radius: 5px;
+            color: #343a40;
+            text-decoration: none;
+            font-size: 0.92rem;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .category-item a:hover {
+            background: #e9ecef;
+            color: #0d6efd;
+        }
+
+        .category-item.active a {
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Zone principale */
+        .catalogue-main {
+            flex: 1;
+            min-width: 0;          /* évite le débordement en flex */
+        }
+
+        /* Responsive : sidebar au-dessus sur mobile */
+        @media (max-width: 768px) {
+            .catalogue-layout {
+                flex-direction: column;
+            }
+
+            .catalogue-sidebar {
+                width: 100%;
+                position: static;
+            }
+        }
     </style>
 </head>
 <body>
 
 {{-- Navbar --}}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
-    <div class="container">        
+<nav class="navbar navbar-expand-lg navbar-dark bg-blue-custom fixed-top shadow">
+    <div class="container">
         <span class="navbar-brand">
-            <i class="bi bi-box-seam"></i>
-            <a class="navbar-brand" href="{{ url('/') }}">Ki-Loue</a>
+            <a class="navbar-brand" href="{{ url('/') }}">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Rentalpark" height="40">
+            </a>
         </span>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarNav">
-    
-            @yield('nav-bar')   
-        
-        </div>    
-        
+
+            @yield('nav-bar')
+
+        </div>
+
         <ul class="navbar-nav ms-auto">
             <li class="nav-item dropdown">
 
@@ -245,13 +437,13 @@
 
                 </ul>
             </li>
-        </ul>        
+        </ul>
 
         {{-- Dark mode toggle --}}
         <div class="text-end mb-2">
-            <button class="btn btn-sm btn-outline-warning" 
+            <button class="btn btn-sm btn-outline-warning"
                     id="themeToggle"
-                    onclick="toggleTheme()" 
+                    onclick="toggleTheme()"
                     title="Changer de mode">
                 <i id="themeIcon" class="bi bi-sun-fill"></i>
             </button>
@@ -261,7 +453,7 @@
 </nav>
 
 {{-- Main Content --}}
-<div class="container mt-4">
+<div>
     @yield('main-content')
 </div>
 
@@ -271,9 +463,9 @@
         <div class="row g-4">
             {{-- Colonne 1 : À propos --}}
             <div class="col-lg-4 col-md-6">
-                <h5 class="fw-bold mb-3"><i class="bi bi-box-seam me-2 text-primary"></i>Ki-Loue</h5>
+                <img src="{{ asset('images/logo.jpg') }}" alt="Rentalpark" height="40">
                 <p class="text-muted small">
-                    La plateforme de référence pour la location de matériels et équipements. 
+                    La plateforme de référence pour la location de matériels et équipements.
                     Trouvez ce dont vous avez besoin, où que vous soyez.
                 </p>
                 <div class="d-flex gap-3 fs-5 mt-3">
@@ -308,7 +500,7 @@
                 <h6 class="fw-bold mb-3">Contact</h6>
                 <ul class="list-unstyled small text-muted">
                     <li class="mb-2"><i class="bi bi-geo-alt me-2"></i> Lomé, Togo</li>
-                    <li class="mb-2"><i class="bi bi-envelope me-2"></i> contact@ki-loue.com</li>
+                    <li class="mb-2"><i class="bi bi-envelope me-2"></i> contact@Rentalpark.com</li>
                     <li class="mb-2"><i class="bi bi-telephone me-2"></i> +228 00 00 00 00</li>
                 </ul>
             </div>
@@ -317,7 +509,7 @@
         <hr class="my-4 opacity-25">
 
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
-            <span>&copy; {{ date('Y') }} Ki-Loue. Tous droits réservés.</span>
+            <span>&copy; {{ date('Y') }} Rentalpark. Tous droits réservés.</span>
             <div class="d-flex gap-3">
                 <span>Développé avec <i class="bi bi-heart-fill text-danger"></i></span>
             </div>
@@ -327,7 +519,7 @@
 
 {{-- Bootstrap JS --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>  
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>
 <script src="{{ asset('js/laravel-form-handler.js') }}"></script>
 {{-- Custom JS --}}
 @stack('scripts')
@@ -351,7 +543,7 @@ function togglePassword() {
 function toggleTheme() {
     const html = document.documentElement;
     const icon = document.getElementById('themeIcon');
-    
+
     if (html.getAttribute('data-bs-theme') === 'dark') {
         // Passer en mode clair
         html.setAttribute('data-bs-theme', 'light');

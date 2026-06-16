@@ -27,6 +27,13 @@
                 </li>
 
                 <li class="nav-item">
+                    <a href="{{ route('user.abonnements.index') }}"
+                       class="nav-link {{ request()->routeIs('user.abonnements.*') ? 'active' : '' }}">
+                        <i class="bi bi-receipt me-2"></i> Abonnements
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="{{ route('user.publications.index') }}"
                        class="nav-link {{ request()->routeIs('user.publications.*') ? 'active' : '' }}">
                         <i class="bi bi-journal-text me-2"></i> Publications

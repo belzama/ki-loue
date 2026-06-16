@@ -56,7 +56,9 @@ class TypesDispositifController extends Controller
 
         return response()->json([
             'params' => $type->params,
-            'nb_max_photo' => $type->nb_max_photo
+            'nb_max_photo' => $type->nb_max_photo,
+            'tarif_min'    => $type->tarif_min,
+            'tarif_max'    => $type->tarif_max,
         ]);
     }
 

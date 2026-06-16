@@ -39,6 +39,8 @@ return new class extends Migration
 
             $table->enum('role', ['Admin', 'User'])->default('User');
 
+            $table->decimal('taux_tarif_abonnement', 5, 2)->default(0);
+            
             $table->decimal('taux_commission', 5, 2)->default(0);
             $table->decimal('taux_commission_sponsor', 5, 2)->default(0);
             $table->decimal('solde_reel', 10, 2)->default(0);

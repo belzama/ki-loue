@@ -56,7 +56,6 @@ class DispositifController extends Controller
             'marque'                 => 'nullable|string|max:150',
             'modele'                 => 'nullable|string|max:150',
             'description'            => 'nullable|string',
-            'etat'                   => 'required|in:Neuf,Bon,Révisé',
 
             'photos'   => 'required|array|min:1',
             'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
@@ -91,7 +90,8 @@ class DispositifController extends Controller
             // 5. CREATE DISPOSITIF
             $dispositif = Dispositif::create(array_merge($validatedData, [
                 'user_id'     => Auth::id(),
-                'designation' => $designation
+                'designation' => $designation,
+                'etat'        => 'Bon'
             ]));
 
             // ======================================================

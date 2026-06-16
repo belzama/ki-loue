@@ -62,6 +62,8 @@
                     @foreach($dispositifs as $d)
                         <option value="{{ $d->id }}"
                                 data-tarif="{{ $d->type_dispositif->tarif_min ?? 0 }}"
+                                data-abonnement="{{ $aAbonnement }}"
+                                data-abonnement-url="{{ route('user.abonnements.createByDispositif', $d) }}"
                             {{ old('dispositif_id') == $d->id ? 'selected' : '' }}>
                             {{ $d->designation }} ({{ $d->type_dispositif->nom ?? '' }})
                         </option>
@@ -267,6 +269,7 @@
 </form>
 
 @include('user.publications.confirm_modal')
+@include('user.publications.choix_abonnement_modal')
 @section('scripts')
 <script src="{{ asset('js/dependent-select.js') }}"></script>
 
@@ -302,6 +305,9 @@ const baseUrl = "{{ url('/') }}";
 const OLD_PAYS   = "{{ old('pays_id', $publication->dispositif->user->pays_id ?? $dispositif->user->pays_id ?? $user->pays_id ?? '') }}";
 const OLD_REGION = "{{ old('region_id',$publication->departement->region_id ?? $publication->region_id ?? '') }}";
 const OLD_DEPARTEMENT  = "{{ old('departement_id', $publication->departement_id ?? '') }}";
+
+const DISPOSITIF_ABONNEMENT_ACTIF = {{ ($dispositif && $dispositif->abonnementActif) ? 'true' : 'false' }};
+const ABONNEMENT_URL = "{{ $dispositif ? route('user.abonnements.createByDispositif', $dispositif) : '' }}";
 
 const tarifInput = document.getElementById('tarif_location');
 const dateDebutInput = document.getElementById('date_debut');
@@ -381,6 +387,7 @@ function formatMoney(amount) {
 ================================= */
 function calculer()
 {
+    
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
     const baseCalcul = Math.max(tarifSaisi, currentTarifMin);
 
@@ -398,6 +405,14 @@ function calculer()
 
     const jours = diffDays(date_debut, date_fin);
     document.getElementById("nb_jours").value = jours;
+    
+    // 🔒 Si abonnement actif : publication gratuite, on ne recalcule rien
+    if (window.abonnementActif) {
+        document.getElementById('prix_publication').value = formatMoney(0);
+        document.getElementById('bonus_accorde').value     = formatMoney(0);
+        document.getElementById('cout_publication').value  = formatMoney(0);
+        return;
+    }
 
     if (jours <= 0) return;
 
@@ -474,6 +489,11 @@ function getPaliersDynamiques() {
 }
 
 function calculerSimulation() {
+    if (window.abonnementActif) {
+        if (bloc) bloc.style.display = 'none';
+        return;
+    }
+
     const tarifSaisi = parseFloat(tarifInput?.value) || 0;
     const date_debut = dateDebutInput?.value;
     const joursActuels = parseInt(document.getElementById("nb_jours")?.value) || 0;
@@ -569,6 +589,40 @@ function calculerSimulation() {
 }
 
 /* =================================
+   Gestion Abonnement
+================================= */
+window.abonnementActif = false;
+
+function gererAbonnement(actif, url)
+{
+    window.abonnementActif = !!actif;
+
+    if (window.abonnementActif) {
+        // ✅ Abonnement valide : publication gratuite
+        document.getElementById('prix_publication').value   = formatMoney(0);
+        document.getElementById('bonus_accorde').value      = formatMoney(0);
+        document.getElementById('cout_publication').value   = formatMoney(0);
+
+        btnDetail.style.display = 'none';
+        blocDetail.style.display = 'none';
+        bloc.style.display = 'none';
+
+    } else {
+        // ❌ Pas d'abonnement valide : afficher le choix
+        if (url) {
+            document.getElementById('lienAbonnement').href = url;
+        }
+
+        const myModal = new bootstrap.Modal(document.getElementById('modalChoixAbonnement'));
+        myModal.show();
+
+        // Relancer le calcul normal
+        calculer();
+        calculerSimulation();
+    }
+}
+
+/* =================================
    Events
 ================================= */
 
@@ -615,6 +669,12 @@ dispositifSelect?.addEventListener('change', function() {
         realInput.value = nouveauTarifMin;
     }
 
+    // 🆕 Vérification abonnement
+    const aAbonnement = selectedOption.getAttribute('data-abonnement') === '1';
+    const urlAbonnement = selectedOption.getAttribute('data-abonnement-url');
+
+    gererAbonnement(aAbonnement, urlAbonnement);
+
     calculer();
     calculerSimulation();
 });
@@ -643,6 +703,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (bloc) bloc.style.display = 'none';
 
+    // 🆕 Cas dispositif imposé
+    if (typeof DISPOSITIF_ABONNEMENT_ACTIF !== 'undefined') {
+        gererAbonnement(DISPOSITIF_ABONNEMENT_ACTIF, ABONNEMENT_URL);
+    }
+
+    // 🆕 Cas select avec valeur pré-sélectionnée (old() après erreur validation)
+    if (dispositifSelect && dispositifSelect.value) {
+        const selectedOption = dispositifSelect.options[dispositifSelect.selectedIndex];
+        const aAbonnement = selectedOption.getAttribute('data-abonnement') === '1';
+        const urlAbonnement = selectedOption.getAttribute('data-abonnement-url');
+        gererAbonnement(aAbonnement, urlAbonnement);
+    }
+    
     chargerTarifs(PAYS_ID);
 
     appliquerContraintesDates();

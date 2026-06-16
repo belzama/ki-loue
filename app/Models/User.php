@@ -44,6 +44,7 @@ class User extends Authenticatable
         'telephone',
         'whatsapp',
         'password',
+        'taux_tarif_abonnement',
         'taux_commission',
         'taux_commission_sponsor'
     ];

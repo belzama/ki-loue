@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         User::create([
             'code' => 'ADMIN',
             'nom' => 'Administrateur',
-            'email' => 'admin@Ki-loue.com',
+            'email' => 'admin@Rentalpark.com',
             'password' => Hash::make('admin123'), // mot de passe sécurisé
             'role' => 'Admin',
             'pays_id' => $defaultPays->id ?? null,

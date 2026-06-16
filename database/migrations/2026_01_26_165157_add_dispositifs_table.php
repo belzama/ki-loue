@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('designation');
             $table->text('description')->nullable();
             $table->enum('etat', ['Neuf', 'Bon', 'Révisé'])->default('Bon');
+            $table->double('tarif_min', 10, 2)->default(0);
+            $table->double('tarif_max', 10, 2)->default(0);
             $table->timestamps();
         });
     }

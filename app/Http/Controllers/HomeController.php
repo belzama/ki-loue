@@ -37,6 +37,42 @@ class HomeController extends Controller
         ->where('date_debut', '<=', now())
         ->where('date_fin', '>=', now());
 
+        $publications = $query
+            ->latest()
+            ->paginate(12)
+            ->withQueryString(); // garde les filtres dans l'URL
+
+        /*
+        |----------------------------------------------------------------------
+        | DONNÉES POUR LES FILTRES
+        |----------------------------------------------------------------------
+        */
+
+        $categories = Categorie::orderBy('nom')->get();
+
+        return view('welcome', compact(
+            'country',
+            'publications',
+            'categories',
+        ));
+    }
+
+    public function showCatalogue(Request $request)
+    {
+        // On cherche le pays, mais on prévoit un fallback (ex: 'FR' par défaut)
+        $country = getUserCountry();
+
+        // Requête de base avec eager loading
+        $query = Publication::with([
+            'dispositif.photos',
+            'dispositif.type_dispositif.categorie',
+            'departement.region.pays',
+            'devise'
+        ])
+        ->where('active', 1)
+        ->where('date_debut', '<=', now())
+        ->where('date_fin', '>=', now());
+
         /*
         |----------------------------------------------------------------------
         | FILTRES
@@ -118,14 +154,9 @@ class HomeController extends Controller
         $regions             = Region::orderBy('nom')->get();
         $departements             = Departement::orderBy('nom')->get();
 
-        return view('welcome', compact(
-            'country',
-            'publications',
-            'categories',
-            'typesDispositifs',
-            'pays',
-            'regions',
-            'departements'
+        return view('publications.index', compact(
+            'country', 'publications', 'categories',
+            'typesDispositifs', 'pays', 'regions', 'departements'
         ));
     }
 

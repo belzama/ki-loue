@@ -16,6 +16,7 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\TypesDispositifController;
 use App\Http\Controllers\DispositifController;
 use App\Http\Controllers\DispositifPhotoController;
+use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\SysParamController;
 use App\Http\Controllers\LocalisationController;
@@ -26,6 +27,7 @@ Route::get('/change-pays/{pays}', [PaysController::class, 'change'])->name('chan
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/publications', [HomeController::class, 'showCatalogue'])->name('catalogue.index');
 // Afficher une publication spécifique
 Route::get('/publications/{publication}', [HomeController::class, 'show'])
     ->name('publications.show');
@@ -81,6 +83,19 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     // Création d'une publication à partir d'un dispositif existant
     Route::get('publications/create/{dispositif}', [PublicationController::class, 'createByDispositif'])->name('publications.createByDispositif');
     
+    Route::get('abonnements', [AbonnementController::class, 'index'])->name('abonnements.index');
+    Route::get('abonnements/create', [AbonnementController::class, 'create'])->name('abonnements.create');
+    Route::post('abonnements', [AbonnementController::class, 'store'])->name('abonnements.store');
+    Route::get('abonnements/{dispositif}/edit', [AbonnementController::class, 'edit'])->name('abonnements.edit');
+    Route::put('abonnements/{dispositif}', [AbonnementController::class, 'update'])->name('abonnements.update');
+    Route::delete('abonnements/{dispositif}', [AbonnementController::class, 'destroy'])->name('abonnements.destroy');
+    // Page "Voir plus"
+    Route::get('abonnements/{dispositif}/show', [AbonnementController::class, 'show'])->name('abonnements.show');
+
+    Route::resource('abonnements', AbonnementController::class);
+    // Création d'un abonnement à partir d'un dispositif existant
+    Route::get('abonnements/create/{dispositif}', [AbonnementController::class, 'createByDispositif'])->name('abonnements.createByDispositif');
+    
     Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/{publication}/create',[ReservationController::class, 'create'])->name('reservations.create');
     Route::get('reservations/{id}/approve', [ReservationController::class, 'approveForm'])->name('reservations.approve.form');
@@ -123,5 +138,6 @@ Route::get('/types_dispositif/{id}', [TypesDispositifController::class, 'show'])
 Route::get('/types_dispositif/{id}/params', [TypesDispositifController::class, 'params']);
 
 Route::get('/dispositifs/{dispositif}/tarif-min', [DispositifController::class, 'getTarifMin']);
+Route::get('/dispositifs/{dispositif}/tarif-max', [DispositifController::class, 'getTarifMax']);
     
 Route::get('/pays/{pays}/tarifs', [PaysController::class, 'getTarifs']);

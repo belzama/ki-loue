@@ -45,6 +45,7 @@ class UserController extends Controller
             'type' => 'required|in:Société,Particulier',
             'role' => 'required|in:Admin,User',
 
+            'taux_tarif_abonnement' => 'required|numeric|min:0',
             'taux_commission' => 'required|numeric|min:0',
             'taux_commission_sponsor' => 'required|numeric|min:0',
         ]);
@@ -83,6 +84,7 @@ class UserController extends Controller
             'type' => 'required|in:Société,Particulier',
             'role' => 'required|in:Admin,User',
 
+            'taux_tarif_abonnement' => 'required|numeric|min:0',
             'taux_commission' => 'required|numeric|min:0',
             'taux_commission_sponsor' => 'required|numeric|min:0',
         ]);

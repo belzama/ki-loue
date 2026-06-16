@@ -7,7 +7,7 @@ use App\Models\TypesDispositif;
 
 class Categorie extends Model
 {
-    protected $fillable = ['nom'];
+    protected $fillable = ['nom', 'image_link'];
     
     public function types_dispositifs()
     {

@@ -123,7 +123,8 @@ class PublicationController extends Controller
     {
         $user = auth()->user();
         // Récupérer les dispositifs de l'utilisateur connecté
-        $dispositifs = Dispositif::where('user_id', auth()->id())->get();
+        //$dispositifs = Dispositif::where('user_id', auth()->id())->get();
+        $dispositifs = Dispositif::with(['type_dispositif', 'abonnementActif'])->where('user_id', $user->id)->get();
 
         $pays = Pays::orderBy('nom')->get();
         $devises = Devise::all();    // si tu as des devises

@@ -58,6 +58,24 @@
         </div>
     </div>
 
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label>Tarif minimum <span class="text-danger">*</span></label>
+            <input type="number" id="tarif_min" name="tarif_min" class="form-control" step="0.01"
+                value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}" required>
+            <small class="form-text text-muted" id="tarif_min_hint"></small>
+            <div class="invalid-feedback" id="error-tarif_min"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label>Tarif maximum <span class="text-danger">*</span></label>
+            <input type="number" id="tarif_max" name="tarif_max" class="form-control" step="0.01"
+                value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}" required>
+            <small class="form-text text-muted" id="tarif_max_hint"></small>
+            <div class="invalid-feedback" id="error-tarif_max"></div>
+        </div>
+    </div>
+
     {{-- MARQUE / MODELE --}}
     <div class="row g-3 mb-3">
         <div class="col-md-6">
@@ -75,23 +93,6 @@
 
     {{-- PARAMETRES DYNAMIQUES --}}
     <div id="params-container" class="mt-3"></div>
-
-    {{-- ETAT --}}
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Etat <span class="text-danger">*</span></label>
-        <div class="d-flex gap-4">
-            @foreach(['Neuf','Bon','Révisé'] as $etat)
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="etat"
-                           value="{{ $etat }}"
-                        {{ old('etat',$dispositif->etat ?? 'Neuf') == $etat ? 'checked' : '' }}>
-                    <label class="form-check-label">{{ $etat }}</label>
-                </div>
-            @endforeach
-        </div>
-    </div>
 
     {{-- PHOTOS --}}
     <div class="mb-3">
@@ -174,6 +175,87 @@
         }
 
         // --- 2. CHARGEMENT DYNAMIQUE (API) ---
+        function setTarifLimits(min, max) {
+            const tarifMinEl = document.getElementById('tarif_min');
+            const tarifMaxEl = document.getElementById('tarif_max');
+            const tarifMinHint = document.getElementById('tarif_min_hint');
+            const tarifMaxHint = document.getElementById('tarif_max_hint');
+
+            if (min == null || max == null) {
+                tarifMinEl.removeAttribute('min');
+                tarifMinEl.removeAttribute('max');
+                tarifMaxEl.removeAttribute('min');
+                tarifMaxEl.removeAttribute('max');
+                tarifMinHint.textContent = '';
+                tarifMaxHint.textContent = '';
+                return;
+            }
+
+            min = parseFloat(min);
+            max = parseFloat(max);
+
+            tarifMinEl.min = min;
+            tarifMinEl.max = max;
+            tarifMaxEl.min = min;
+            tarifMaxEl.max = max;
+
+            tarifMinHint.textContent = `Doit être compris entre ${min} et ${max}`;
+            tarifMaxHint.textContent = `Doit être compris entre ${min} et ${max}`;
+
+            // Toujours mettre à jour les valeurs lors d'un changement de type
+            tarifMinEl.value = min;
+            tarifMaxEl.value = max;
+
+            // Validation live (une seule fois pour éviter les doublons d'écouteurs)
+            if (!tarifMinEl.dataset.listenerAttached) {
+                tarifMinEl.addEventListener('input', () => {
+                    const m = parseFloat(tarifMinEl.dataset.currentMin);
+                    const M = parseFloat(tarifMinEl.dataset.currentMax);
+                    validateTarifInput(tarifMinEl, m, M);
+                });
+                tarifMinEl.dataset.listenerAttached = 'true';
+            }
+            if (!tarifMaxEl.dataset.listenerAttached) {
+                tarifMaxEl.addEventListener('input', () => {
+                    const m = parseFloat(tarifMaxEl.dataset.currentMin);
+                    const M = parseFloat(tarifMaxEl.dataset.currentMax);
+                    validateTarifInput(tarifMaxEl, m, M);
+                });
+                tarifMaxEl.dataset.listenerAttached = 'true';
+            }
+
+            // Stocker les bornes actuelles pour les listeners
+            tarifMinEl.dataset.currentMin = min;
+            tarifMinEl.dataset.currentMax = max;
+            tarifMaxEl.dataset.currentMin = min;
+            tarifMaxEl.dataset.currentMax = max;
+        }
+
+        function validateTarifInput(el, min, max) {
+            let val = parseFloat(el.value);
+            if (isNaN(val)) return;
+
+            if (val < min) {
+                el.value = min;
+            } else if (val > max) {
+                el.value = max;
+            }
+
+            // Cohérence tarif_min <= tarif_max
+            const tarifMinEl = document.getElementById('tarif_min');
+            const tarifMaxEl = document.getElementById('tarif_max');
+            let vMin = parseFloat(tarifMinEl.value);
+            let vMax = parseFloat(tarifMaxEl.value);
+
+            if (!isNaN(vMin) && !isNaN(vMax) && vMin > vMax) {
+                if (el === tarifMinEl) {
+                    tarifMaxEl.value = vMin;
+                } else {
+                    tarifMinEl.value = vMax;
+                }
+            }
+        }
+
         async function loadParams(typeId) {
 
             if (!typeId) {
@@ -186,8 +268,12 @@
             try {
                 const res = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
                 const data = await res.json();
+                //console.log('tarif_min:', data.tarif_min, 'tarif_max:', data.tarif_max);
 
                 renderPhotoInputs(data.nb_max_photo ?? 4);
+                
+                // --- GESTION TARIF MIN/MAX ---
+                setTarifLimits(data.tarif_min, data.tarif_max);
 
                 container.empty();
 
@@ -233,7 +319,7 @@
                     }
 
                     container.append(`
-                <div class="mb-3">
+                <div class="col-md-6">
                     <label class="form-label">
                         ${param.label || param.name}
                         ${unit ? `(${unit})` : ''}

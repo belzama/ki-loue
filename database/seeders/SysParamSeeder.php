@@ -12,7 +12,7 @@ class SysParamSeeder extends Seeder
         $params = [
             [
                 'code'  => 'APP_NAME',
-                'value' => 'Ki-Loue',
+                'value' => 'Rentalpark',
                 'desc'  => 'Nom de l’application',
             ],
             [
