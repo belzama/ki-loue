@@ -93,7 +93,7 @@ Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->g
     // Page "Voir plus"
     Route::get('abonnements/{dispositif}/show', [AbonnementController::class, 'show'])->name('abonnements.show');
 
-    Route::resource('abonnements', AbonnementController::class);
+    //Route::resource('abonnements', AbonnementController::class);
     // Création d'un abonnement à partir d'un dispositif existant
     Route::get('abonnements/create/{dispositif}', [AbonnementController::class, 'createByDispositif'])->name('abonnements.createByDispositif');
     
