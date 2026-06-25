@@ -17,9 +17,12 @@ class UserSeeder extends Seeder
         User::create([
             'code' => 'ADMIN',
             'nom' => 'Administrateur',
-            'email' => 'admin@Rentalpark.com',
+            'prenom' => 'Système',
+            'email' => 'admin@rentalpark.com',
             'password' => Hash::make('admin123'), // mot de passe sécurisé
             'role' => 'Admin',
+            'telephone' => '91520434',
+            'whatsapp' => '91520434',
             'pays_id' => $defaultPays->id ?? null,
         ]);
 
