@@ -13,7 +13,7 @@
 
             {{-- HEADER --}}
             <div class="text-center mb-1">
-                <img src="{{ asset('images/logo80x80.jpg') }}" alt="Rentalpark" class="d-block mx-auto mb-1">
+                <img src="{{ asset('images/logo_fond_blanc.png') }}" alt="Rentalpark" class="d-block mx-auto mb-1" height="120">
                 <h6 class="fw-bold mb-0">Inscription</h6>
                 <small class="text-muted">Créez votre compte</small>
             </div>

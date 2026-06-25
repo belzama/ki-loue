@@ -56,6 +56,9 @@ class DispositifController extends Controller
             'marque'                 => 'nullable|string|max:150',
             'modele'                 => 'nullable|string|max:150',
             'description'            => 'nullable|string',
+            'tarif_min'              => 'required|numeric|min:0',
+            'tarif_max'              => 'required|numeric|min:0|gte:tarif_min',
+
 
             'photos'   => 'required|array|min:1',
             'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
@@ -158,7 +161,9 @@ class DispositifController extends Controller
             'marque'                 => 'nullable|string|max:150',
             'modele'                 => 'nullable|string|max:150',
             'description'            => 'nullable|string',
-            'etat'                   => 'required|in:Neuf,Bon,Révisé',
+            'tarif_min'              => 'required|numeric|min:0',
+            'tarif_max'              => 'required|numeric|min:0|gte:tarif_min',
+
             'photos'                 => 'nullable|array',
             'photos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
             'params'                 => 'nullable|array',

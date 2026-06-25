@@ -12,6 +12,7 @@ use App\Http\Controllers\PaysController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\departementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategorieController;   
 use App\Http\Controllers\TypesDispositifController;
 use App\Http\Controllers\DispositifController;
@@ -69,6 +70,10 @@ Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group
 });
 
 Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->group(function () {
+    Route::get('profile',           [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('profile',           [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password',  [ProfileController::class, 'password'])->name('profile.password');
+    
     Route::get('dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     
     Route::get('dispositifs', [DispositifController::class, 'index'])->name('dispositifs.index');

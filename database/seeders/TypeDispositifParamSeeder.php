@@ -45,7 +45,14 @@ class TypeDispositifParamSeeder extends Seeder
             ['type' => 'Camion plateau grue', 'name' => 'charge_levage', 'label' => 'Charge de levage', 'unit' => 'Tonne', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Mini camion de liaison', 'name' => 'charge_utile', 'label' => 'Charge utile', 'unit' => 'Tonne', 'type_v' => 'decimal', 'req' => false],
             ['type' => 'Pickup', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
-
+            ['type' => 'Citadine', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Berline', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'SUV Crossover', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Luxe 4*4', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Bus', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Fourgon', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            ['type' => 'Utilitaires', 'name' => 'nb_places', 'label' => 'Nombre de places', 'unit' => 'Places', 'type_v' => 'int', 'req' => false],
+            
             // Matériel de Chantier
             ['type' => 'Groupe électrogène', 'name' => 'puissance', 'label' => 'Puissance', 'unit' => 'KVA', 'type_v' => 'decimal', 'req' => true],
             ['type' => 'Compresseur d’air', 'name' => 'pression', 'label' => 'Pression', 'unit' => 'Bars', 'type_v' => 'decimal', 'req' => true],

@@ -9,11 +9,11 @@
 
 
         {{-- Formulaire --}}
-        <div class="shadow-lg border-0 rounded-4" style="background:white; margin-top:30px; max-width:320px; width:100%;">
+        <div class="shadow-lg border-0 rounded-4" style="background:white; margin-top:30px; max-width:380px; width:100%;">
             <div class="card-body p-4">
 
                 <div class="text-center mb-4">
-                    <img src="{{ asset('images/logo80x80.jpg') }}" alt="Rentalpark">
+                    <img src="{{ asset('images/logo_fond_blanc.png') }}" alt="Rentalpark" height="120">
                     <h4 class="fw-bold">Connexion</h4>
                     <small class="text-muted">
                         Entrez votre code d’accès

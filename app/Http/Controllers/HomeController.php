@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 
 use Stevebauman\Location\Facades\Location;
 
@@ -48,7 +49,19 @@ class HomeController extends Controller
         |----------------------------------------------------------------------
         */
 
-        $categories = Categorie::orderBy('nom')->get();
+        $categories = Categorie::addSelect([
+            'publications_actives_count' => Publication::selectRaw('COUNT(*)')
+                ->whereHas('dispositif', function ($q) {
+                    $q->whereHas('type_dispositif', function ($q2) {
+                        $q2->whereColumn('categorie_id', 'categories.id');
+                    });
+                })
+                ->where('active', true)
+                ->whereDate('date_debut', '<=', now())
+                ->whereDate('date_fin', '>=', now())
+        ])
+        ->orderBy('nom')
+        ->get();
 
         return view('welcome', compact(
             'country',
@@ -148,7 +161,20 @@ class HomeController extends Controller
         |----------------------------------------------------------------------
         */
 
-        $categories = Categorie::orderBy('nom')->get();
+        $categories = Categorie::addSelect([
+            'publications_actives_count' => Publication::selectRaw('COUNT(*)')
+                ->whereHas('dispositif', function ($q) {
+                    $q->whereHas('type_dispositif', function ($q2) {
+                        $q2->whereColumn('categorie_id', 'categories.id');
+                    });
+                })
+                ->where('active', true)
+                ->whereDate('date_debut', '<=', now())
+                ->whereDate('date_fin', '>=', now())
+        ])
+        ->orderBy('nom')
+        ->get();
+
         $typesDispositifs = TypesDispositif::orderBy('nom')->get();
         $pays             = Pays::orderBy('nom')->get();
         $regions             = Region::orderBy('nom')->get();

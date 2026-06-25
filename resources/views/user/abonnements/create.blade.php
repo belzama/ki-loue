@@ -89,7 +89,7 @@
                     <div class="card-body d-flex flex-column gap-3 p-4">
 
                         {{-- Dates --}}
-                        <div class="mb-0 fw-bold">
+                        <div class="text-center fw-bold">
                             <small class="opacity-100">
                                 {{ $debut->format('d/m/Y') }} - {{ $fin->format('d/m/Y') }}
                             </small>

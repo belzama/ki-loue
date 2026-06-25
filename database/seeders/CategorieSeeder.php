@@ -14,13 +14,30 @@ class CategorieSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Matériels de terrassement',
-            'Matériels de bitumage',
-            'Matériels de transport',
-            'Matériels auxiliaires de chantier',
-            'Matériels de démolition',
-            'Matériels de production du béton',
-            'Matériels de levage et de manutention',
+            'Bulldozer',
+            'Niveleuse',
+            'Pelle mécanique',
+            'Tractopelle',
+            'Chargeuse',
+            'Compacteur',
+            'Recycleuse/Raboteuse',
+            'Finisseur',
+            'Centrale à béton/enrobé',
+            'Camion citerne',
+            'Camion benne',
+            'Tombereau',
+            'Vehicule articulé',
+            'Camion plateau',
+            'Camion grue',
+            'Vehicule utilitaire',
+            'Coffrage/Echaffaudage',
+            'Auxiliaires de démolition',
+            'Bétonnière',
+            'Auto-bétonnière',
+            'Camion toupie',
+            'Pompe à béton',
+            'Elevateur/Télescopique',
+            'Grue',
         ];
 
         foreach ($categories as $nom) {

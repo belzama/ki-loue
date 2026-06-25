@@ -134,7 +134,7 @@
 
             {{-- MENU --}}
             <li>
-                <a class="dropdown-item py-2" href="{{-- route('profile.show') --}}">
+                <a class="dropdown-item py-2" href="{{ route('user.profile.show') }}">
                     <i class="bi bi-person me-2 text-muted"></i>
                     Mon profil
                 </a>

@@ -1,7 +1,7 @@
 <div class="container">
     <div class="section-header">
         <div>
-            <div class="section-title">Catalogue</div>
+            <div class="section-title">Notre Catalogue</div>
             <div class="section-sub">({{ $publications->count() }}) matériels disponibles en location</div>
         </div>
     </div>
