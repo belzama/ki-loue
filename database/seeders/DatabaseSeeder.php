@@ -26,7 +26,9 @@ class DatabaseSeeder extends Seeder
             TypesDispositifSeeder::class,    
             TypeDispositifParamSeeder::class,    
             //DispositifSeeder::class,             
-            //DispositifPhotoSeeder::class,          
+            //DispositifPhotoSeeder::class,  
+            PeriodiciteSeeder::class,           
+            TarifSeeder::class,         
             SysParamSeeder::class,           
         ]);
         /*
