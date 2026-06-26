@@ -37,8 +37,8 @@ class CategorieSeeder extends Seeder
             ['nom' => 'Grue', 'image_link' => 'categories/grue.jpg'],
         ];
 
-        foreach ($categories as $nom) {
-            Categorie::create(['nom' => $nom]);
+        foreach ($categories as $categorie) {
+            Categorie::create($categorie);
         }
     }
 }
