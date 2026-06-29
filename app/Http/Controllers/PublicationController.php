@@ -192,22 +192,25 @@ class PublicationController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // 2. Calculs via Service
-        $prix_publication = TarifService::calculPrixPublication(
-            $user->pays_id,
-            $request->tarif_location,
-            $request->date_debut,
-            $request->date_fin
-        );
+        // 2. Récupération du dispositif et vérification abonnement
+        $dispositif = Dispositif::findOrFail($request->dispositif_id);
+        $abonnementActif = $dispositif->abonnementActif()->exists(); 
 
-        $bonus_accorde = min($user->solde_bonus, $prix_publication);
-        $cout_publication = $prix_publication - $bonus_accorde;
+        $prix_publication = $abonnementActif
+            ? 0  // Gratuit si abonnement actif
+            : TarifService::calculPrixPublication(
+                $user->pays_id,
+                $request->tarif_location,
+                $request->date_debut,
+                $request->date_fin
+            );
 
-        // 3. Vérification Solde
-        $dispositif = Dispositif::findOrFail($dispositif_id);
+        $bonus_accorde = $abonnementActif ? 0 : min($user->solde_bonus, $prix_publication);
+        $cout_publication = $abonnementActif ? 0 : ($prix_publication - $bonus_accorde);
 
-       if (
-            !$dispositif->abonnement_actif() &&
+        // 3. Vérification Solde — seulement si pas d'abonnement
+        if (
+            !$abonnementActif &&
             $prix_publication > ($user->solde_reel + $user->solde_bonus)
         ) {
             $montantARecharger = $prix_publication - ($user->solde_reel + $user->solde_bonus);
@@ -234,7 +237,7 @@ class PublicationController extends Controller
 
         // 4. Transaction et Création
         try {
-            DB::transaction(function () use ($request, $user, $prix_publication, $bonus_accorde, $cout_publication) {
+            DB::transaction(function () use ($request, $user, $prix_publication, $bonus_accorde, $cout_publication, $abonnementActif) {
 
                 Publication::create([
                     'dispositif_id'   => $request->dispositif_id,
@@ -250,16 +253,17 @@ class PublicationController extends Controller
                     'statut'          => 1 // Actif par défaut
                 ]);
 
-                if ($bonus_accorde > 0) {
-                    TransactionService::execute($user, $bonus_accorde, 'retrait', 'paiement', 'Paiement publication (bonus)');
+                // Transactions seulement si pas d'abonnement actif
+                if (!$abonnementActif) {
+                    if ($bonus_accorde > 0) {
+                        TransactionService::execute($user, $bonus_accorde, 'retrait', 'paiement', 'Paiement publication (bonus)');
+                    }
+                    if ($cout_publication > 0) {
+                        TransactionService::execute($user, $cout_publication, 'retrait', 'paiement', 'Paiement publication');
+                    }
+                    // Commissions (Sponsor et Perso)
+                    $this->distributeCommissions($user, $cout_publication);
                 }
-
-                if ($cout_publication > 0) {
-                    TransactionService::execute($user, $cout_publication, 'retrait', 'paiement', 'Paiement publication');
-                }
-
-                // Commissions (Sponsor et Perso)
-                $this->distributeCommissions($user, $cout_publication);
             });
 
             $msg = 'Publication créée avec succès.';
