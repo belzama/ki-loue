@@ -156,6 +156,7 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
 
+                            @if(!$dispositif->publicationEncours)
                                 @if(!$abonnementActif)
                                     {{-- ✅ Abonnement valide : accès direct --}}
                                     <a href="{{ route('user.publications.createByDispositif', $dispositif) }}"
@@ -181,6 +182,7 @@
                                         <span>S'abonner</span>
                                     </a>
                                 @endif
+                            @endif
                         </div>
 
                         <form action="{{ route('user.dispositifs.destroy', $dispositif) }}"
