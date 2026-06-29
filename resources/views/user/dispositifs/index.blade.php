@@ -156,30 +156,32 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
 
-                            @if($abonnementActif)
-                                {{-- ✅ Abonnement valide : accès direct --}}
-                                <a href="{{ route('user.publications.createByDispositif', $dispositif) }}"
-                                   class="btn btn-sm btn-outline-success" title="Publier">
-                                    <i class="bi bi-megaphone"></i>
-                                    <span>Publier</span>
-                                </a>
-                            @else
-                                {{-- ❌ Pas d'abonnement : ouvrir modal --}}
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-success"
-                                        title="Publier"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalAbonnement{{ $dispositif->id }}">
-                                    <i class="bi bi-megaphone"></i>
-                                    <span>Publier</span>
-                                </button>
+                            @if(!$dispositif->publicationEncours)
+                                @if(!$abonnementActif)
+                                    {{-- ✅ Abonnement valide : accès direct --}}
+                                    <a href="{{ route('user.publications.createByDispositif', $dispositif) }}"
+                                    class="btn btn-sm btn-outline-success" title="Publier">
+                                        <i class="bi bi-megaphone"></i>
+                                        <span>Publier</span>
+                                    </a>
+                                @else
+                                    {{-- ❌ Pas d'abonnement : ouvrir modal --}}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            title="Publier"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalAbonnement{{ $dispositif->id }}">
+                                        <i class="bi bi-megaphone"></i>
+                                        <span>Publier</span>
+                                    </button>
 
-                                {{-- Bouton S'abonner — uniquement si pas d'abonnement --}}
-                                <a href="{{ route('user.abonnements.createByDispositif', $dispositif) }}"
-                                   class="btn btn-sm btn-outline-info" title="S'abonner">
-                                    <i class="bi bi-bell"></i>
-                                    <span>S'abonner</span>
-                                </a>
+                                    {{-- Bouton S'abonner — uniquement si pas d'abonnement --}}
+                                    <a href="{{ route('user.abonnements.createByDispositif', $dispositif) }}"
+                                    class="btn btn-sm btn-outline-info" title="S'abonner">
+                                        <i class="bi bi-bell"></i>
+                                        <span>S'abonner</span>
+                                    </a>
+                                @endif
                             @endif
                         </div>
 
