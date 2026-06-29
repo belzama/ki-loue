@@ -31,7 +31,7 @@ class PeriodiciteSeeder extends Seeder
                 'libelle' => 'Semestrielle',
                 'couleur' => 'warning',
                 'nb_jour' => 180,
-                'qte' => 60,
+                'qte' => 6,
                 'taux_remise' => 10,
             ],
             [

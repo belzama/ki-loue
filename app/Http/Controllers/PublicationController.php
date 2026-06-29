@@ -204,7 +204,12 @@ class PublicationController extends Controller
         $cout_publication = $prix_publication - $bonus_accorde;
 
         // 3. Vérification Solde
-        if ($prix_publication > ($user->solde_reel + $user->solde_bonus)) {
+        $dispositif = Dispositif::findOrFail($dispositif_id);
+
+       if (
+            !$dispositif->abonnement_actif() &&
+            $prix_publication > ($user->solde_reel + $user->solde_bonus)
+        ) {
             $montantARecharger = $prix_publication - ($user->solde_reel + $user->solde_bonus);
 
             // CRITIQUE : On stocke en session ICI pour que ce soit dispo en AJAX ET en classique
