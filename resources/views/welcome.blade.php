@@ -14,7 +14,7 @@
 @section('main-content')
 {{-- HERO --}}
 <section class="section bg-img text-white">
-    <div class="hero-layout">
+    <div class="hero-layout"><!-- 
 
         {{-- Gauche : texte --}}
         <div class="hero-block">
@@ -29,13 +29,13 @@
                 Accédez à notre catalogue
                 <i class="bi bi-arrow-right ms-2"></i>
             </a>
-        </div>
+        </div> -->
 
         {{-- Droite : catégories --}}
         <div class="cats-wrapper">
             <div class="cats-header">
                 <div>
-                    <div class="section-title">Quelques <span>Catégories</span></div>
+                    <div class="section-title">Nos <span>Catégories</span></div>
                     <div class="section-sub">Matériels disponibles en location</div>
                 </div>
                 <a href="{{ route('catalogue.index') }}" class="see-all">
@@ -44,9 +44,9 @@
             </div>
 
             <div class="cats-grid" id="categoriesGrid">
-                @foreach($categories as $index => $categorie)
+                @foreach($categories as $categorie)
                     <a href="{{ route('catalogue.index', ['categorie_id' => $categorie->id]) }}"
-                    class="cat-card {{ $index >= 12 ? 'extra-category d-none' : '' }}">
+                    class="cat-card">
                         <div class="cat-img-wrap">
                             <img src="{{ asset('storage/'.$categorie->image_link) }}"
                                 alt="{{ $categorie->nom }}">
@@ -55,14 +55,6 @@
                     </a>
                 @endforeach
             </div>
-
-            @if($categories->count() > 12)
-                <div class="text-center mt-4">
-                    <button id="showMoreCategories" class="btn btn-outline-primary">
-                        Voir plus de catégories
-                    </button>
-                </div>
-            @endif
         </div>
 
     </div>
@@ -92,22 +84,4 @@
         });
     </script>
 @endif
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const btn = document.getElementById('showMoreCategories');
-
-    if (btn) {
-        btn.addEventListener('click', function () {
-
-            document.querySelectorAll('.extra-category')
-                .forEach(item => item.classList.remove('d-none'));
-
-            btn.style.display = 'none';
-        });
-    }
-
-});
-</script>
 @endpush
