@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('designation');
             $table->integer('tranche_debut');
             $table->integer('tranche_fin');
-            $table->decimal('tranche_valeur', 15, 4);
+            $table->decimal('tranche_valeur', 15, 5);
             $table->unique(['pays_id','tranche_debut']);
 
             $table->timestamps();

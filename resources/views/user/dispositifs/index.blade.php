@@ -99,11 +99,11 @@
                     </div>
 
                     {{-- Badge état --}}
-                    <div class="position-absolute top-0 end-0 m-2">
+                    <!-- <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge {{ $dispositif->etat === 'Neuf' ? 'bg-success' : ($dispositif->etat === 'Bon' ? 'bg-primary' : 'bg-warning') }}">
                             {{ $dispositif->etat }}
                         </span>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="card-body d-flex flex-column">
@@ -157,7 +157,7 @@
                             </a>
 
                             @if(!$dispositif->publicationEncours)
-                                @if(!$abonnementActif)
+                                @if($abonnementActif)
                                     {{-- ✅ Abonnement valide : accès direct --}}
                                     <a href="{{ route('user.publications.createByDispositif', $dispositif) }}"
                                     class="btn btn-sm btn-outline-success" title="Publier">

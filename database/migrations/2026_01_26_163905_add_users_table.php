@@ -29,8 +29,12 @@ return new class extends Migration
             $table->string('nom');
             $table->string('prenom');
             $table->string('raison_sociale')->nullable();
+            
             $table->string('email')->unique();
+            $table->string('email_verification_code', 255)->nullable()->after('email_verified_at');
+            $table->timestamp('email_verification_code_expires_at')->nullable()->after('email_verification_code');
             $table->timestamp('email_verified_at')->nullable();
+            
             $table->string('password');
             $table->rememberToken();
 

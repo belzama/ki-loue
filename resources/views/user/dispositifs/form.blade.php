@@ -81,17 +81,21 @@
             {{-- TARIFS --}}
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label>Tarif minimum <span class="text-danger">*</span></label>
-                    <input type="number" id="tarif_min" name="tarif_min" class="form-control" step="0.01"
+                    <label>Prix minimum de location <span class="text-danger">*</span></label>
+                    <input type="text" id="tarif_min_display" class="form-control" inputmode="numeric"
+                        value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}">
+                    <input type="hidden" id="tarif_min" name="tarif_min"
                         value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}" required>
-                    <small class="form-text text-muted" id="tarif_min_hint"></small>
+                    <!-- <small class="form-text text-muted" id="tarif_min_hint"></small> -->
                     <div class="invalid-feedback" id="error-tarif_min"></div>
                 </div>
                 <div class="col-md-6">
-                    <label>Tarif maximum <span class="text-danger">*</span></label>
-                    <input type="number" id="tarif_max" name="tarif_max" class="form-control" step="0.01"
+                    <label>Prix maximum de location <span class="text-danger">*</span></label>
+                    <input type="text" id="tarif_max_display" class="form-control" inputmode="numeric"
+                        value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}">
+                    <input type="hidden" id="tarif_max" name="tarif_max"
                         value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}" required>
-                    <small class="form-text text-muted" id="tarif_max_hint"></small>
+                    <!-- <small class="form-text text-muted" id="tarif_max_hint"></small> -->
                     <div class="invalid-feedback" id="error-tarif_max"></div>
                 </div>
             </div>
@@ -205,57 +209,55 @@
         function setTarifLimits(min, max) {
             const tarifMinEl  = document.getElementById('tarif_min');
             const tarifMaxEl  = document.getElementById('tarif_max');
+            const tarifMinDisplay = document.getElementById('tarif_min_display');
+            const tarifMaxDisplay = document.getElementById('tarif_max_display');
             const tarifMinHint = document.getElementById('tarif_min_hint');
             const tarifMaxHint = document.getElementById('tarif_max_hint');
 
             if (min == null || max == null) {
-                tarifMinEl.removeAttribute('min'); tarifMinEl.removeAttribute('max');
-                tarifMaxEl.removeAttribute('min'); tarifMaxEl.removeAttribute('max');
-                tarifMinHint.textContent = '';
-                tarifMaxHint.textContent = '';
+                if (tarifMinHint) tarifMinHint.textContent = '';
+                if (tarifMaxHint) tarifMaxHint.textContent = '';
                 return;
             }
 
             min = parseFloat(min);
             max = parseFloat(max);
 
-            tarifMinEl.min = min; tarifMinEl.max = max;
-            tarifMaxEl.min = min; tarifMaxEl.max = max;
-
-            tarifMinHint.textContent = `Doit être compris entre ${min} et ${max}`;
-            tarifMaxHint.textContent = `Doit être compris entre ${min} et ${max}`;
+            if (tarifMinHint) tarifMinHint.textContent = `Doit être compris entre ${formatNombre(min)} et ${formatNombre(max)}`;
+            if (tarifMaxHint) tarifMaxHint.textContent = `Doit être compris entre ${formatNombre(min)} et ${formatNombre(max)}`;
 
             tarifMinEl.value = min;
             tarifMaxEl.value = max;
-
-            // blur uniquement — validation en quittant le champ
-            if (!tarifMinEl.dataset.listenerAttached) {
-                tarifMinEl.addEventListener('blur', () => {
-                    validateTarifInput(tarifMinEl,
-                        parseFloat(tarifMinEl.dataset.currentMin),
-                        parseFloat(tarifMinEl.dataset.currentMax));
-                });
-                tarifMinEl.dataset.listenerAttached = 'true';
-            }
-            if (!tarifMaxEl.dataset.listenerAttached) {
-                tarifMaxEl.addEventListener('blur', () => {
-                    validateTarifInput(tarifMaxEl,
-                        parseFloat(tarifMaxEl.dataset.currentMin),
-                        parseFloat(tarifMaxEl.dataset.currentMax));
-                });
-                tarifMaxEl.dataset.listenerAttached = 'true';
-            }
+            tarifMinDisplay.value = formatNombre(min);
+            tarifMaxDisplay.value = formatNombre(max);
 
             tarifMinEl.dataset.currentMin = min; tarifMinEl.dataset.currentMax = max;
             tarifMaxEl.dataset.currentMin = min; tarifMaxEl.dataset.currentMax = max;
+
+            if (!tarifMinDisplay.dataset.listenerAttached) {
+                tarifMinDisplay.addEventListener('blur', () => {
+                    validateTarifInput(tarifMinEl, tarifMinDisplay,
+                        parseFloat(tarifMinEl.dataset.currentMin),
+                        parseFloat(tarifMinEl.dataset.currentMax));
+                });
+                tarifMinDisplay.dataset.listenerAttached = 'true';
+            }
+            if (!tarifMaxDisplay.dataset.listenerAttached) {
+                tarifMaxDisplay.addEventListener('blur', () => {
+                    validateTarifInput(tarifMaxEl, tarifMaxDisplay,
+                        parseFloat(tarifMaxEl.dataset.currentMin),
+                        parseFloat(tarifMaxEl.dataset.currentMax));
+                });
+                tarifMaxDisplay.dataset.listenerAttached = 'true';
+            }
         }
 
-        function validateTarifInput(el, min, max) {
-            let val = parseFloat(el.value);
+        function validateTarifInput(hiddenEl, displayEl, min, max) {
+            let val = parseFloat(hiddenEl.value);
             if (isNaN(val)) return;
 
-            if (val < min) el.value = min;
-            else if (val > max) el.value = max;
+            if (val < min) val = min;
+            else if (val > max) val = max;
 
             const tarifMinEl = document.getElementById('tarif_min');
             const tarifMaxEl = document.getElementById('tarif_max');
@@ -263,10 +265,51 @@
             let vMax = parseFloat(tarifMaxEl.value);
 
             if (!isNaN(vMin) && !isNaN(vMax) && vMin > vMax) {
-                if (el === tarifMinEl) tarifMaxEl.value = vMin;
-                else tarifMinEl.value = vMax;
+                if (hiddenEl === tarifMinEl) vMax = vMin;
+                else vMin = vMax;
+                tarifMinEl.value = vMin;
+                tarifMaxEl.value = vMax;
+                document.getElementById('tarif_min_display').value = formatNombre(vMin);
+                document.getElementById('tarif_max_display').value = formatNombre(vMax);
+            } else {
+                hiddenEl.value = val;
+                displayEl.value = formatNombre(val);
             }
         }
+
+        // Formate un nombre avec séparateurs de milliers (espace)
+        function formatNombre(val) {
+            val = val.toString().replace(/\D/g, ''); // retire tout sauf les chiffres
+            if (!val) return '';
+            return parseInt(val, 10).toLocaleString('fr-FR');
+        }
+
+        // Retire les séparateurs pour obtenir la valeur brute
+        function unformatNombre(val) {
+            return val.toString().replace(/\s/g, '');
+        }
+
+        // Attache le formatage live à un champ display + son champ hidden
+        function attachFormatage(displayId, hiddenId) {
+            const displayEl = document.getElementById(displayId);
+            const hiddenEl  = document.getElementById(hiddenId);
+
+            displayEl.addEventListener('input', function() {
+                const raw = unformatNombre(this.value);
+                this.value = formatNombre(raw);
+                hiddenEl.value = raw;
+            });
+
+            // Formatage initial (si valeur préremplie en mode édition)
+            if (displayEl.value) {
+                const raw = unformatNombre(displayEl.value);
+                displayEl.value = formatNombre(raw);
+                hiddenEl.value = raw;
+            }
+        }
+
+        attachFormatage('tarif_min_display', 'tarif_min');
+        attachFormatage('tarif_max_display', 'tarif_max');
 
         // --- 3. CHARGEMENT PARAMS ---
         async function loadParams(typeId) {
@@ -277,7 +320,7 @@
             try {
                 const res  = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
                 const data = await res.json();
-
+                
                 renderPhotoInputs(data.nb_max_photo ?? 4);
                 setTarifLimits(data.tarif_min, data.tarif_max);
                 
@@ -339,6 +382,7 @@
                 });
 
             } catch (e) {
+                console.error('Erreur détaillée:', e);
                 container.html(`<div class="text-danger">Erreur chargement</div>`);
             }
         }
@@ -387,8 +431,6 @@
         }
 
         // --- 5. MODALE DE CONFIRMATION ---
-        const dispositifForm = document.getElementById('dispositifForm');
-
         dispositifForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -397,20 +439,59 @@
                 return;
             }
 
+            const deviseSymbol = "{{ auth()->user()->pays?->devise?->symbol ?? 'F CFA' }}";
+
             const activeCatName = document.querySelector('.categorie-sidebar-btn.active span')?.textContent ?? 'N/A';
 
+            // Fonction utilitaire pour formater un montant avec séparateurs de milliers
+            function formatMontant(val) {
+                if (val === '' || val === null || isNaN(val)) return null;
+                return parseFloat(val).toLocaleString('fr-FR');
+            }
+
+            // Récupération et formatage de la plage de prix
+            const prixMinRaw = $("#tarif_min").val();
+            const prixMaxRaw = $("#tarif_max").val();
+            const prixMin = formatMontant(prixMinRaw);
+            const prixMax = formatMontant(prixMaxRaw);
+
+            let prixHtml = 'N/A';
+            if (prixMin && prixMax) {
+                prixHtml = `${prixMin} ${deviseSymbol} - ${prixMax} ${deviseSymbol} / jour`;
+            } else if (prixMin) {
+                prixHtml = `À partir de ${prixMin} ${deviseSymbol}`;
+            } else if (prixMax) {
+                prixHtml = `Jusqu'à ${prixMax} ${deviseSymbol}`;
+            }
+
             let summaryHtml = `
-                <div class="col-md-6 mb-2"><strong>Catégorie :</strong><br> ${activeCatName}</div>
-                <div class="col-md-6 mb-2"><strong>Type :</strong><br> ${$("#types_dispositif_id option:selected").text()}</div>
-                <div class="col-md-6 mb-2"><strong>Marque :</strong><br> ${$("#marque").val() || 'N/A'}</div>
-                <div class="col-md-6 mb-2"><strong>Modèle :</strong><br> ${$("#modele").val() || 'N/A'}</div>
+                <div class="col-12 border-bottom py-1">
+                    <strong class="summary-label">Catégorie :</strong> <span>${activeCatName}</span>
+                </div>
+                <div class="col-12 border-bottom py-1">
+                    <strong class="summary-label">Type :</strong> <span>${$("#types_dispositif_id option:selected").text()}</span>
+                </div>
+                <div class="col-12 border-bottom py-1">
+                    <strong class="summary-label">Marque :</strong> <span>${$("#marque").val() || 'N/A'}</span>
+                </div>
+                <div class="col-12 border-bottom py-1">
+                    <strong class="summary-label">Modèle :</strong> <span>${$("#modele").val() || 'N/A'}</span>
+                </div>
+                <div class="col-12 border-bottom py-1">
+                    <strong class="summary-label">Prix de location :</strong> <span>${prixHtml}</span>
+                </div>
                 <div class="col-12"><hr><h6>Paramètres techniques :</h6><ul class="small">`;
 
             $("#params-container .col-md-6").each(function() {
                 const label = $(this).find('label').text().replace('*', '').trim();
                 const input = $(this).find('input:not([type=hidden]), select');
                 let val = input.is('select') ? input.find('option:selected').text() : input.val();
+
                 if (val && val !== 'Sélectionner') {
+                    // Formatage avec séparateurs de milliers si c'est un champ numérique
+                    if (input.attr('type') === 'number' && !isNaN(val) && val !== '') {
+                        val = parseFloat(val).toLocaleString('fr-FR');
+                    }
                     const unit = $(this).find('.input-group-text').text();
                     summaryHtml += `<li><strong>${label} :</strong> ${val} ${unit}</li>`;
                 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerificationCodeController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\DeviseController;
@@ -46,8 +47,13 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Inscription
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('register', [RegisteredUserController::class, 'store']);
+// ✅ Vérification email (sans auth)
+Route::post('/verify-email/check',  [VerificationCodeController::class, 'verify'])->name('verification.verify');
+Route::post('/verify-email/resend', [VerificationCodeController::class, 'resend'])->name('verification.resend');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/pays/create', [PaysController::class, 'create'])->name('pays.create');

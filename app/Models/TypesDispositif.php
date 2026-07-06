@@ -17,7 +17,7 @@ class TypesDispositif extends Model
     }
     public function params()
     {
-        return $this->hasMany(TypeDispositifParam::class);
+        return $this->hasMany(TypeDispositifParam::class, 'types_dispositif_id');
     }
 
     public function categorie()

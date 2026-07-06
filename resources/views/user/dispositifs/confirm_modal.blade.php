@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
                 <div id="summaryContent" class="row">
-                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Modifier</button>

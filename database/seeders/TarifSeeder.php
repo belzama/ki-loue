@@ -32,14 +32,14 @@ class TarifSeeder extends Seeder
                 'designation' => 'Tranche 3',
                 'tranche_debut' => 8,
                 'tranche_fin' => 15,
-                'tranche_valeur' => 0.00053,
+                'tranche_valeur' => 0.00530,
             ],
             [
                 'pays_id' => 1,
                 'designation' => 'Tranche 4',
                 'tranche_debut' => 16,
                 'tranche_fin' => 31,
-                'tranche_valeur' => 0.0021,
+                'tranche_valeur' => 0.00210,
             ],
         ];
 

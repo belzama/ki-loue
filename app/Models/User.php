@@ -41,6 +41,8 @@ class User extends Authenticatable
         'prenom',
         'raison_sociale',
         'email',
+        'email_verification_code',           
+        'email_verification_code_expires_at',
         'telephone',
         'whatsapp',
         'password',
