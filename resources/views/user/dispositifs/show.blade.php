@@ -6,12 +6,12 @@
     <div class="card-body">
 
         <h4 class="mb-3">
-            {{ $dispositif->type_dispositif->nom }}
+            {{-- $dispositif->type_dispositif->nom --}}
             {{ $dispositif->designation }}
             {{ $dispositif->numero_immatriculation }}
-            <span class="badge bg-info mb-3">
+            <!-- <span class="badge bg-info mb-3">
                 {{ ucfirst($dispositif->etat) }}
-            </span>
+            </span> -->
         </h4>
 
         {{-- ===== 4. GALERIE PHOTOS ===== --}}

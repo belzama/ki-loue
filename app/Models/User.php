@@ -40,11 +40,12 @@ class User extends Authenticatable
         'nom',
         'prenom',
         'raison_sociale',
-        'email',
-        'email_verification_code',           
-        'email_verification_code_expires_at',
-        'telephone',
-        'whatsapp',
+        'email',          
+        'email_verified_at',
+        'telephone',          
+        'telephone_verified_at',
+        'whatsapp',          
+        'whatsapp_verified_at',
         'password',
         'taux_tarif_abonnement',
         'taux_commission',
@@ -76,6 +77,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'whatsapp_verified_at' => 'datetime',
+            'telephone_verified_at' => 'datetime',
+            
             'password' => 'hashed',
         ];
     }

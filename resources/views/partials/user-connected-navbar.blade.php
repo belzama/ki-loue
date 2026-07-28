@@ -1,21 +1,24 @@
 <ul class="navbar-nav flex-grow-1 d-flex justify-content-center align-items-center">
 
     <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center" href="{{ url('/') }}">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->is('/') ? 'active-link' : '' }}"
+           href="{{ url('/') }}">
             <i class="bi bi-house me-2"></i>
             <span>Accueil</span>
         </a>
     </li>
 
     <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center" href="{{ route('user.dispositifs.index') }}">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.dispositifs.*') ? 'active-link' : '' }}"
+           href="{{ route('user.dispositifs.index') }}">
             <i class="bi bi-truck me-2"></i>
             <span>Matériels</span>
         </a>
     </li>
 
     <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center" href="{{ route('user.publications.index') }}">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.publications.*') ? 'active-link' : '' }}"
+           href="{{ route('user.publications.index') }}">
             <i class="bi bi-journal-text me-2"></i>
             <span>Publications</span>
         </a>
@@ -23,14 +26,16 @@
 
     @if(auth()->user()->role === 'Admin')
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}"
+               href="{{ route('admin.dashboard') }}">
                 <i class="bi bi-person me-2"></i>
                 <span>Mon compte</span>
             </a>
         </li>
     @else
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('user.dashboard') }}">
+            <a class="nav-link {{ request()->routeIs('user.dashboard') ? 'active-link' : '' }}"
+               href="{{ route('user.dashboard') }}">
                 <i class="bi bi-person me-2"></i>
                 <span>Mon compte</span>
             </a>

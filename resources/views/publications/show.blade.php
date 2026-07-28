@@ -25,7 +25,7 @@
 
         <div class="d-flex flex-wrap gap-2">
 
-            <form action="{{ route('reservations.store', $publication->id) }}" method="POST" id="contactForm">
+            <!-- <form action="{{ route('reservations.store', $publication->id) }}" method="POST" id="contactForm">
                 @csrf
 
                 {{-- Afficher le numéro (PC) --}}
@@ -73,7 +73,13 @@
                         <i class="bi bi-envelope-fill"></i> Envoyer Email
                     </button>
                 @endif
-            </form>
+            </form> -->
+            <a href="https://wa.me/{{ config('services.infobip.whatsapp_sender') }}?text={{ urlencode('Bonjour, je suis intéressé par cette annonce : ' . route('publications.show', $publication)) }}"
+            target="_blank"
+            class="btn btn-success contact-btn btn-sm px-3 shadow-sm">
+                <i class="bi bi-whatsapp"></i>
+                Contacter
+            </a>
 
         </div>
     </div>

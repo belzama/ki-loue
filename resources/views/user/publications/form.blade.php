@@ -226,7 +226,7 @@
             </div>
         </div>
 
-        <div class="mt-3 mb-3">
+        <div class="mt-3 mb-3 d-none">
             <div class="d-flex justify-content-start">
                 <button id="btn_toggle_detail" type="button"
                     class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 shadow-sm">

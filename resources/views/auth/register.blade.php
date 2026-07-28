@@ -31,13 +31,13 @@
                 <div class="row g-2 mb-2">
                     <div class="col-6">
                         <label class="form-label form-label-sm mb-0">Nom <span class="text-danger">*</span></label>
-                        <input type="text" name="nom" value="{{ old('nom') }}"
+                        <input type="text" id="nom" name="nom" value="{{ old('nom') }}"
                                class="form-control form-control-sm" required>
                         @error('nom')<small class="text-danger">{{ $message }}</small>@enderror
                     </div>
                     <div class="col-6">
                         <label class="form-label form-label-sm mb-0">Prénom(s) <span class="text-danger">*</span></label>
-                        <input type="text" name="prenom" value="{{ old('prenom') }}"
+                        <input type="text" id="prenom" name="prenom" value="{{ old('prenom') }}"
                                class="form-control form-control-sm" required>
                         @error('prenom')<small class="text-danger">{{ $message }}</small>@enderror
                     </div>
@@ -83,10 +83,16 @@
                         </select>
                     </div>
                     <div class="col-6">
-                        <label class="form-label form-label-sm mb-0">Pseudo</label>
-                        <input type="text" name="code" value="{{ old('code') }}"
-                               class="form-control form-control-sm"
-                               placeholder="Généré automatiquement">
+                        <label class="form-label form-label-sm mb-0">Pseudo (Code parrainage)</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="code" id="code" value="{{ old('code') }}"
+                                class="form-control form-control-sm"
+                                placeholder="Généré automatiquement"
+                                readonly>
+                            <button type="button" class="btn btn-outline-secondary" id="regenerateCode" title="Générer un nouveau code">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -211,6 +217,39 @@
             el.addEventListener("change", toggleRaisonSociale);
         });
 
+        // ── Code parrainage ──────────────────────────────────────
+        const referralCodeInput = document.getElementById('code');
+        const regenerateBtn = document.getElementById('regenerateCode');
+        const nomInput = document.getElementById('nom');       // adapte l'id si différent
+        const prenomInput = document.getElementById('prenom'); // adapte l'id si différent
+
+        function generateReferralCode(nom, prenom) {
+            const cleanNom = (nom || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+            const cleanPrenom = (prenom || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+            const firstLetterPrenom = cleanPrenom.charAt(0); // "W" pour "Wayi"
+
+            const suffix = String(Math.floor(Math.random() * 1000)).padStart(3, '0'); // ex: "450", "007", "999"
+
+            return `${firstLetterPrenom}${cleanNom}${suffix}`;
+        }
+
+
+        function updateReferralCode() {
+            referralCodeInput.value = generateReferralCode(nomInput.value, prenomInput.value);
+        }
+
+        // Génère le code au chargement si Nom/Prénom déjà remplis (ex: retour après erreur de validation)
+        if (!referralCodeInput.value && nomInput.value && prenomInput.value) {
+            updateReferralCode();
+        }
+
+        // Regénère automatiquement le code quand Nom ou Prénom changent
+        nomInput.addEventListener('input', updateReferralCode);
+        prenomInput.addEventListener('input', updateReferralCode);
+
+        // Bouton pour forcer une régénération manuelle (change juste le suffixe aléatoire)
+        regenerateBtn.addEventListener('click', updateReferralCode);
+
         // ── intlTelInput ────────────────────────────────────────
         const telInput      = document.querySelector("#telephone");
         const whatsappInput = document.querySelector("#whatsapp");
@@ -218,6 +257,7 @@
         const itiTel = window.intlTelInput(telInput, {
             initialCountry: "auto",
             nationalMode: false,
+            separateDialCode: true,  
             preferredCountries: ["tg", "ci", "sn", "fr"],
             geoIpLookup: function (callback) {
                 fetch("https://ipapi.co/json")
@@ -231,6 +271,7 @@
         const itiWhatsapp = window.intlTelInput(whatsappInput, {
             initialCountry: "auto",
             nationalMode: false,
+            separateDialCode: true,  
             preferredCountries: ["tg", "ci", "sn", "fr"],
             utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js"
         });
@@ -301,7 +342,7 @@
             verifyBtn.disabled = true;
             verifyBtn.textContent = 'Vérification...';
 
-            fetch('{{ route("verification.verify") }}', {
+            fetch('{{ route("verification.check") }}', {   // ⚠️ changé : verification.verify → verification.check
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {

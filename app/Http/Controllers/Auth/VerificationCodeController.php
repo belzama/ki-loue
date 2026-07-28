@@ -55,8 +55,8 @@ class VerificationCodeController extends Controller
         $user = User::findOrFail($userId);
 
         if (
-            $user->email_verification_code_expires_at &&
-            now()->diffInSeconds($user->email_verification_code_expires_at) > 540
+            $user->verification_code_expires_at &&
+            now()->diffInSeconds($user->verification_code_expires_at) > 540
         ) {
             return response()->json(['message' => 'Patientez avant de renvoyer un code.'], 429);
         }

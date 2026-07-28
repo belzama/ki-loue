@@ -82,20 +82,28 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label>Prix minimum de location <span class="text-danger">*</span></label>
-                    <input type="text" id="tarif_min_display" class="form-control" inputmode="numeric"
-                        value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}">
+                    <div class="input-group">
+                        <input type="text" id="tarif_min_display" class="form-control" inputmode="numeric"
+                            value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}">
+                        <span class="input-group-text">
+                            {{ auth()->user()->pays->devise->symbol ?? '' }} / JOUR
+                        </span>
+                    </div>
                     <input type="hidden" id="tarif_min" name="tarif_min"
                         value="{{ old('tarif_min', $dispositif->tarif_min ?? '') }}" required>
-                    <!-- <small class="form-text text-muted" id="tarif_min_hint"></small> -->
                     <div class="invalid-feedback" id="error-tarif_min"></div>
                 </div>
                 <div class="col-md-6">
                     <label>Prix maximum de location <span class="text-danger">*</span></label>
-                    <input type="text" id="tarif_max_display" class="form-control" inputmode="numeric"
-                        value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}">
+                    <div class="input-group">
+                        <input type="text" id="tarif_max_display" class="form-control" inputmode="numeric"
+                            value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}">
+                        <span class="input-group-text">
+                            {{ auth()->user()->pays->devise->symbol ?? '' }} / JOUR
+                        </span>
+                    </div>
                     <input type="hidden" id="tarif_max" name="tarif_max"
                         value="{{ old('tarif_max', $dispositif->tarif_max ?? '') }}" required>
-                    <!-- <small class="form-text text-muted" id="tarif_max_hint"></small> -->
                     <div class="invalid-feedback" id="error-tarif_max"></div>
                 </div>
             </div>

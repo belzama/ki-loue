@@ -31,7 +31,7 @@ class RegisteredUserController extends Controller
      * Enregistrer un nouvel utilisateur
      */
     public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
-    {
+    {   
         $request->validate([
             'nom'            => ['required', 'string', 'max:150'],
             'prenom'         => ['required', 'string', 'max:150'],

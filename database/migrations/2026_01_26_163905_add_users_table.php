@@ -31,15 +31,19 @@ return new class extends Migration
             $table->string('raison_sociale')->nullable();
             
             $table->string('email')->unique();
-            $table->string('email_verification_code', 255)->nullable()->after('email_verified_at');
-            $table->timestamp('email_verification_code_expires_at')->nullable()->after('email_verification_code');
             $table->timestamp('email_verified_at')->nullable();
             
             $table->string('password');
             $table->rememberToken();
 
             $table->string('telephone');
+            $table->timestamp('telephone_verified_at')->nullable();
+
             $table->string('whatsapp');
+            $table->timestamp('whatsapp_verified_at')->nullable();
+            $table->boolean('whatsapp_notifications_opt_in')->default(false);
+
+            $table->timestamp('verification_code_expires_at')->nullable();
 
             $table->enum('role', ['Admin', 'User'])->default('User');
 

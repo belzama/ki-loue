@@ -39,12 +39,14 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
 
-            // 🔀 Redirection selon rôle
-            if (auth()->user()->role === 'Admin') {
-                return redirect()->route('admin.dashboard');
-            }
+            $user = Auth::user();
 
-            return redirect()->route('user.dashboard');
+            // 🔀 Redirection selon rôle
+            // La vérification email/téléphone/whatsapp (selon sys_params) est gérée
+            // automatiquement par le middleware "contacts.verified" via la modal.
+            return $user->role === 'Admin'
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('user.dashboard');
         }
 
         // ❌ Échec

@@ -166,8 +166,11 @@ class DispositifController extends Controller
 
             'photos'                 => 'nullable|array',
             'photos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
-            'params'                 => 'nullable|array',
-            'params.*'               => 'nullable|string',
+
+            // 🔥 NOUVEAU FORMAT PARAMS
+            'params' => ['nullable', 'array'],
+            'params.*.value' => ['nullable'],
+            'params.*.unit'  => ['nullable', 'string'],
         ]);
 
         return DB::transaction(function () use ($request, $dispositif, $validatedData) {
@@ -179,8 +182,11 @@ class DispositifController extends Controller
 
             // Mise à jour des paramètres (Nettoyage + Réinsertion)
             $dispositif->params()->delete();
+            
             if ($request->filled('params')) {
-                foreach ($request->params as $paramId => $value) {
+                foreach ($request->params as $paramId => $paramData) {
+                    $value = $paramData['value'] ?? null;
+                    
                     if (is_numeric($paramId) && !empty($value)) {
                         $dispositif->params()->create([
                             'type_dispositif_param_id' => $paramId,

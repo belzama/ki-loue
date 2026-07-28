@@ -224,20 +224,6 @@ class HomeController extends Controller
             'message'          => 'nullable|string',
         ]);
 
-        // Création de la réservation
-        $reservation = Reservation::create([
-            'publication_id'   => $publication->id,
-            'user_id'          => auth()->id(), // null si non connecté
-            'date_reservation' => now()->toDateString(),
-            'date_demandee'    => $data['date_demandee'] ?? null,
-            'duree_demandee'   => $data['duree_demandee'] ?? 1,
-            'nom_prenom'       => $data['nom_prenom'] ?? null,
-            'email'            => $data['email'] ?? null,
-            'message'          => $data['message'] ?? null,
-            'telephone'        => $data['telephone'] ?? null,
-            'statut'           => 'Demandée',
-        ]);
-
         try {
 
             DB::beginTransaction();

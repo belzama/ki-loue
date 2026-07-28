@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\UserMiddleware;
+use App\Http\Middleware\EnsureContactsAreVerified;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'admin' => AdminMiddleware::class,
             'user'  => UserMiddleware::class,
+            'contacts.verified' => EnsureContactsAreVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

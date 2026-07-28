@@ -27,7 +27,7 @@
                     <div class="text-muted small mb-2">{{ auth()->user()->raison_sociale }}</div>
                 @endif
 
-                <span class="badge mb-3 {{ auth()->user()->type === 'Société' ? 'bg-primary' : 'bg-secondary' }}">
+                <span class="badge fs-5 mb-3 {{ auth()->user()->type === 'Société' ? 'bg-primary' : 'bg-secondary' }}">
                     {{ auth()->user()->type }}
                 </span>
 
@@ -39,6 +39,14 @@
                     <div class="d-flex justify-content-between py-1 border-bottom">
                         <span class="text-muted small">Email</span>
                         <span class="fw-semibold small">{{ auth()->user()->email }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted small">Téléphone</span>
+                        <span class="fw-semibold small">{{ auth()->user()->telephone }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted small">Whatsapp</span>
+                        <span class="fw-semibold small">{{ auth()->user()->whatsapp }}</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom">
                         <span class="text-muted small">Solde réel</span>
@@ -69,7 +77,7 @@
                 </a>
 
                 <button type="button"
-                        class="btn btn-outline-warning btn-sm w-100 mt-2"
+                        class="btn btn-warning btn-sm w-100 mt-2"
                         data-bs-toggle="modal"
                         data-bs-target="#modalPassword">
                     <i class="bi bi-lock me-1"></i> Modifier mon mot de passe
@@ -95,6 +103,18 @@
                         @endforeach
                     </ul>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('whatsapp_unverified') && !auth()->user()->whatsapp_verified_at)
+                <div class="alert alert-warning alert-dismissible fade show d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Votre numéro WhatsApp n'est pas encore vérifié.
+                    </div>
+                    <button type="button" class="btn btn-sm btn-warning" id="btnVerifyWhatsapp">
+                        Vérifier maintenant
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" id="btnDismissWhatsapp"></button>
                 </div>
             @endif
 
@@ -141,7 +161,7 @@
                             </div>
 
                             {{-- Raison sociale --}}
-                            <div class="col-12">
+                            <div class="col-12" id="raison_sociale_block">
                                 <label class="form-label">Raison sociale</label>
                                 <input type="text" name="raison_sociale"
                                        class="form-control @error('raison_sociale') is-invalid @enderror"
@@ -150,7 +170,7 @@
                             </div>
 
                             {{-- Email --}}
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" name="email"
                                        class="form-control @error('email') is-invalid @enderror"
@@ -158,39 +178,56 @@
                                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            {{-- Pays --}}
-                            <div class="col-md-6">
-                                <label class="form-label">Pays <span class="text-danger">*</span></label>
-                                <select name="pays_id"
-                                        class="form-select @error('pays_id') is-invalid @enderror" required>
-                                    <option value="">Sélectionner</option>
-                                    @foreach($pays as $p)
-                                        <option value="{{ $p->id }}"
-                                            {{ old('pays_id', auth()->user()->pays_id) == $p->id ? 'selected' : '' }}>
-                                            {{ $p->nom }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('pays_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
                             {{-- Téléphone / WhatsApp --}}
-                            <div class="col-md-6">
-                                <label class="form-label">Téléphone <span class="text-danger">*</span></label>
-                                <input type="text" name="telephone"
-                                       class="form-control @error('telephone') is-invalid @enderror"
-                                       value="{{ old('telephone', auth()->user()->telephone) }}" required>
-                                @error('telephone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="row g-2 mb-2">                             
+
+                                {{-- Pays --}}
+                                <div class="col-md-4">
+                                    <label class="form-label">Pays <span class="text-danger">*</span></label>
+                                    <select name="pays_id"
+                                            class="form-select @error('pays_id') is-invalid @enderror" required>
+                                        <option value="">Sélectionner</option>
+                                        @foreach($pays as $p)
+                                            <option value="{{ $p->id }}"
+                                                {{ old('pays_id', auth()->user()->pays_id) == $p->id ? 'selected' : '' }}>
+                                                {{ $p->nom }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('pays_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                
+                                <div class="col-4">
+                                    <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+                                    <input type="tel" id="telephone" name="telephone"
+                                        class="form-control @error('telephone') is-invalid @enderror"
+                                        value="{{ old('telephone', auth()->user()->telephone) }}" required>
+                                    @error('telephone') 
+                                        <div class="invalid-feedback">{{ $message }}</div> 
+                                    @enderror
+                                </div>
+
+                                <div class="col-4">
+                                    <label class="form-label">WhatsApp</label>
+                                    <input type="tel" id="whatsapp" name="whatsapp"
+                                        class="form-control @error('whatsapp') is-invalid @enderror"
+                                        value="{{ old('whatsapp', auth()->user()->whatsapp) }}">
+                                    @error('whatsapp') 
+                                        <div class="invalid-feedback">{{ $message }}</div> 
+                                    @enderror
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">WhatsApp</label>
-                                <input type="text" name="whatsapp"
-                                       class="form-control @error('whatsapp') is-invalid @enderror"
-                                       value="{{ old('whatsapp', auth()->user()->whatsapp) }}">
-                                @error('whatsapp') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                        </div>
 
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="whatsapp_notifications_opt_in" id="whatsappOptIn" value="1"
+                                    {{ old('whatsapp_notifications_opt_in', auth()->user()->whatsapp_notifications_opt_in) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="whatsappOptIn">
+                                    Recevoir mes notifications par WhatsApp (facturé selon le tarif en vigueur)
+                                </label>
+                            </div>
                         </div>
 
                         <div class="mt-4 text-end">
@@ -283,31 +320,204 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalVerifyContact" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vérification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="verifyContactForm">
+                <div class="modal-body">
+                    <div id="verifyContactAlert" class="alert alert-danger d-none"></div>
+                    <p>Entrez le code envoyé à <span id="verifyContactLabel"></span>.</p>
+                    <input type="hidden" id="verifyContactType">
+                    <input type="text" id="verifyContactCode" class="form-control" maxlength="6" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" id="verifyContactSubmitBtn" class="btn btn-success">Confirmer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
-function togglePwd(inputId, btn) {
-    const input = document.getElementById(inputId);
-    const icon  = btn.querySelector('i');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('bi-eye', 'bi-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    function togglePwd(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon  = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
     }
-}
+    
+    // ── Raison sociale ──────────────────────────────────────────
+    function toggleRaisonSociale() {
+        const typeChecked = document.querySelector('input[name="type"]:checked');
+        const block = document.getElementById("raison_sociale_block");
 
-// Rouvrir la modal si erreur de mot de passe
-@error('current_password')
-    document.addEventListener('DOMContentLoaded', () => {
-        new bootstrap.Modal(document.getElementById('modalPassword')).show();
+        if (!typeChecked || !block) return; // sécurité si les éléments n'existent pas sur cette page
+
+        block.style.display = typeChecked.value === "Société" ? "block" : "none";
+    }
+
+    // ── Init au chargement ──────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", function () {
+
+        toggleRaisonSociale();
+
+        document.querySelectorAll('input[name="type"]').forEach(el => {
+            el.addEventListener("change", toggleRaisonSociale);
+        });
+        
+        // ✅ Injecter le numéro complet juste avant la soumission du formulaire
+        const profileForm = document.querySelector('form[action="{{ route('user.profile.update') }}"]');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function () {
+                telInput.value      = itiTel.getNumber();
+                whatsappInput.value = itiWhatsapp.getNumber();
+            });
+        }
+
     });
-@enderror
-@error('password')
-    document.addEventListener('DOMContentLoaded', () => {
-        new bootstrap.Modal(document.getElementById('modalPassword')).show();
+
+    // Rouvrir la modal si erreur de mot de passe
+    @error('current_password')
+        document.addEventListener('DOMContentLoaded', () => {
+            new bootstrap.Modal(document.getElementById('modalPassword')).show();
+        });
+    @enderror
+    @error('password')
+        document.addEventListener('DOMContentLoaded', () => {
+            new bootstrap.Modal(document.getElementById('modalPassword')).show();
+        });
+    @enderror
+
+    // ── intlTelInput ────────────────────────────────────────
+    const telInput      = document.querySelector("#telephone");
+    const whatsappInput = document.querySelector("#whatsapp");
+
+    const itiTel = window.intlTelInput(telInput, {
+        initialCountry: "auto",
+        nationalMode: false,
+        separateDialCode: true,  
+        preferredCountries: ["tg", "ci", "sn", "fr"],
+        geoIpLookup: function (callback) {
+            fetch("https://ipapi.co/json")
+                .then(res => res.json())
+                .then(data => callback(data.country_code.toLowerCase()))
+                .catch(() => callback("tg"));
+        },
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js"
     });
-@enderror
+
+    const itiWhatsapp = window.intlTelInput(whatsappInput, {
+        initialCountry: "auto",
+        nationalMode: false,
+        separateDialCode: true,  
+        preferredCountries: ["tg", "ci", "sn", "fr"],
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js"
+    });
+
+    document.getElementById('btnDismissWhatsapp')?.addEventListener('click', function () {
+        fetch('{{ route("verification.whatsapp.dismiss") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            }
+        });
+    });
+
+    // ── Vérification email / whatsapp (profil) ──────────────────
+    function sendVerificationCode(type, btn) {
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Envoi...';
+        }
+
+        fetch('{{ route("verification.send") }}', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ type })
+        })
+        .then(res => res.json().then(data => ({ status: res.status, body: data })))
+        .then(({ status, body }) => {
+            if (status === 200) {
+                const modal = new bootstrap.Modal(document.getElementById('modalVerifyContact'));
+                document.getElementById('verifyContactType').value = type;
+                document.getElementById('verifyContactLabel').textContent =
+                    type === 'email' ? 'votre adresse email' : 'votre numéro WhatsApp';
+                modal.show();
+            } else {
+                alert(body.message || 'Erreur lors de l\'envoi du code.');
+            }
+        })
+        .catch(() => alert('Erreur réseau.'))
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = type === 'whatsapp' ? 'Vérifier maintenant' : 'Renvoyer le code';
+            }
+        });
+    }
+
+    document.getElementById('btnVerifyWhatsapp')?.addEventListener('click', function () {
+        sendVerificationCode('whatsapp', this);
+    });
+
+    document.getElementById('verifyContactForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const type = document.getElementById('verifyContactType').value;
+        const code = document.getElementById('verifyContactCode').value;
+        const submitBtn = document.getElementById('verifyContactSubmitBtn');
+        const alertBox = document.getElementById('verifyContactAlert');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Vérification...';
+
+        fetch('{{ route("verification.confirm") }}', {   // ⚠️ changé : verification.verify → verification.confirm
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ type, code })
+        })
+        .then(res => res.json().then(data => ({ status: res.status, body: data })))
+        .then(({ status, body }) => {
+            if (status === 200) {
+                window.location.reload();
+            } else {
+                alertBox.textContent = body.message || 'Code invalide ou expiré.';
+                alertBox.classList.remove('d-none');
+            }
+        })
+        .catch(() => {
+            alertBox.textContent = 'Erreur réseau.';
+            alertBox.classList.remove('d-none');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmer';
+        });
+    });
 </script>
 @endpush
 

@@ -35,4 +35,31 @@ return [
         ],
     ],
 
+    'infobip' => [
+        'base_url' => env('INFOBIP_BASE_URL'),
+        'api_key' => env('INFOBIP_API_KEY'),
+        'sms_sender' => env('INFOBIP_SMS_SENDER'),
+        'whatsapp_sender' => env('INFOBIP_WHATSAPP_SENDER'),
+
+        // 📋 Registre central de tous les templates WhatsApp du projet
+        'whatsapp_templates' => [
+            'verification_code' => [
+                'name' => env('INFOBIP_TEMPLATE_VERIFICATION', 'verification_code'),
+                'language' => 'fr',
+                'cout' => 0,
+            ],
+            'reservation_confirmed' => [
+                'name' => env('INFOBIP_TEMPLATE_RESERVATION', 'reservation_confirmed'),
+                'language' => 'fr',
+                'cout' => 25,
+            ],
+            'payment_reminder' => [
+                'name' => env('INFOBIP_TEMPLATE_PAYMENT', 'payment_reminder'),
+                'language' => 'fr',
+                'cout' => 25,
+            ],
+            // ➕ ajoute une entrée ici à chaque nouveau template créé sur Infobip
+        ],
+    ],
+
 ];

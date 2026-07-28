@@ -32,7 +32,8 @@ return new class extends Migration
                 'retrait',
                 'paiement',
                 'remboursement',
-                'ajustement'
+                'ajustement',
+                'notification',
             ])->default('recharge');
 
             // Source ou référence externe (paiement mobile, Stripe, Flooz, TMoney)

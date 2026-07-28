@@ -71,14 +71,14 @@
                 <div class="card-body pt-0">
                     <div class="bg-light p-3 rounded-3 mb-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Solde réel</span>
+                            <span class="text-muted">Solde transaction</span>
                             <span class="fw-bold">
                                 {{ number_format($user->solde_reel, 0, ' ', ' ') }}
                                 {{ $user->pays->devise->symbol ?? 'FCFA' }}
                             </span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Bonus</span>
+                            <span class="text-muted">Solde bonus</span>
                             <span class="fw-bold">
                                 + {{ number_format($user->solde_bonus, 0, ' ', ' ') }}
                                 {{ $user->pays->devise->symbol ?? 'FCFA' }}
@@ -86,7 +86,7 @@
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
-                            <span class="h6 fw-bold mb-0">Total disponible</span>
+                            <span class="h6 fw-bold mb-0">Solde disponible</span>
                             <span class="fw-bold">
                                 {{ number_format($user->solde_reel + $user->solde_bonus, 0, ' ', ' ') }}
                                 {{ $user->pays->devise->symbol ?? 'FCFA' }}

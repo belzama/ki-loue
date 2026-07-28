@@ -13,7 +13,7 @@ class VerificationCodeService
 
         $user->update([
             'email_verification_code'            => Hash::make($code),
-            'email_verification_code_expires_at' => now()->addMinutes(10),
+            'verification_code_expires_at' => now()->addMinutes(10),
         ]);
 
         Mail::to($user->email)->send(new EmailVerificationCode($code));
@@ -21,8 +21,8 @@ class VerificationCodeService
 
     public static function verify(User $user, string $code): bool
     {
-        if (!$user->email_verification_code_expires_at ||
-            now()->isAfter($user->email_verification_code_expires_at)) {
+        if (!$user->verification_code_expires_at ||
+            now()->isAfter($user->verification_code_expires_at)) {
             return false;
         }
 
@@ -33,7 +33,7 @@ class VerificationCodeService
         $user->update([
             'email_verified_at'                  => now(),
             'email_verification_code'            => null,
-            'email_verification_code_expires_at' => null,
+            'verification_code_expires_at' => null,
         ]);
 
         return true;

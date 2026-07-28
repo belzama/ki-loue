@@ -10,7 +10,10 @@
 <div class="modal fade" id="verifyEmailModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-body p-5 text-center">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" id="closeModalBtn" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0 p-5 text-center">
 
                 <h3 class="mb-2">📬 Vérifiez votre email</h3>
                 <p class="text-muted">
@@ -60,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const verifyBtn   = document.getElementById('verifyBtn');
     const resendBtn   = document.getElementById('resendBtn');
     const codeInput   = document.getElementById('codeInput');
+    const closeModalBtn = document.getElementById('closeModalBtn');
 
     function showAlert(message, type = 'danger') {
         alertBox.className = `alert alert-${type}`;
@@ -132,6 +136,13 @@ document.addEventListener('DOMContentLoaded', function () {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length === 6) {
             form.dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Bouton de fermeture : déconnecte l'utilisateur et redirige
+    closeModalBtn.addEventListener('click', function () {
+        if (confirm('Voulez-vous vraiment annuler la vérification ? Vous serez déconnecté.')) {
+            window.location.href = '{{ route("logout.get") }}'; // adapte selon ta route de déconnexion
         }
     });
 });

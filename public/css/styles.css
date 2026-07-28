@@ -66,6 +66,22 @@ body {
     padding: 1.5rem;
     box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
 }
+
+.nav-link {
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-link.active-link {
+    color: #f39200 !important; /* orange - à ajuster selon ta charte */
+    background-color: rgba(255, 140, 0, 0.15);
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.nav-link.active-link i {
+    color: #f39200 !important;
+}
+
 .navbar-brand {
     font-weight: 600;
     letter-spacing: .5px;
@@ -130,6 +146,7 @@ body {
 .publication-card{
     transition: all .25s ease;
     border-radius:12px;
+    border: 1px solid #495057;
 }
 
 .publication-card:hover{
@@ -306,7 +323,7 @@ body {
     flex: 1;
     background: rgba(255,255,255,0.05);
     backdrop-filter: blur(6px);
-    padding: 36px 32px;
+    padding: 10px 120px;
 }
 
 .cats-header {
@@ -330,12 +347,30 @@ body {
 }
 
 .cats-header .see-all {
-    color: #29235c;
-    font-size: 13px;
-    background: rgba(255, 255, 255, 0.08);;
+    color: #fff;
+    font-size: 15px;
+    background: #29235c;/*rgba(255, 255, 255, 0.08);*/
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    /*border: 1px solid rgba(255, 255, 255, 0.12);*/
+}
+
+.cats-footer {
+    display: flex;
+    justify-content: center;  /* horizontal */
+    align-items: center;
+    margin: 20px 20px;
+}
+
+.cats-footer .see-all {
+    color: #fff;
+    font-size: 15px;
+    background: #29235c;/*rgba(255, 255, 255, 0.08);*/
+    padding: 10px;
+    border-radius: 16px;
+    width: 250px;
+    text-align: center;
+    /*border: 1px solid rgba(255, 255, 255, 0.12);*/
 }
 
 .cats-grid {
@@ -368,10 +403,11 @@ body {
 }
 
 .cat-img-wrap {
-    /*width: 44px;
-    height: 44px;*/
+    width: 64px;
+    height: 64px;
+    border: solid 3px #29235c;
     border-radius: 8px;
-    background: rgba(255,255,255,0.12);
+    background: #fff /*rgba(255,255,255,0.12)*/;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -25,6 +25,9 @@
         <div class="code">{{ $code }}</div>
         <p>Ce code est valable <strong>10 minutes</strong>.</p>
         <p class="warning">⚠️ Ne partagez ce code avec personne.</p>
+        <p style="color: #6c757d; font-size: 0.85rem;">
+            Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
+        </p>
     </div>
     <div class="footer">
         &copy; {{ date('Y') }} {{ config('app.name') }}

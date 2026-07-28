@@ -28,6 +28,7 @@ class ProfileController extends Controller
             'raison_sociale'=> 'nullable|string|max:255',
             'telephone'     => 'required|string|max:20',
             'whatsapp'      => 'nullable|string|max:20',
+            'whatsapp_notifications_opt_in' => 'nullable|boolean',
         ]);
 
         auth()->user()->update($request->only('nom', 'prenom', 'raison_sociale', 'telephone', 'whatsapp'));

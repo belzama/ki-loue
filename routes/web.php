@@ -6,6 +6,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerificationCodeController;
+use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\DeviseController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\SysParamController;
 use App\Http\Controllers\LocalisationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\InfobipWebhookController;
 
 Route::get('/change-pays/{pays}', [PaysController::class, 'change'])->name('change.pays');
 
@@ -43,17 +45,32 @@ Route::get('/publications/{publication}/reservation', [HomeController::class, 'c
 Route::post('/publications/{publication}/reservation', [HomeController::class, 'storeReservation'])
     ->name('reservations.store');
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// ── Routes invités (non connectés) ──────────────────────────
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
 
-// Inscription
-Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-Route::post('register', [RegisteredUserController::class, 'store']);
-// ✅ Vérification email (sans auth)
-Route::post('/verify-email/check',  [VerificationCodeController::class, 'verify'])->name('verification.verify');
-Route::post('/verify-email/resend', [VerificationCodeController::class, 'resend'])->name('verification.resend');
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
 
+    // Vérification email à l'inscription (utilisateur pas encore authentifié)
+    Route::post('/verify-email/check', [VerificationCodeController::class, 'verify'])->name('verification.check');
+    Route::post('/verify-email/resend', [VerificationCodeController::class, 'resend'])->name('verification.resend');
+});
+
+// ── Déconnexion (utilisateur connecté) ──────────────────────
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+});
+
+// ── Vérification email/whatsapp après connexion ─────────────
+// ⚠️ SANS 'contacts.verified' ici, sinon boucle infinie de redirection
+Route::middleware('auth')->group(function () {
+    Route::get('/verification/notice', [VerificationController::class, 'notice'])->name('verification.notice');
+    Route::post('/verification/send', [VerificationController::class, 'send'])->name('verification.send');
+    Route::post('/verification/verify', [VerificationController::class, 'verify'])->name('verification.confirm');
+    Route::post('/verification/whatsapp/dismiss', [VerificationController::class, 'dismissWhatsappReminder'])->name('verification.whatsapp.dismiss');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/pays/create', [PaysController::class, 'create'])->name('pays.create');
@@ -63,7 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/pays/{pays}', [PaysController::class, 'destroy'])->name('pays.destroy');
 });
 
-Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth','role:Admin', 'contacts.verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('devises', DeviseController::class);
     Route::resource('pays', PaysController::class)->parameters(['pays' => 'pays']);
@@ -75,7 +92,7 @@ Route::middleware(['auth','role:Admin'])->prefix('admin')->name('admin.')->group
     Route::resource('sys_params', SysParamController::class);
 });
 
-Route::middleware(['auth', 'role:Admin,User'])->prefix('user')->name('user.')->group(function () {
+Route::middleware(['auth', 'role:Admin,User', 'contacts.verified'])->prefix('user')->name('user.')->group(function () {
     Route::get('profile',           [ProfileController::class, 'show'])->name('profile.show');
     Route::put('profile',           [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password',  [ProfileController::class, 'password'])->name('profile.password');
@@ -153,3 +170,6 @@ Route::get('/dispositifs/{dispositif}/tarif-min', [DispositifController::class, 
 Route::get('/dispositifs/{dispositif}/tarif-max', [DispositifController::class, 'getTarifMax']);
     
 Route::get('/pays/{pays}/tarifs', [PaysController::class, 'getTarifs']);
+
+Route::post('/webhooks/infobip/whatsapp/{secret}', [InfobipWebhookController::class, 'handleWhatsappInbound'])
+    ->name('webhooks.infobip.whatsapp');
