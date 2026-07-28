@@ -84,11 +84,7 @@
         @endforelse
     </div>
 
-<div class="d-flex justify-content-center mt-4">
-    {{ $publications->links() }}
-</div>
-
-    <div class="mt-4">
+    <div class="d-flex justify-content-center mt-4">
         {{ $publications->links() }}
     </div>
 </div>
