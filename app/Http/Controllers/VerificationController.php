@@ -75,6 +75,14 @@ class VerificationController extends Controller
             ->latest()
             ->first();
 
+        Log::info('Verify attempt', [
+            'sent' => $request->code,
+            'sent_len' => strlen($request->code),
+            'stored' => $verification?->code,
+            'stored_len' => $verification ? strlen($verification->code) : null,
+            'expired' => $verification?->isExpired(),
+        ]);
+
         if (!$verification || $verification->code !== $request->code || $verification->isExpired()) {
             return response()->json(['message' => 'Code invalide ou expiré.'], 422);
         }
