@@ -31,6 +31,8 @@ class VerificationController extends Controller
             ['code' => $code, 'expires_at' => now()->addMinutes(10)]
         );
 
+        Log::info('Send verification', ['user' => $user->id, 'type' => $type, 'code' => $code]);
+
         $sent = match ($type) {
             'email' => (bool) Mail::to($user->email)->send(new VerificationCodeMail($code)) || true,
             'telephone' => $this->infobip->sendSms($contact, "Votre code de vérification RentalPark : {$code}"),
