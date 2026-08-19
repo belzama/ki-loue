@@ -100,13 +100,16 @@ Route::middleware(['auth', 'role:Admin,User', 'contacts.verified'])->prefix('use
     Route::get('dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     
     Route::get('dispositifs', [DispositifController::class, 'index'])->name('dispositifs.index');
-    Route::get('dispositifs/create', [DispositifController::class, 'create'])->name('dispositifs.create');
+    Route::get('dispositifs/create/{typeDispositif}', [DispositifController::class, 'create'])->name('dispositifs.create');
     Route::post('dispositifs', [DispositifController::class, 'store'])->name('dispositifs.store');
     Route::get('dispositifs/{dispositif}/edit', [DispositifController::class, 'edit'])->name('dispositifs.edit');
     Route::put('dispositifs/{dispositif}', [DispositifController::class, 'update'])->name('dispositifs.update');
     Route::delete('dispositifs/{dispositif}', [DispositifController::class, 'destroy'])->name('dispositifs.destroy');
     // Page "Voir plus"
     Route::get('dispositifs/{dispositif}/show', [DispositifController::class, 'show'])->name('dispositifs.show');
+    
+    Route::get('dispositifs/nouveau', [DispositifController::class, 'selectType'])
+    ->name('dispositifs.select_type');
 
     Route::resource('publications', PublicationController::class);
     // Création d'une publication à partir d'un dispositif existant

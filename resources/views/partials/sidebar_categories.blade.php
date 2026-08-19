@@ -15,9 +15,10 @@
         <li class="category-item {{ !$activeCat ? 'active' : '' }}" data-name="toutes les catégories">
             <a href="{{ route('catalogue.index', request()->except('categorie_id', 'page')) }}"
                {{ !$activeCat ? 'aria-current="page"' : '' }}>
-                <span class="category-img category-img--placeholder">🗂️</span>
+                <span class="category-img category-img--placeholder">🎛️</span>
                 <span class="category-name">Toutes les catégories</span>
-                <span class="category-count">{{ $categories->sum('publications_actives_count') }}</span>
+                <!-- <span class="category-count">{{ $categories->sum('publications_actives_count') }}</span> -->
+                <span class="category-count">{{ $publications->total() }}</span>
             </a>
         </li>
 

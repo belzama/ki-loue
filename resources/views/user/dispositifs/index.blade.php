@@ -5,7 +5,7 @@
 {{-- PAGE TITLE --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4><i class="bi bi-truck me-2"></i> Mes matériels ({{ $dispositifs->total() }})</h4>
-    <a href="{{ route('user.dispositifs.create') }}" class="btn btn-primary">
+    <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Ajouter un matériel
     </a>
 </div>

@@ -9,7 +9,7 @@ use App\Models\Categorie;
 
 class TypesDispositif extends Model
 {
-    protected $fillable = ['categorie_id','nom','tarif_min','tarif_max','nb_max_photo',',nom_dispositif_fields'];
+    protected $fillable = ['categorie_id','nom','image_link','tarif_min','tarif_max','nb_max_photo',',nom_dispositif_fields'];
     
     public function dispositifs()
     {

@@ -9,7 +9,7 @@
             </h2>
             <p class="text-muted mb-0">Bienvenue, {{ auth()->user()->name }}. Voici l'état de votre parc et vos finances.</p>
         </div>
-        <a href="{{ route('user.dispositifs.create') }}" class="btn btn-primary px-4 shadow-sm">
+        <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-primary px-4 shadow-sm">
             <i class="bi bi-plus-lg me-2"></i>Ajouter un matériel
         </a>
     </div>

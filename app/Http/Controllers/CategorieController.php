@@ -24,9 +24,19 @@ class CategorieController extends Controller
     {
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
+            'image' => (isset($category) ? 'nullable' : 'required') . '|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        Categorie::create($validated);
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('categories', 'public');
+            $validated['image_link'] = $path;
+        } elseif (isset($category)) {
+            unset($validated['image_link']); // ne pas écraser l'image existante si aucun nouveau fichier
+        }
+
+        $category->fill($validated)->save();
+
+        //Categorie::create($validated);
 
         return redirect()->route('admin.categories.index');
     }
@@ -42,11 +52,23 @@ class CategorieController extends Controller
     {
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // supprimer l'ancienne image si elle existe
+            if ($category->image_link) {
+                \Storage::disk('public')->delete($category->image_link);
+            }
+            $validated['image_link'] = $request->file('image')->store('categories', 'public');
+        }
+
+        unset($validated['image']);
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Catégorie modifiée avec succès.');
     }
 
     public function destroy(Categorie $category)

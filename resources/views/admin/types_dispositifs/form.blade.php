@@ -57,6 +57,24 @@
         value="{{ old('nom_dispositif_fields', $types_dispositif->nom_dispositif_fields ?? '') }}">
 </div>
 
+<div class="mb-3">
+    <label>Image du type
+        @if(!isset($types_dispositif))
+            <span class="text-danger">*</span>
+        @endif
+    </label>
+    <input type="file" name="image" class="form-control" accept="image/*"
+        @if(!isset($types_dispositif)) required @endif>
+
+    @if(isset($types_dispositif) && $types_dispositif->image_link)
+        <div class="mt-2">
+            <img src="{{ asset('storage/' . $types_dispositif->image_link) }}"
+                 alt="{{ $types_dispositif->nom }}" style="max-height: 100px;">
+            <div class="form-text">Laisser vide pour conserver l'image actuelle.</div>
+        </div>
+    @endif
+</div>
+
 <hr>
 
 <h5>Paramètres du type</h5>

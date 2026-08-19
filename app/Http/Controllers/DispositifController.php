@@ -40,11 +40,19 @@ class DispositifController extends Controller
         return view('user.dispositifs.index', compact('categories', 'types', 'dispositifs'));
     }
 
-    public function create()
+    public function selectType()
     {
-        $categories = Categorie::all();
-        $types = TypesDispositif::with('params')->get();
-        return view('user.dispositifs.create', compact('categories', 'types'));
+        $categories = Categorie::with(['types_dispositifs' => function ($q) {
+            $q->orderBy('nom');
+        }])->orderBy('nom')->get();
+
+        return view('user.dispositifs.select_type', compact('categories'));
+    }
+
+    public function create(TypesDispositif $typeDispositif)
+    {
+        $typeDispositif->load('params');
+        return view('user.dispositifs.create', compact('typeDispositif'));
     }
 
     public function store(Request $request)
@@ -144,11 +152,10 @@ class DispositifController extends Controller
     {
         abort_if($dispositif->user_id !== Auth::id(), 403);
 
-        $categories = Categorie::all();
-        $types = TypesDispositif::with('params')->get();
-        $dispositif->load('params');
-
-        return view('user.dispositifs.edit', compact('dispositif','categories','types'));
+        $dispositif->load('types_dispositif.categorie', 'types_dispositif.params', 'params.typeDispositifParam', 'photos');
+        $typeDispositif = $dispositif->types_dispositif;
+    
+        return view('user.dispositifs.edit', compact('dispositif', 'typeDispositif'));
     }
 
     public function update(Request $request, Dispositif $dispositif)

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('categorie_id')->constrained()->cascadeOnDelete();
             $table->string('nom');
+            $table->string('image_link')->nullable();
             $table->double('tarif_min', 10, 2)->default(0);
             $table->double('tarif_max', 10, 2)->default(0);
             $table->integer('nb_max_photo')->default(4);

@@ -2,7 +2,7 @@
 
 @section('content')
     <h1>Ajouter une catégorie</h1>
-    <form action="{{ route('admin.categories.store') }}" method="POST">
+    <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
         @include('admin.categories.form')
     </form>
 @endsection

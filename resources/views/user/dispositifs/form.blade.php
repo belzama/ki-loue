@@ -1,4 +1,3 @@
-
 @php
     $isEdit = isset($dispositif);
 @endphp
@@ -19,43 +18,27 @@
 
 <div class="d-flex gap-3">
 
-    {{-- Liste catégories à gauche --}}
-    <div class="categorie-sidebar">
-        <h6 class="categorie-sidebar-title">Catégorie</h6>
-        {{-- Filtre catégories --}}
-        <div class="mb-2">
-            <input type="text"
-                id="categorie-filter"
-                placeholder="Rechercher..."
-                class="form-control form-control-sm">
-        </div>
-        <ul class="categorie-sidebar-list" id="categorie-list">
-            @foreach($categories as $cat)
-                <li class="categorie-sidebar-item" 
-                    data-id="{{ $cat->id }}"
-                    data-name="{{ strtolower($cat->nom) }}">
-                    <button type="button" 
-                            class="categorie-sidebar-btn {{ old('categorie_id', $dispositif->type_dispositif->categorie_id ?? '') == $cat->id ? 'active' : '' }}"
-                            onclick="selectCategorie({{ $cat->id }})">
+    <div class="type-info-panel">
+        <h6 class="categorie-sidebar-title">Type sélectionné</h6>
 
-                        @if($cat->image_link)
-                            <img src="{{ asset('storage/'.$cat->image_link) }}" alt="{{ $cat->nom }}" class="categorie-sidebar-img">
-                        @else
-                            <span class="categorie-sidebar-placeholder"><i class="bi bi-grid"></i></span>
-                        @endif
+        @if($typeDispositif->image_link)
+            <img src="{{ asset('storage/'.$typeDispositif->image_link) }}"
+                alt="{{ $typeDispositif->nom }}"
+                class="type-info-img">
+        @else
+            <div class="type-info-placeholder">
+                <i class="bi bi-image"></i>
+            </div>
+        @endif
 
-                        <span>{{ $cat->nom }}</span>
-                    </button>
-                </li>
-            @endforeach
-        </ul>
+        <div class="type-info-nom">{{ $typeDispositif->nom }}</div>
+        <div class="type-info-cat text-muted small">{{ $typeDispositif->categorie->nom ?? '' }}</div>
 
-        {{-- Champ caché pour soumettre la valeur --}}
-        <input type="hidden" id="categorie_id" name="categorie_id">
-        <div class="invalid-feedback d-block" id="error-categorie_id"></div>
+        <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-sm btn-outline-secondary mt-3 w-100">
+            <i class="bi bi-arrow-left"></i> Changer de type
+        </a>
     </div>
 
-    {{-- Formulaire à droite --}}
     <div class="flex-grow-1">
 
         <form id="dispositifForm"
@@ -66,19 +49,8 @@
             @csrf
             @if($isEdit) @method('PUT') @endif
 
-            {{-- TYPE --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
-                <select id="types_dispositif_id"
-                        name="types_dispositif_id"
-                        data-selected="{{ old('types_dispositif_id', $dispositif->types_dispositif_id ?? '') }}"
-                        class="form-select">
-                    <option value="">Sélectionner</option>
-                </select>
-                <div class="invalid-feedback" id="error-types_dispositif_id"></div>
-            </div>
+            <input type="hidden" name="types_dispositif_id" value="{{ $typeDispositif->id }}">
 
-            {{-- TARIFS --}}
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label>Prix minimum de location <span class="text-danger">*</span></label>
@@ -108,7 +80,6 @@
                 </div>
             </div>
 
-            {{-- MARQUE / MODELE --}}
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Marque</label>
@@ -122,16 +93,13 @@
                 </div>
             </div>
 
-            {{-- PARAMETRES DYNAMIQUES --}}
             <div id="params-container" class="mt-3"></div>
 
-            {{-- PHOTOS --}}
             <div class="mb-3">
                 <label class="form-label fw-semibold">Photos</label>
                 <div id="photos-container" class="row g-3"></div>
             </div>
 
-            {{-- PROGRESS --}}
             <div id="progressContainer" style="display:none;">
                 <div class="progress" style="height:25px;">
                     <div id="progressBar" class="progress-bar bg-success">0%</div>
@@ -150,25 +118,18 @@
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="{{ asset('js/dependent-select.js') }}"></script>
 
 <script>
-    document.getElementById('categorie-filter').addEventListener('input', function () {
-        const search = this.value.toLowerCase().trim();
-        document.querySelectorAll('.categorie-sidebar-item').forEach(item => {
-            item.style.display = item.dataset.name.includes(search) ? '' : 'none';
-        });
-    });
-
     $(document).ready(function() {
-        // --- VARIABLES GLOBALES ---
-        const typeSelectEl = document.getElementById('types_dispositif_id');
         const container = $('#params-container');
         const photosContainer = $('#photos-container');
         const baseUrl = "{{ url('/') }}";
+        const typeId = {{ $typeDispositif->id }};
+        const typeNom = @json($typeDispositif->nom);
+        const categorieNom = @json($typeDispositif->categorie->nom ?? 'N/A');
 
         const existingParams = {!! json_encode(
-            isset($dispositif)
+            $isEdit
                 ? $dispositif->params->mapWithKeys(function ($p) {
                     return [$p->type_dispositif_param_id => [
                         'value' => $p->value,
@@ -179,7 +140,7 @@
         ) !!};
 
         const existingPhotos = {!! json_encode(
-            isset($dispositif)
+            $isEdit
                 ? $dispositif->photos->map(fn($p) => [
                     'id'  => $p->id,
                     'url' => asset('storage/' . $p->path)
@@ -187,7 +148,7 @@
                 : []
         ) !!};
 
-        // --- 1. RENDU DES PHOTOS ---
+        // --- 1. PHOTOS ---
         function renderPhotoInputs(maxPhotos) {
             photosContainer.empty();
             for (let i = 0; i < maxPhotos; i++) {
@@ -234,13 +195,18 @@
             if (tarifMinHint) tarifMinHint.textContent = `Doit être compris entre ${formatNombre(min)} et ${formatNombre(max)}`;
             if (tarifMaxHint) tarifMaxHint.textContent = `Doit être compris entre ${formatNombre(min)} et ${formatNombre(max)}`;
 
-            tarifMinEl.value = min;
-            tarifMaxEl.value = max;
-            tarifMinDisplay.value = formatNombre(min);
-            tarifMaxDisplay.value = formatNombre(max);
-
             tarifMinEl.dataset.currentMin = min; tarifMinEl.dataset.currentMax = max;
             tarifMaxEl.dataset.currentMin = min; tarifMaxEl.dataset.currentMax = max;
+
+            // ⚠️ Ne préremplir que si aucune valeur n'existe déjà (create, ou old())
+            if (!tarifMinEl.value) {
+                tarifMinEl.value = min;
+                tarifMinDisplay.value = formatNombre(min);
+            }
+            if (!tarifMaxEl.value) {
+                tarifMaxEl.value = max;
+                tarifMaxDisplay.value = formatNombre(max);
+            }
 
             if (!tarifMinDisplay.dataset.listenerAttached) {
                 tarifMinDisplay.addEventListener('blur', () => {
@@ -285,19 +251,16 @@
             }
         }
 
-        // Formate un nombre avec séparateurs de milliers (espace)
         function formatNombre(val) {
-            val = val.toString().replace(/\D/g, ''); // retire tout sauf les chiffres
+            val = val.toString().replace(/\D/g, '');
             if (!val) return '';
             return parseInt(val, 10).toLocaleString('fr-FR');
         }
 
-        // Retire les séparateurs pour obtenir la valeur brute
         function unformatNombre(val) {
             return val.toString().replace(/\s/g, '');
         }
 
-        // Attache le formatage live à un champ display + son champ hidden
         function attachFormatage(displayId, hiddenId) {
             const displayEl = document.getElementById(displayId);
             const hiddenEl  = document.getElementById(hiddenId);
@@ -308,7 +271,6 @@
                 hiddenEl.value = raw;
             });
 
-            // Formatage initial (si valeur préremplie en mode édition)
             if (displayEl.value) {
                 const raw = unformatNombre(displayEl.value);
                 displayEl.value = formatNombre(raw);
@@ -319,32 +281,19 @@
         attachFormatage('tarif_min_display', 'tarif_min');
         attachFormatage('tarif_max_display', 'tarif_max');
 
-        // --- 3. CHARGEMENT PARAMS ---
-        async function loadParams(typeId) {
-            if (!typeId) { container.empty(); return; }
-
+        // --- 3. CHARGEMENT PARAMS (appelé une seule fois, type déjà connu) ---
+        async function loadParams() {
             container.html(`<div>Chargement...</div>`);
 
             try {
                 const res  = await fetch(`${baseUrl}/types_dispositif/${typeId}/params`);
                 const data = await res.json();
-                
+
                 renderPhotoInputs(data.nb_max_photo ?? 4);
                 setTarifLimits(data.tarif_min, data.tarif_max);
-                
-                // ✅ En mode Edit : écraser les valeurs par défaut avec les valeurs existantes
-                @if($isEdit)
-                    const tarifMinEl = document.getElementById('tarif_min');
-                    const tarifMaxEl = document.getElementById('tarif_max');
-                    const existingTarifMin = {{ $dispositif->tarif_min ?? 'null' }};
-                    const existingTarifMax = {{ $dispositif->tarif_max ?? 'null' }};
-
-                    if (existingTarifMin !== null) tarifMinEl.value = existingTarifMin;
-                    if (existingTarifMax !== null) tarifMaxEl.value = existingTarifMax;
-                @endif
 
                 container.empty();
-                
+
                 data.params.forEach(param => {
                     const paramData  = existingParams[param.id] ?? {};
                     const value      = paramData.value ?? '';
@@ -395,69 +344,19 @@
             }
         }
 
-        // --- 4. SÉLECTION CATÉGORIE & CASCADE ---
-        window.selectCategorie = function(catId, preselectTypeId = null) {
-            document.getElementById('categorie_id').value = catId;
+        loadParams();
 
-            document.querySelectorAll('.categorie-sidebar-btn').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`.categorie-sidebar-item[data-id="${catId}"] .categorie-sidebar-btn`);
-            if (activeBtn) activeBtn.classList.add('active');
-
-            const typeSelect = document.getElementById('types_dispositif_id');
-            typeSelect.innerHTML = '<option value="">Chargement...</option>';
-
-            fetch(`{{ url('types_dispositif/by-categorie') }}/${catId}`)
-                .then(r => r.json())
-                .then(data => {
-                    typeSelect.innerHTML = '<option value="">Sélectionner</option>';
-                    data.forEach(type => {
-                        const opt = document.createElement('option');
-                        opt.value       = type.id;
-                        opt.textContent = type.nom;
-                        if (preselectTypeId && type.id == preselectTypeId) opt.selected = true;
-                        typeSelect.appendChild(opt);
-                    });
-
-                    if (preselectTypeId && typeSelect.value) {
-                        loadParams(typeSelect.value);
-                    }
-                });
-        };
-
-        // Init mode Edit
-        @if($isEdit)
-            const initCatId  = {{ $dispositif->type_dispositif->categorie_id ?? 'null' }};
-            const initTypeId = {{ $dispositif->types_dispositif_id ?? 'null' }};
-            if (initCatId) selectCategorie(initCatId, initTypeId);
-        @endif
-
-        // Changement manuel du type
-        if (typeSelectEl) {
-            typeSelectEl.addEventListener('change', function() {
-                if (this.value) loadParams(this.value);
-            });
-        }
-
-        // --- 5. MODALE DE CONFIRMATION ---
+        // --- 4. MODALE DE CONFIRMATION ---
         dispositifForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            if (!typeSelectEl.value) {
-                alert("Veuillez sélectionner un type de matériel.");
-                return;
-            }
-
             const deviseSymbol = "{{ auth()->user()->pays?->devise?->symbol ?? 'F CFA' }}";
 
-            const activeCatName = document.querySelector('.categorie-sidebar-btn.active span')?.textContent ?? 'N/A';
-
-            // Fonction utilitaire pour formater un montant avec séparateurs de milliers
             function formatMontant(val) {
                 if (val === '' || val === null || isNaN(val)) return null;
                 return parseFloat(val).toLocaleString('fr-FR');
             }
 
-            // Récupération et formatage de la plage de prix
             const prixMinRaw = $("#tarif_min").val();
             const prixMaxRaw = $("#tarif_max").val();
             const prixMin = formatMontant(prixMinRaw);
@@ -474,10 +373,10 @@
 
             let summaryHtml = `
                 <div class="col-12 border-bottom py-1">
-                    <strong class="summary-label">Catégorie :</strong> <span>${activeCatName}</span>
+                    <strong class="summary-label">Catégorie :</strong> <span>${categorieNom}</span>
                 </div>
                 <div class="col-12 border-bottom py-1">
-                    <strong class="summary-label">Type :</strong> <span>${$("#types_dispositif_id option:selected").text()}</span>
+                    <strong class="summary-label">Type :</strong> <span>${typeNom}</span>
                 </div>
                 <div class="col-12 border-bottom py-1">
                     <strong class="summary-label">Marque :</strong> <span>${$("#marque").val() || 'N/A'}</span>
@@ -496,7 +395,6 @@
                 let val = input.is('select') ? input.find('option:selected').text() : input.val();
 
                 if (val && val !== 'Sélectionner') {
-                    // Formatage avec séparateurs de milliers si c'est un champ numérique
                     if (input.attr('type') === 'number' && !isNaN(val) && val !== '') {
                         val = parseFloat(val).toLocaleString('fr-FR');
                     }
@@ -516,7 +414,7 @@
             executeAjaxSubmit();
         });
 
-        // --- 6. ENVOI AJAX ---
+        // --- 5. ENVOI AJAX ---
         function executeAjaxSubmit() {
             const formData        = new FormData(dispositifForm);
             const xhr             = new XMLHttpRequest();
@@ -545,14 +443,12 @@
                     btn.disabled = false;
                     progressContainer.style.display = 'none';
 
-                    // ✅ Afficher la réponse brute pour déboguer
                     console.error('Statut :', xhr.status);
                     console.error('Réponse brute :', xhr.responseText);
 
                     try {
                         handleErrors(JSON.parse(xhr.responseText));
                     } catch (e) {
-                        // Si la réponse n'est pas du JSON (ex: exception Laravel)
                         console.error('Réponse non-JSON (exception Laravel) :', xhr.responseText);
                         alert('Erreur serveur 500 — voir la console pour les détails.');
                     }
@@ -580,7 +476,6 @@
         }
     });
 
-    // --- FONCTIONS GLOBALES ---
     window.previewPhoto = function(event, index) {
         const file = event.target.files[0];
         if (!file) return;

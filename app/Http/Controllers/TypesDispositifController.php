@@ -94,10 +94,16 @@ class TypesDispositifController extends Controller
             'tarif_max' => 'required|numeric|gte:tarif_min',
             'nb_max_photo' => 'required|numeric|min:1',
             'nom_dispositif_fields' => 'nullable|string|max:150',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'params.*.name' => 'nullable|string|max:150',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',
         ]);
+
+        if ($request->hasFile('image')) {
+            $data['image_link'] = $request->file('image')->store('types_dispositifs', 'public');
+        }
+        unset($data['image']);
 
         $type = TypesDispositif::create($data);
 
@@ -140,10 +146,20 @@ class TypesDispositifController extends Controller
             'tarif_max' => 'required|numeric|gte:tarif_min',
             'nb_max_photo' => 'required|numeric|min:1',
             'nom_dispositif_fields' => 'nullable|string|max:150',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'params.*.name' => 'nullable|string|max:150',
             'params.*.value_type' => 'nullable|in:string,decimal,date,datetime',
             'params.*.required' => 'nullable|boolean',
         ]);
+
+        if ($request->hasFile('image')) {
+            // supprimer l'ancienne image si elle existe
+            if ($types_dispositif->image_link) {
+                \Storage::disk('public')->delete($types_dispositif->image_link);
+            }
+            $data['image_link'] = $request->file('image')->store('types_dispositifs', 'public');
+        }
+        unset($data['image']);
 
         $types_dispositif->update($data);
 

@@ -2,7 +2,7 @@
 
 @section('content')
 <h1>Modifier le type de matériel</h1>
-<form action="{{ route('admin.types_dispositifs.update', $types_dispositif) }}" method="POST">
+<form action="{{ route('admin.types_dispositifs.update', $types_dispositif) }}" method="POST" enctype="multipart/form-data">
     @method('PUT')
     @include('admin.types_dispositifs.form')
 </form>
