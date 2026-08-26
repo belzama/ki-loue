@@ -20,9 +20,11 @@
 
     <div class="type-info-panel">
         <h6 class="categorie-sidebar-title">Type sélectionné</h6>
+    
+        @php($imgSrc = $typeDispositif->image_link ?: optional($typeDispositif->categorie)->image_link)
 
-        @if($typeDispositif->image_link)
-            <img src="{{ asset('storage/'.$typeDispositif->image_link) }}"
+        @if($imgSrc)
+            <img src="{{ asset('storage/' . $imgSrc) }}"
                 alt="{{ $typeDispositif->nom }}"
                 class="type-info-img">
         @else
