@@ -5,10 +5,15 @@
 @section('content')
 
 {{-- PAGE TITLE --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-journal-text me-2"></i> Mes publications ({{$publications->total()}})</h4>
-    <a href="{{ route('user.publications.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nouvelle publication
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-journal-text page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Mes publications ({{$publications->total()}})</h1>
+        </div>
+    </div>
+    <a href="{{ route('user.publications.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Nouvelle publication
     </a>
 </div>
 
@@ -250,11 +255,11 @@
                         </span>
                     </div>
 
-                    <div class="position-absolute top-0 end-0 m-3">
+                    <!-- <div class="position-absolute top-0 end-0 m-3">
                         <span class="badge shadow-sm {{ $publication->dispositif->etat === 'Neuf' ? 'bg-primary' : 'bg-secondary' }}">
                             {{ $publication->dispositif->etat }}
                         </span>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="card-body p-4">
@@ -302,7 +307,7 @@
                 </div>
 
                 {{-- Actions --}}
-                <div class="card-footer bg-white border-0 p-4 pt-0 d-flex gap-2">
+                <div class="card-footer bg-white border-0 p-0 pt-0 d-flex gap-2">
                     @if(!$isExpired && $publication->active)
                         <a href="{{ route('user.publications.edit', $publication) }}"
                         class="btn btn-outline-dark action-btn flex-grow-1 btn-sm">

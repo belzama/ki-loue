@@ -1,15 +1,17 @@
 @extends('layouts.guest')
 
 @section('content')
-<div class="container py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-grid-1x2-fill text-primary me-2"></i>Tableau de bord
-            </h2>
-            <p class="text-muted mb-0">Bienvenue, {{ auth()->user()->name }}. Voici l'état de votre parc et vos finances.</p>
+<div class="container-fluid py-2">
+
+    <div class="dashboard-header">
+        <div class="dashboard-header-left">
+            <i class="bi bi-grid-1x2-fill dashboard-header-icon"></i>
+            <div>
+                <h1 class="dashboard-title">Tableau de bord</h1>
+                <p class="dashboard-subtitle">Bienvenue, {{ auth()->user()->name }}. Voici l'état de votre parc et vos finances.</p>
+            </div>
         </div>
-        <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-primary px-4 shadow-sm">
+        <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-add-material">
             <i class="bi bi-plus-lg me-2"></i>Ajouter un matériel
         </a>
     </div>
@@ -162,12 +164,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* Optionnel : ajout de quelques classes de fond subtiles si non présentes dans votre CSS */
-    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1) !important; }
-    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
-    .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
-    .bg-info-subtle { background-color: rgba(13, 202, 240, 0.1) !important; }
-</style>
 @endsection

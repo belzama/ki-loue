@@ -4,116 +4,118 @@
 @endsection
 
 @section('main-content')
-<div class="container-fluid">
-    <div class="row">
+<div style="margin-top: 5px">
+    <div class="container-fluid">
+        <div class="row">
 
-        {{-- SIDEBAR --}}
-        <aside class="col-3 bg-light sidebar p-3">
-            <ul class="nav flex-column gap-1">
-                <li class="nav-item">
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.devises.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-currency-exchange me-2"></i> Devises
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.pays.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-globe-americas me-2"></i> Pays
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.regions.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-map me-2"></i> Régions
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.departements.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-building me-2"></i> Préfectures/Départements
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.users.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-people me-2"></i> Utilisateurs
-                    </a>
-                </li>
+            {{-- SIDEBAR --}}
+            <aside class="col-3 bg-light sidebar p-3">
+                <ul class="nav flex-column gap-1">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.dashboard') }}"
+                        class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.devises.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-currency-exchange me-2"></i> Devises
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.pays.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-globe-americas me-2"></i> Pays
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.regions.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-map me-2"></i> Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.departements.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-building me-2"></i> Préfectures/Départements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.users.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-people me-2"></i> Utilisateurs
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('admin.categories.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-tags me-2"></i> Categories de matériels
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('admin.types_dispositifs.index') }}" 
+                            class="nav-link">
+                            <i class="bi bi-cpu me-2"></i> Types de matériels
+                        </a>
+                    </li>
                 
-                <li class="nav-item">
-                    <a href="{{ route('admin.categories.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-tags me-2"></i> Categories de matériels
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.types_dispositifs.index') }}" 
-                        class="nav-link">
-                        <i class="bi bi-cpu me-2"></i> Types de matériels
-                    </a>
-                </li>
-            
-                <li class="nav-item">
-                    <a href="{{ route('user.dispositifs.index') }}"
-                       class="nav-link {{ request()->routeIs('user.dispositifs.*') ? 'active' : '' }}">
-                        <i class="bi bi-truck me-2"></i> Matériels
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a href="{{ route('user.dispositifs.index') }}"
+                        class="nav-link {{ request()->routeIs('user.dispositifs.*') ? 'active' : '' }}">
+                            <i class="bi bi-truck me-2"></i> Matériels
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('user.abonnements.index') }}"
-                       class="nav-link {{ request()->routeIs('user.abonnements.*') ? 'active' : '' }}">
-                        <i class="bi bi-receipt me-2"></i> Abonnements
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a href="{{ route('user.abonnements.index') }}"
+                        class="nav-link {{ request()->routeIs('user.abonnements.*') ? 'active' : '' }}">
+                            <i class="bi bi-receipt me-2"></i> Abonnements
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('user.publications.index') }}"
-                       class="nav-link {{ request()->routeIs('user.publications.*') ? 'active' : '' }}">
-                        <i class="bi bi-journal-text me-2"></i> Publications
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a href="{{ route('user.publications.index') }}"
+                        class="nav-link {{ request()->routeIs('user.publications.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text me-2"></i> Publications
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('user.reservations.index') }}"
-                       class="nav-link {{ request()->routeIs('user.reservations.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-check me-2"></i> Réservations
-                    </a>
-                </li>      
+                    <li class="nav-item">
+                        <a href="{{ route('user.reservations.index') }}"
+                        class="nav-link {{ request()->routeIs('user.reservations.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-check me-2"></i> Réservations
+                        </a>
+                    </li>      
 
-                <li class="nav-item">
-                    <a href="{{ route('user.transactions.index') }}"
-                       class="nav-link {{ request()->routeIs('user.transactions.*') ? 'active' : '' }}">
-                        <i class="bi bi-arrow-left-right me-2"></i> Transactions
-                    </a>
-                </li>            
+                    <li class="nav-item">
+                        <a href="{{ route('user.transactions.index') }}"
+                        class="nav-link {{ request()->routeIs('user.transactions.*') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-left-right me-2"></i> Transactions
+                        </a>
+                    </li>            
 
-                <li class="nav-item">
-                    <a href="{{ route('user.notifications.index') }}"
-                       class="nav-link {{ request()->routeIs('user.notifications.*') ? 'active' : '' }}">
-                        <i class="bi bi-bell me-2"></i> Notifications
-                    </a>
-                </li>
-            </ul>
-        </aside>
+                    <li class="nav-item">
+                        <a href="{{ route('user.notifications.index') }}"
+                        class="nav-link {{ request()->routeIs('user.notifications.*') ? 'active' : '' }}">
+                            <i class="bi bi-bell me-2"></i> Notifications
+                        </a>
+                    </li>
+                </ul>
+            </aside>
 
-        {{-- CONTENT --}}
-        <main class="col-9 p-4">
-            <div class="content-wrapper">
-                {{-- PAGE CONTENT --}}
-                @yield('content')
+            {{-- CONTENT --}}
+            <main class="col-9 p-4">
+                <div class="content-wrapper">
+                    {{-- PAGE CONTENT --}}
+                    @yield('content')
 
-            </div>
-        </main>
+                </div>
+            </main>
 
+        </div>
     </div>
 </div>
 

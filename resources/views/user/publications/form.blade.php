@@ -593,7 +593,7 @@ function calculerSimulation() {
 ================================= */
 window.abonnementActif = false;
 
-function gererAbonnement(actif, url)
+function gererAbonnement(actif, url, afficherModal = true)
 {
     window.abonnementActif = !!actif;
 
@@ -613,8 +613,11 @@ function gererAbonnement(actif, url)
             document.getElementById('lienAbonnement').href = url;
         }
 
-        const myModal = new bootstrap.Modal(document.getElementById('modalChoixAbonnement'));
-        myModal.show();
+       // ✅ On n'affiche le modal que si explicitement demandé
+        if (afficherModal) {
+            const myModal = new bootstrap.Modal(document.getElementById('modalChoixAbonnement'));
+            myModal.show();
+        }
 
         // Relancer le calcul normal
         calculer();
@@ -673,7 +676,7 @@ dispositifSelect?.addEventListener('change', function() {
     const aAbonnement = selectedOption.getAttribute('data-abonnement') === '1';
     const urlAbonnement = selectedOption.getAttribute('data-abonnement-url');
 
-    gererAbonnement(aAbonnement, urlAbonnement);
+    gererAbonnement(aAbonnement, urlAbonnement); // afficherModal reste true (défaut)
 
     calculer();
     calculerSimulation();
@@ -703,9 +706,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (bloc) bloc.style.display = 'none';
 
-    // 🆕 Cas dispositif imposé
-    if (typeof DISPOSITIF_ABONNEMENT_ACTIF !== 'undefined') {
-        gererAbonnement(DISPOSITIF_ABONNEMENT_ACTIF, ABONNEMENT_URL);
+    // Cas dispositif imposé : l'utilisateur a déjà fait son choix
+    // (bouton "Publier" ou "Continuer sans abonnement") → pas de modal ici
+    if (typeof DISPOSITIF_ABONNEMENT_ACTIF !== 'undefined' && dispositif) {
+        gererAbonnement(DISPOSITIF_ABONNEMENT_ACTIF, ABONNEMENT_URL, false);
     }
 
     // 🆕 Cas select avec valeur pré-sélectionnée (old() après erreur validation)
@@ -713,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedOption = dispositifSelect.options[dispositifSelect.selectedIndex];
         const aAbonnement = selectedOption.getAttribute('data-abonnement') === '1';
         const urlAbonnement = selectedOption.getAttribute('data-abonnement-url');
-        gererAbonnement(aAbonnement, urlAbonnement);
+        gererAbonnement(aAbonnement, urlAbonnement, false); // idem, pas de modal
     }
     
     chargerTarifs(PAYS_ID);

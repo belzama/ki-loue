@@ -5,92 +5,90 @@
 @endsection
 
 @section('main-content')
-<div class="section bg-img container-fluid min-vh-100 d-flex align-items-center justify-content-center py-3">
+<div class="section bg-login-image container-fluid min-vh-100 d-flex align-items-center justify-content-center py-3">
 
+    {{-- Formulaire --}}
+    <div class="shadow-lg border-0 rounded-4" style="background:white; margin-top:30px; max-width:380px; width:100%;">
+        <div class="card-body p-4">
 
-        {{-- Formulaire --}}
-        <div class="shadow-lg border-0 rounded-4" style="background:white; margin-top:30px; max-width:380px; width:100%;">
-            <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <img src="{{ asset('images/logo_fond_blanc.png') }}" alt="Rentalpark" height="120">
+                <h4 class="fw-bold">Connexion</h4>
+                <small class="text-muted">
+                    Entrez votre code d’accès
+                </small>
+            </div>
 
-                <div class="text-center mb-4">
-                    <img src="{{ asset('images/logo_fond_blanc.png') }}" alt="Rentalpark" height="120">
-                    <h4 class="fw-bold">Connexion</h4>
-                    <small class="text-muted">
-                        Entrez votre code d’accès
-                    </small>
+            {{-- Erreurs --}}
+            @if($errors->any())
+                <div class="alert alert-danger small">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                {{-- Email ou pseudo --}}
+                <div class="mb-3">
+                    <label class="form-label">Email ou pseudo</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <input type="text"
+                            name="login"
+                            value="{{ old('login') }}"
+                            class="form-control"
+                            placeholder="email@exemple.com ou BTP-001"
+                            required autofocus>
+                    </div>
                 </div>
 
-                {{-- Erreurs --}}
-                @if($errors->any())
-                    <div class="alert alert-danger small">
-                        {{ $errors->first() }}
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
-
-                    {{-- Email ou pseudo --}}
-                    <div class="mb-3">
-                        <label class="form-label">Email ou pseudo</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-person"></i>
-                            </span>
-                            <input type="text"
-                                name="login"
-                                value="{{ old('login') }}"
+                {{-- Mot de passe --}}
+                <div class="mb-3">
+                    <label class="form-label">Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password"
+                                id="password"
+                                name="password"
                                 class="form-control"
-                                placeholder="email@exemple.com ou BTP-001"
-                                required autofocus>
-                        </div>
+                                placeholder="••••••••"
+                                required>
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="togglePassword()">
+                            <i id="eyeIcon" class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Options --}}
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                                type="checkbox"
+                                name="remember"
+                                id="remember">
+                        <label class="form-check-label" for="remember">
+                            Se souvenir
+                        </label>
                     </div>
 
-                    {{-- Mot de passe --}}
-                    <div class="mb-3">
-                        <label class="form-label">Mot de passe</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-lock"></i>
-                            </span>
-                            <input type="password"
-                                    id="password"
-                                    name="password"
-                                    class="form-control"
-                                    placeholder="••••••••"
-                                    required>
-                            <button type="button"
-                                    class="btn btn-outline-secondary"
-                                    onclick="togglePassword()">
-                                <i id="eyeIcon" class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <a href="{{-- route('password.request') --}}"
+                        class="small text-decoration-none">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
 
-                    {{-- Options --}}
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                    type="checkbox"
-                                    name="remember"
-                                    id="remember">
-                            <label class="form-check-label" for="remember">
-                                Se souvenir
-                            </label>
-                        </div>
-
-                        <a href="{{-- route('password.request') --}}"
-                            class="small text-decoration-none">
-                            Mot de passe oublié ?
-                        </a>
-                    </div>
-
-                    <button class="btn btn-primary w-100 py-2 fw-semibold">
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
-                        Se connecter
-                    </button>
-                </form>
-            </div>
+                <button class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                    Se connecter
+                </button>
+            </form>
         </div>
     </div>
 </div>

@@ -108,7 +108,7 @@
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn btn-success">
+            <button type="submit" id="submitBtn" class="btn btn-add-el">
                 {{ $isEdit ? 'Modifier' : 'Créer' }}
             </button>
 

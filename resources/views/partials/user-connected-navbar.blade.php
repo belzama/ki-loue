@@ -1,23 +1,23 @@
 <ul class="navbar-nav flex-grow-1 d-flex justify-content-center align-items-center">
 
-    <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->is('/') ? 'active-link' : '' }}"
+    <li class="nav-item">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->is('/') ? 'active' : '' }}"
            href="{{ url('/') }}">
             <i class="bi bi-house me-2"></i>
             <span>Accueil</span>
         </a>
     </li>
 
-    <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.dispositifs.*') ? 'active-link' : '' }}"
+    <li class="nav-item">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.dispositifs.*') ? 'active' : '' }}"
            href="{{ route('user.dispositifs.index') }}">
             <i class="bi bi-truck me-2"></i>
             <span>Matériels</span>
         </a>
     </li>
 
-    <li class="nav-item px-2">
-        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.publications.*') ? 'active-link' : '' }}"
+    <li class="nav-item">
+        <a class="nav-link text-white d-inline-flex align-items-center {{ request()->routeIs('user.publications.*') ? 'active' : '' }}"
            href="{{ route('user.publications.index') }}">
             <i class="bi bi-journal-text me-2"></i>
             <span>Publications</span>
@@ -26,7 +26,7 @@
 
     @if(auth()->user()->role === 'Admin')
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}"
+            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                href="{{ route('admin.dashboard') }}">
                 <i class="bi bi-person me-2"></i>
                 <span>Mon compte</span>
@@ -34,7 +34,7 @@
         </li>
     @else
         <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('user.dashboard') ? 'active-link' : '' }}"
+            <a class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}"
                href="{{ route('user.dashboard') }}">
                 <i class="bi bi-person me-2"></i>
                 <span>Mon compte</span>

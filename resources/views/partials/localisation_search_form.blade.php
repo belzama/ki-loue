@@ -43,16 +43,15 @@
                 </div>
 
                 <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-dark flex-grow-1" title="Rechercher">
-                        <i class="bi bi-search"></i>
+                    <button type="submit" class="btn btn-dark flex-fill" title="Rechercher">
+                        <i class="bi bi-search"></i> Rechercher
                     </button>
-                    <a href="{{ url()->current() }}" class="btn btn-outline-secondary flex-grow-1" title="Réinitialiser">
+                    <a href="{{ url()->current() }}" class="btn btn-outline-secondary flex-fill" title="Réinitialiser">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
 
             </div>
-
         </form>
     </div>
 </div>

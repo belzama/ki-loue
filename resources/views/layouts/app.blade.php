@@ -24,137 +24,98 @@
    <link href="{{ asset('css/styles.css') }}" rel="stylesheet">
 </head>
 <body>
-
-    {{-- Navbar --}}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-blue-custom fixed-top shadow">
-        <div class="container">
-            <span class="navbar-brand">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo_text_fond_bleu.png') }}" alt="Rentalpark" height="40">
-                </a>
-            </span>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-
-                @yield('nav-bar')
-
+    {{-- Bande orange : icônes sociales + navbar en pilule --}}
+    <header class="site-header">
+        <div class="header">
+            <div class="header-social">
+                <a href="#" target="_blank"><i class="bi bi-linkedin"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-tiktok"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
             </div>
 
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-
-                    {{-- Pays actif (session ou défaut) --}}
-                    @php
-                        $currentPays = session('pays') ?? $paysList->first();
-                    @endphp
-
-                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
-                    href="#" role="button" data-bs-toggle="dropdown">
-
-                        <img src="https://flagcdn.com/w20/{{ strtolower($currentPays->code) }}.png"
-                            class="rounded" alt="{{ $currentPays->nom }}">
-
-                        <span>{{ $currentPays->nom }}</span>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-blue-custom shadow">
+                <div class="container-fluid px-3">
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        <img src="{{ asset('images/logo_text_fond_bleu.png') }}" alt="Rentalpark">
                     </a>
-
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-
-                        @foreach($paysList as $pays)
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2"
-                                href="{{ route('change.pays', $pays->id) }}">
-
-                                    <img src="https://flagcdn.com/w20/{{ strtolower($pays->code) }}.png"
-                                        alt="{{ $pays->nom }}">
-
-                                    <div>
-                                        <div class="fw-semibold">{{ $pays->nom }}</div>
-                                        <small class="text-muted">{{ $pays->langue_officielle }}</small>
-                                    </div>
-                                </a>
-                            </li>
-                        @endforeach
-
-                    </ul>
-                </li>
-            </ul>
-
-            {{-- Dark mode toggle --}}
-            <div class="text-end mb-2">
-                <button class="btn btn-sm btn-outline-warning"
-                        id="themeToggle"
-                        onclick="toggleTheme()"
-                        title="Changer de mode">
-                    <i id="themeIcon" class="bi bi-sun-fill"></i>
-                </button>
-            </div>
-
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            @yield('nav-bar')
+                        </ul>
+                    </div>
+                    <div class="navbar-right">
+                        {{-- Pays + thème : identique à la version précédente --}}
+                        @include('partials.select-pays-theme')
+                    </div>
+                </div>
+            </nav>
         </div>
-    </nav>
+    </header>
 
     {{-- Main Content --}}
-    <div>
-        @yield('main-content')
-    </div>
+    @yield('main-content')
 
     {{-- Footer --}}
-    <footer class="mt-5 py-5 border-top bg-body-tertiary">
-        <div class="container">
-            <div class="row g-4">
-                {{-- Colonne 1 : À propos --}}
-                <div class="col-lg-4 col-md-6">
-                    <img src="{{ asset('images/logo_text_fond_blanc.png') }}" alt="Rentalpark" height="40">
-                    <p class="text-muted small">
-                        La plateforme de référence pour la location de matériels et équipements.
-                        Trouvez ce dont vous avez besoin, où que vous soyez.
-                    </p>
-                    <div class="d-flex gap-3 fs-5 mt-3">
-                        <a href="#" class="text-muted"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-muted"><i class="bi bi-linkedin"></i></a>
+    <footer class="mt-5 bg-body-tertiary">
+        <div class="footer-card">
+            <div class="container">
+                <div class="row g-4">
+                    {{-- Colonne 1 : À propos --}}
+                    <div class="col-lg-4 col-md-6">
+                        <img src="{{ asset('images/logo_text_fond_blanc.png') }}" alt="Rentalpark" height="40">
+                        <p class="text-muted small">
+                            La plateforme de référence pour la location de matériels et équipements.
+                            Trouvez ce dont vous avez besoin, où que vous soyez.
+                        </p>
+                        <div class="d-flex gap-3 fs-5 mt-3 social-icons">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-instagram"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                        </div>
+                    </div>
+
+                    {{-- Colonne 2 : Liens rapides --}}
+                    <div class="col-lg-2 col-md-6">
+                        <h6 class="fw-bold mb-3">Navigation</h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none text-muted">Accueil</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Parcourir</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+
+                    {{-- Colonne 3 : Support --}}
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="fw-bold mb-3">Aide & Support</h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">FAQ</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Conditions Générales</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Politique de confidentialité</a></li>
+                        </ul>
+                    </div>
+
+                    {{-- Colonne 4 : Contact --}}
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="fw-bold mb-3">Contact</h6>
+                        <ul class="list-unstyled small text-muted">
+                            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i> Lomé, Togo</li>
+                            <li class="mb-2"><i class="bi bi-envelope me-2"></i> contact@Rentalpark.com</li>
+                            <li class="mb-2"><i class="bi bi-telephone me-2"></i> +228 00 00 00 00</li>
+                        </ul>
                     </div>
                 </div>
 
-                {{-- Colonne 2 : Liens rapides --}}
-                <div class="col-lg-2 col-md-6">
-                    <h6 class="fw-bold mb-3">Navigation</h6>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="{{ url('/') }}" class="text-decoration-none text-muted">Accueil</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Parcourir</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Comment ça marche</a></li>
-                    </ul>
-                </div>
+                <hr class="my-4">
 
-                {{-- Colonne 3 : Support --}}
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold mb-3">Aide & Support</h6>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">FAQ</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Conditions Générales</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Politique de confidentialité</a></li>
-                    </ul>
-                </div>
-
-                {{-- Colonne 4 : Contact --}}
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold mb-3">Contact</h6>
-                    <ul class="list-unstyled small text-muted">
-                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i> Lomé, Togo</li>
-                        <li class="mb-2"><i class="bi bi-envelope me-2"></i> contact@Rentalpark.com</li>
-                        <li class="mb-2"><i class="bi bi-telephone me-2"></i> +228 00 00 00 00</li>
-                    </ul>
-                </div>
-            </div>
-
-            <hr class="my-4 opacity-25">
-
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
-                <span>&copy; {{ date('Y') }} Rentalpark. Tous droits réservés.</span>
-                <div class="d-flex gap-3">
-                    <span>Développé avec <i class="bi bi-heart-fill text-danger"></i></span>
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
+                    <span>&copy; {{ date('Y') }} Rentalpark. Tous droits réservés.</span>
+                    <div class="d-flex gap-3">
+                        <span>Développé avec <i class="bi bi-heart-fill text-danger"></i></span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -3,10 +3,15 @@
 @section('content')
 
 {{-- PAGE TITLE --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-truck me-2"></i> Mes matériels ({{ $dispositifs->total() }})</h4>
-    <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Ajouter un matériel
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-truck page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Mes matériels ({{ $dispositifs->total() }})</h1>
+        </div>
+    </div>
+    <a href="{{ route('user.dispositifs.select_type') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter un matériel
     </a>
 </div>
 

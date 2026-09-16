@@ -3,8 +3,15 @@
     : 'layouts.guest')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-truck me-2"></i> Nouveau matériel — choisir un type</h4>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-truck page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Nouveau matériel</h1>
+            <p class="page-subtitle">choisir un type</p>
+        </div>
+    </div>
 </div>
 
 <div class="mb-4">
@@ -12,22 +19,24 @@
            placeholder="Rechercher une catégorie ou un type...">
 </div>
 
-<div class="categories-row d-flex flex-wrap gap-4 mb-4" id="categories-row">
+<div class="cats-grid" id="categories-row">
     @foreach($categories as $cat)
         @if($cat->types_dispositifs->isNotEmpty())
-        <div class="cat-item text-center"
-             data-nom="{{ strtolower($cat->nom) }}"
-             data-cat-nom="{{ $cat->nom }}"
-             data-count="{{ $cat->types_dispositifs->count() }}"
-             role="button">
-            <div class="cat-icon-circle mx-auto mb-2 d-flex align-items-center justify-content-center">
+        <div class="cat-card cat-item"
+           data-nom="{{ strtolower($cat->nom) }}"
+           data-cat-nom="{{ $cat->nom }}"
+           data-count="{{ $cat->types_dispositifs->count() }}"
+           role="button">
+            <div class="cat-icon-box">
                 @if($cat->image_link)
                     <img src="{{ asset('storage/' . $cat->image_link) }}" alt="{{ $cat->nom }}">
                 @else
                     <i class="bi bi-truck fs-3 text-muted"></i>
                 @endif
             </div>
-            <div class="small fw-semibold">{{ $cat->nom }}</div>
+            <div class="cat-label-box">
+                <span class="cat-name">{{ $cat->nom }}</span>
+            </div>
 
             {{-- Template caché : liste verticale des types de cette catégorie --}}
             <div class="cat-types-template d-none">
@@ -72,35 +81,6 @@
     </div>
 </div>
 @endsection
-
-@push('styles')
-<style>
-    .cat-icon-circle {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        background-color: #e9ecef;
-        overflow: hidden;
-        border: 2px solid transparent;
-        transition: border-color .2s ease, transform .2s ease;
-    }
-
-    .cat-icon-circle img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .cat-item {
-        cursor: pointer;
-    }
-
-    .cat-item:hover .cat-icon-circle {
-        border-color: #f39200;
-        transform: scale(1.05);
-    }
-</style>
-@endpush
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

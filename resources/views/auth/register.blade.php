@@ -6,7 +6,7 @@
 
 @section('main-content')
 
-<div class="section bg-img container-fluid min-vh-100 d-flex align-items-center justify-content-center py-3">
+<div class="section bg-login-image container-fluid min-vh-100 d-flex align-items-center justify-content-center py-3">
 
     <div class="shadow-lg border-0 rounded-4" style="background:white; margin-top:30px; max-width:520px; width:100%;">
         <div class="card-body p-3">

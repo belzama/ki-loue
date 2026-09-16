@@ -19,11 +19,20 @@
 
         {{-- Contenu principal --}}
         <main class="catalogue-main">
-            @include('partials.localisation_search_form')
+            <div class="catalogue-header">                    
+                @include('partials.localisation_search_form')
+            </div>
             
-            @include('partials.search-publications-actives')
+            <div class="catalogue-body">
+                <div class="text-center">
+                <h2 class="catalogue-title">Notre Catalogue</h2>
+                    <p class="catalogue-sub">({{ $publications->total() }}) matériels disponibles en location</p>
+                </div>
+                <div style="margin: 10px;">                
+                    @include('partials.search-publications-actives')
+                </div>
+            </div>
         </main>
-
     </div>
 
 @endsection

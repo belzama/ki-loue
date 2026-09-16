@@ -1,12 +1,15 @@
 <aside class="catalogue-sidebar">
-    <h3 class="sidebar-title">Catégories</h3>
+    
+    <div class="category-header">
+        <h3 class="sidebar-title">Catégories</h3>
 
-    {{-- Champ de filtre --}}
-    <div class="category-search">
-        <input type="text"
-               id="category-filter"
-               placeholder="Rechercher une catégorie..."
-               class="category-search-input">
+        {{-- Champ de filtre --}}
+        <div class="category-search">
+            <input type="text"
+                id="category-filter"
+                placeholder="Rechercher une catégorie..."
+                class="category-search-input">
+        </div>
     </div>
 
     <ul class="category-list" id="category-list">
