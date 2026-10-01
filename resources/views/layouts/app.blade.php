@@ -121,19 +121,485 @@
         </div>
     </footer>
 
+    <!-- Waiting global -->
+    <div id="global-waiting" class="global-waiting d-none">
+        <div class="waiting-box">
+
+            <div class="waiting-logo-container">
+                <img
+                    src="{{ asset('images/logo_fond_blanc.png') }}"
+                    alt="RentalPark"
+                    class="waiting-logo"
+                >
+
+                <div class="waiting-spinner-overlay">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="waiting-message">
+                Traitement en cours...
+            </div>
+
+        </div>
+    </div>
+
     
     @include('partials.verification-modal')
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>
-    <script src="{{ asset('js/laravel-form-handler.js') }}"></script>
-    {{-- Custom JS --}}
-    @stack('scripts')
-
+    
     {{-- Scripts --}}
 
     <script>
+        (function () {
+
+            'use strict';
+
+            /*
+            |--------------------------------------------------------------------------
+            | WAITING GLOBAL RENTALPARK
+            |--------------------------------------------------------------------------
+            */
+
+            const waiting = document.getElementById('global-waiting');
+
+            if (!waiting) {
+                console.error('❌ #global-waiting introuvable.');
+                return;
+            }
+
+            const messageElement = waiting.querySelector('.waiting-message');
+
+            let waitingVisible = false;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | AFFICHER
+            |--------------------------------------------------------------------------
+            */
+
+            window.showWaiting = function (message) {
+
+                const defaultMessage = 'Patientez SVP...';
+
+                if (messageElement) {
+                    messageElement.textContent =
+                        typeof message === 'string' && message.trim() !== ''
+                            ? message
+                            : defaultMessage;
+                }
+
+                waiting.classList.remove('d-none');
+                waitingVisible = true;
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | MASQUER
+            |--------------------------------------------------------------------------
+            */
+
+            window.hideWaiting = function () {
+
+                waiting.classList.add('d-none');
+
+                waitingVisible = false;
+
+                document.body.classList.remove('waiting-active');
+
+                // Réinitialiser le message
+                if (messageElement) {
+                    messageElement.textContent = 'Patientez SVP...';
+                }
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FORCER LA FERMETURE
+            |--------------------------------------------------------------------------
+            */
+
+            window.forceHideWaiting = function () {
+
+                waiting.classList.add('d-none');
+
+                waitingVisible = false;
+
+                document.body.classList.remove('waiting-active');
+                
+                // Réinitialiser le message
+                if (messageElement) {
+                    messageElement.textContent = 'Patientez SVP...';
+                }
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TEST
+            |--------------------------------------------------------------------------
+            |
+            | Dans la console :
+            |
+            | showWaiting('Test...');
+            | hideWaiting();
+            |
+            */
+
+            window.testWaiting = function () {
+
+                showWaiting('Test du système...');
+
+                setTimeout(function () {
+                    hideWaiting();
+                }, 2000);
+
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 1. SUBMIT NORMAL
+            |--------------------------------------------------------------------------
+            */
+
+            document.addEventListener('submit', function (event) {
+
+                const form = event.target;
+
+                if (!(form instanceof HTMLFormElement)) {
+                    return;
+                }
+
+                if (form.hasAttribute('data-no-waiting')) {
+                    return;
+                }
+
+                showWaiting(
+                    form.dataset.waitingMessage ||
+                    'Enregistrement en cours...'
+                );
+
+                disableSubmitButtons(form);
+
+            }, true);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2. form.submit()
+            |--------------------------------------------------------------------------
+            |
+            | IMPORTANT :
+            | form.submit() ne déclenche PAS l'événement submit.
+            |
+            | On intercepte donc la méthode native.
+            |--------------------------------------------------------------------------
+            */
+
+            const nativeSubmit =
+                HTMLFormElement.prototype.submit;
+
+            HTMLFormElement.prototype.submit = function () {
+
+                if (!this.hasAttribute('data-no-waiting')) {
+
+                    showWaiting(
+                        this.dataset.waitingMessage ||
+                        'Enregistrement en cours...'
+                    );
+
+                    disableSubmitButtons(this);
+                }
+
+                return nativeSubmit.call(this);
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 3. requestSubmit()
+            |--------------------------------------------------------------------------
+            */
+
+            const nativeRequestSubmit =
+                HTMLFormElement.prototype.requestSubmit;
+
+            if (nativeRequestSubmit) {
+
+                HTMLFormElement.prototype.requestSubmit =
+                    function (...args) {
+
+                        if (!this.hasAttribute('data-no-waiting')) {
+
+                            showWaiting(
+                                this.dataset.waitingMessage ||
+                                'Enregistrement en cours...'
+                            );
+
+                            disableSubmitButtons(this);
+                        }
+
+                        return nativeRequestSubmit.apply(this, args);
+                    };
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 4. DÉSACTIVER LES BOUTONS SUBMIT
+            |--------------------------------------------------------------------------
+            */
+
+            function disableSubmitButtons(form) {
+
+                form.querySelectorAll(
+                    'button[type="submit"], input[type="submit"]'
+                ).forEach(function (button) {
+
+                    if (button.disabled) {
+                        return;
+                    }
+
+                    button.disabled = true;
+
+                    if (button.tagName === 'BUTTON') {
+
+                        if (!button.dataset.originalHtml) {
+
+                            button.dataset.originalHtml =
+                                button.innerHTML;
+                        }
+
+                        button.innerHTML = `
+                            <span
+                                class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                                aria-hidden="true">
+                            </span>
+                            Traitement...
+                        `;
+                    }
+
+                });
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 5. LIENS
+            |--------------------------------------------------------------------------
+            |
+            | On affiche automatiquement le waiting pour les liens
+            | qui entraînent une navigation.
+            |--------------------------------------------------------------------------
+            */
+
+            document.addEventListener('click', function (event) {
+
+                const link = event.target.closest('a');
+
+                if (!link) {
+                    return;
+                }
+
+                if (link.hasAttribute('data-no-waiting')) {
+                    return;
+                }
+
+                /*
+                * Ignorer les liens sans destination
+                */
+
+                const href = link.getAttribute('href');
+
+                if (
+                    !href ||
+                    href === '#' ||
+                    href.startsWith('javascript:')
+                ) {
+                    return;
+                }
+
+                /*
+                * Ignorer les ancres de la page
+                */
+
+                if (href.startsWith('#')) {
+                    return;
+                }
+
+                /*
+                * Ignorer nouvel onglet
+                */
+
+                if (
+                    link.target === '_blank' ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey ||
+                    event.altKey
+                ) {
+                    return;
+                }
+
+                /*
+                * Ignorer bouton désactivé
+                */
+
+                if (link.classList.contains('disabled')) {
+                    return;
+                }
+
+                showWaiting(
+                    link.dataset.waitingMessage ||
+                    'Chargement en cours...'
+                );
+
+            }, true);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 6. BOUTONS AVEC data-waiting
+            |--------------------------------------------------------------------------
+            */
+
+            document.addEventListener('click', function (event) {
+
+                const button = event.target.closest(
+                    'button[data-waiting]'
+                );
+
+                if (!button) {
+                    return;
+                }
+
+                if (button.hasAttribute('data-no-waiting')) {
+                    return;
+                }
+
+                if (button.disabled) {
+                    return;
+                }
+
+                /*
+                * Les boutons submit sont déjà gérés par submit.
+                */
+
+                if (
+                    button.type &&
+                    button.type.toLowerCase() === 'submit'
+                ) {
+                    return;
+                }
+
+                showWaiting(
+                    button.dataset.waitingMessage ||
+                    'Patientez SVP...'
+                );
+
+            }, true);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 7. AJAX JQUERY
+            |--------------------------------------------------------------------------
+            */
+
+            if (window.jQuery) {
+
+                $(document).ajaxStart(function () {
+
+                    showWaiting(
+                        'Patientez SVP...'
+                    );
+
+                });
+
+                $(document).ajaxStop(function () {
+
+                    hideWaiting();
+
+                });
+
+                $(document).ajaxError(function () {
+
+                    hideWaiting();
+
+                });
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 8. FETCH
+            |--------------------------------------------------------------------------
+            */
+
+            if (window.fetch) {
+
+                const nativeFetch = window.fetch;
+
+                window.fetch = function (...args) {
+
+                    showWaiting(
+                        'Patientez SVP...'
+                    );
+
+                    return nativeFetch.apply(this, args)
+                        .then(function (response) {
+
+                            return response;
+
+                        })
+                        .catch(function (error) {
+
+                            throw error;
+
+                        })
+                        .finally(function () {
+
+                            hideWaiting();
+
+                        });
+                };
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 9. NAVIGATION DE PAGE
+            |--------------------------------------------------------------------------
+            */
+
+            window.addEventListener('pageshow', function () {
+
+                hideWaiting();
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 10. DEBUG
+            |--------------------------------------------------------------------------
+            */
+
+            console.log(
+                '✅ Waiting global RentalPark initialisé.'
+            );
+
+        })();
 
         function adjustLayout() {
             const navbar = document.querySelector('.bg-blue-custom');
@@ -186,5 +652,10 @@
             }
         })();
     </script>
+    
+    <script src="{{ asset('js/laravel-form-handler.js') }}"></script>
+    {{-- Custom JS --}}
+    @stack('scripts')
+
 </body>
 </html>

@@ -40,7 +40,7 @@
             <div class="col-md-5">
 
                 <div class="card shadow-sm mb-3">
-                    <div class="card-header fw-bold">
+                    <div class="card-header bg-navy fw-bold">
                         Dépôt
                     </div>
 
@@ -60,7 +60,7 @@
                                         min="0"
                                         step="0.01"
                                        required>
-                                <span class="input-group-text">
+                                <span class="input-group-text  bg-orange">
                                     {{ $devise }}
                                 </span>
                             </div>
@@ -71,27 +71,29 @@
                             Mode de paiement <span class="text-danger">*</span>
                         </label>
 
-                        @forelse($modes as $mode)
-                            <div class="form-check mb-2">
-                                <input class="form-check-input mode-radio"
-                                       type="radio"
-                                       name="mode_paiement_id"
-                                       value="{{ $mode->id }}"
-                                       data-type="{{ $mode->type }}">
-
-                                <label class="form-check-label">
-                                    {{ $mode->designation }}
-                                    <small class="text-muted">
-                                        ({{ $mode->type }})
-                                    </small>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @forelse($modes as $mode)
+                                <label class="payment-option">
+                                    <input type="radio"
+                                        name="mode_paiement_id"
+                                        value="{{ $mode->id }}"
+                                        data-type="{{ $mode->type }}"
+                                        class="mode-radio d-none">
+                                    <span class="payment-badge">
+                                        <span class="payment-logo-wrap">
+                                            <img src="{{ $mode->logo ? asset('storage/' . $mode->logo) : asset('images/payment-placeholder.png') }}"
+                                                alt="{{ $mode->designation }}"
+                                                class="payment-logo">
+                                        </span>
+                                        <span class="payment-text">{{ $mode->designation }}</span>
+                                    </span>
                                 </label>
-                            </div>
-                        @empty
-                            <div class="alert alert-warning">
-                                Aucun mode de paiement disponible.
-                            </div>
-                        @endforelse
-
+                            @empty
+                                <div class="alert alert-warning">
+                                    Aucun mode de paiement disponible.
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 
@@ -101,7 +103,7 @@
             <div class="col-md-7">
 
                 <div class="card shadow-sm">
-                    <div class="card-header fw-bold">
+                    <div class="card-header bg-navy fw-bold">
                         Informations de paiement
                     </div>
 

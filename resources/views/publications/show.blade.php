@@ -17,7 +17,7 @@
     {{-- ===== Titre ===== --}}
     <div class="d-flex justify-content-between align-items-center mb-4" 
         style="margin-top: 3.5em;">
-        <h3 class="fw-bold">
+        <h3 class="fw-bold text-navy">
             {{ $publication->dispositif->designation }}
         </h3>
 
@@ -89,8 +89,8 @@
 
         {{-- ===== INFOS DISPOSITIF ===== --}}
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 border-0">
-                <div class="card-header bg-dark text-white fw-semibold">
+            <div class="card shadow-sm h-100 border-navy">
+                <div class="card-header bg-navy border-navy text-white fw-semibold">
                     Matériel
                 </div>
 
@@ -148,7 +148,7 @@
                         </div>
                     @endforeach
 
-                    <div class="row g-2">
+                    <!-- <div class="row g-2">
                         <div class="col-md-4">
                             <strong>État :</strong>
                         </div>
@@ -157,15 +157,15 @@
                                 {{ $publication->dispositif->etat }}
                             </span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
 
         {{-- ===== LOCALISATION ===== --}}
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 border-0">
-                <div class="card-header bg-dark text-white fw-semibold">
+            <div class="card shadow-sm h-100 border-navy">
+                <div class="card-header bg-navy border-navy text-white fw-semibold">
                     Localisation
                 </div>
 
@@ -213,15 +213,15 @@
 
         {{-- ===== TARIF ===== --}}
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 border-0 text-center">
+            <div class="card shadow-sm h-100 border-orange text-center">
 
-                <div class="card-header bg-success text-white fw-semibold">
+                <div class="card-header bg-orange text-white border-orange fw-semibold">
                     Tarif de location
                 </div>
 
                 <div class="card-body d-flex align-items-center justify-content-center">
 
-                    <div class="display-6 fw-bold text-success">
+                    <div class="display-6 fw-bold text-navy">
                         {{ number_format($publication->tarif_location,0,' ',' ') }}
                         <small class="fs-6">FCFA / jour</small>
                     </div>
@@ -248,7 +248,7 @@
                         <img
                             src="{{ asset('storage/'.$photo->path) }}"
                             class="img-fluid rounded shadow-sm lightbox-item"
-                            style="height:170px; object-fit:cover; cursor:pointer;"
+                            style="height:100%; width:100%; object-fit:cover; cursor:pointer;"
                             data-bs-toggle="modal"
                             data-bs-target="#photoModal"
                             data-index="{{ $index }}"

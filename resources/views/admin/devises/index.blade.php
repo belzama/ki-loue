@@ -1,12 +1,19 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Devises</h1>
-
-<a href="{{ route('admin.devises.create') }}" 
-    class="btn btn-primary mb-3 bi bi-plus-lg">
-    Ajouter une devise
-</a>
+{{-- PAGE TITLE --}}
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-currency-exchange page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Devises ({{ $devises->total()}})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.devises.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter une devise
+    </a>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -43,4 +50,8 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="mt-4">
+    {{ $devises->links() }}
+</div>
 @endsection

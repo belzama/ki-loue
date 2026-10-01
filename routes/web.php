@@ -72,13 +72,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/verification/whatsapp/dismiss', [VerificationController::class, 'dismissWhatsappReminder'])->name('verification.whatsapp.dismiss');
 });
 
-Route::middleware('auth')->group(function () {
+/*Route::middleware('auth')->group(function () {
     Route::get('/pays/create', [PaysController::class, 'create'])->name('pays.create');
     Route::post('/pays', [PaysController::class, 'store'])->name('pays.store');
     Route::get('/pays/{pays}/edit', [PaysController::class, 'edit'])->name('pays.edit');
     Route::put('/pays/{pays}', [PaysController::class, 'update'])->name('pays.update');
     Route::delete('/pays/{pays}', [PaysController::class, 'destroy'])->name('pays.destroy');
-});
+});*/
 
 Route::middleware(['auth','role:Admin', 'contacts.verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');

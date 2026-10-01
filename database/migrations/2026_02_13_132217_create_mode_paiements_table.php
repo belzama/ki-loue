@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('pays_id')->constrained()->cascadeOnDelete();
             $table->string('designation');
             $table->enum('type', ['Mobile Money', 'Visa Card', 'Wallet', 'Espèce', 'Chèque', 'Virement', 'Autres']);
+            $table->string('logo')->nullable();
             $table->string('api_url')->nullable();
             $table->string('numero_compte')->nullable();
             $table->timestamps();

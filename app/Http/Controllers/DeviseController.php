@@ -11,7 +11,8 @@ class DeviseController extends Controller
     public function index()
     {
         return view('admin.devises.index', [
-            'devises' => Devise::all()
+            'devises' => Devise::orderBy('libelle')
+                ->paginate(10)
         ]);
     }
 

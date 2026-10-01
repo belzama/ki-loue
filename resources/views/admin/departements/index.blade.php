@@ -1,12 +1,19 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Préfectures/Départements</h1>
 
-<a href="{{ route('admin.departements.create') }}" 
-    class="btn btn-primary mb-3 bi bi-plus-lg">
-    Ajouter préfecture/département
-</a>
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-building page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Sous-régions ({{ $departements->total() }})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.departements.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter une sous-région
+    </a>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -36,7 +43,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-danger bi bi-trash-fill"
-                        onclick="return confirm('Supprimer préfecture/département ?')" title="Supprimer">
+                        onclick="return confirm('Supprimer sous-région ?')" title="Supprimer">
                     </button>
                 </form>
             </td>
@@ -45,6 +52,6 @@
     </tbody>
 </table>
 
-{{-- $departementList->links() --}}
+{{ $departements->links() }}
 @endsection
 

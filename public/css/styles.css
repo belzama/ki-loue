@@ -18,6 +18,105 @@ body {
 }
 
 /* =========================================================
+   WAITING GLOBAL
+   ========================================================= */
+#global-waiting {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(3px);
+}
+
+#global-waiting.d-none {
+    display: none !important;
+}
+
+.waiting-box {
+    width: 360px;
+    max-width: 90%;
+
+    padding: 35px 40px;
+
+    background: var(--bs-body-bg, #fff);
+    border-radius: 15px;
+
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.20);
+
+    text-align: center;
+}
+
+/* Zone contenant le logo + spinner */
+.waiting-logo-container {
+    position: relative;
+
+    width: 180px;
+    height: 100px;
+
+    margin: 0 auto 25px auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Logo */
+.waiting-logo {
+    display: block;
+
+    width: 160px;
+    max-width: 100%;
+    height: auto;
+
+    position: relative;
+    z-index: 1;
+}
+
+/* Cercle superposé au logo */
+.waiting-spinner-overlay {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cercle */
+.waiting-spinner-overlay .spinner-border {
+    width: 3.5rem;
+    height: 3.5rem;
+
+    border-width: 0.35rem;
+
+    /* légèrement transparent pour voir le logo */
+    opacity: 0.85;
+}
+
+/* Message */
+.waiting-message {
+    text-align: center;
+
+    margin-top: 10px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+/* =========================================================
    1. TOPBAR SOCIAL (fine bande orange au-dessus de la navbar)
    ========================================================= */
 .topbar-social {
@@ -72,6 +171,24 @@ body {
     padding-bottom: 12px;
     margin: 0 auto;
 }
+
+.bg-navy {
+    background-color: var(--rp-navy) !important;
+    color: #fff;
+}
+
+.bg-orange {
+    background-color: var(--rp-orange) !important;
+}
+
+.border-navy {
+    border: solid 1px var(--rp-navy);
+}
+
+.border-orange {
+    border: solid 1px var(--rp-orange);
+}
+
 .navbar-brand img { height: 38px; }
 
 /* Structure générale : logo | liens centrés | pays + thème */
@@ -99,19 +216,42 @@ body {
 .navbar-nav .nav-link:hover,
 .navbar-nav .nav-link.active {
     color: var(--rp-orange) !important;
-}
-.navbar-nav .dropdown-toggle::after {
+}.navbar-nav .dropdown-toggle::after {
     vertical-align: 2px;
 }
+
 .navbar-nav .dropdown-menu {
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    overflow: hidden;
 }
-.navbar-nav .dropdown-item:active,
-.navbar-nav .dropdown-item:hover {
-    background-color: var(--rp-light);
+
+.text-navy {
     color: var(--rp-navy);
+}
+
+.text-orange {
+    color: var(--rp-orange);
+}
+
+.navbar-nav .dropdown-item:hover,
+.navbar-nav .dropdown-item:focus {
+    background-color: rgba(255,255,255,0.08);
+    color: inherit;
+}
+
+.navbar-nav .dropdown-item i {
+    color: inherit;
+}
+
+.dropdown-menu li {
+    border: solid 1px #fff !important; 
+}
+
+.header-wallet .border {
+    border: solid 1px var(--rp-navy) !important;
 }
 
 /* Bloc de droite : Pays + toggle thème, jamais wrappé sous le burger */
@@ -1452,3 +1592,146 @@ footer hr {
     font-weight: 600;
     margin-top: .5rem;
 }
+
+/*----------------payment--------------*/
+.payment-option {
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.payment-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    padding: 8px 6px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+    gap: 6px;
+}
+
+.payment-logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 28px;
+    overflow: hidden;
+}
+
+.payment-logo {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.payment-text {
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: #333;
+    text-align: center;
+    line-height: 1.1;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.payment-option:hover .payment-badge {
+    border-color: #adb5bd;
+}
+
+.mode-radio:checked + .payment-badge {
+    border-color: #1a1a4b;
+    background: #f0f0f8;
+    box-shadow: 0 0 0 2px rgba(26,26,75,0.15);
+}
+
+.wizard-steps {
+    position: relative;
+}
+
+.wizard-steps::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    background: #dee2e6;
+    z-index: 0;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #adb5bd;
+    transition: all 0.2s ease;
+}
+
+.step-label {
+    font-size: 0.8rem;
+    color: #adb5bd;
+    font-weight: 600;
+    text-align: center;
+}
+
+/*----------------------------------------------------*/
+.wizard-step.active .step-circle {
+    border-color: #1a1a4b;
+    background: #1a1a4b;
+    color: #fff;
+}
+
+.wizard-step.active .step-label {
+    color: #1a1a4b;
+}
+
+.wizard-step.completed .step-circle {
+    border-color: #198754;
+    background: #198754;
+    color: #fff;
+}
+
+.wizard-step.completed .step-circle::after {
+    content: '✓';
+}
+
+.mode-logo-preview {
+    width: 60px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+    overflow: hidden;
+}
+.mode-logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.table-logo-thumb { width: 40px; height: 32px; object-fit: contain; }

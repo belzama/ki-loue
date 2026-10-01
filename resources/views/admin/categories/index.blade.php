@@ -2,11 +2,16 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-truck me-2"></i> Catégories</h4>
-    <a href="{{ route('admin.categories.create') }}"
-        class="btn btn-primary mb-3">
-        <i class="bi bi-plus-lg"></i> Ajouter une catégorie
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-tags page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Catégories ({{ $categories->total() }})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.categories.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter une catégorie
     </a>
 </div>
 
@@ -55,4 +60,8 @@
 @if($categories->isEmpty())
     <p class="text-muted">Aucune catégorie pour le moment.</p>
 @endif
+
+<div class="mt-4">
+    {{ $categories->links() }}
+</div>
 @endsection

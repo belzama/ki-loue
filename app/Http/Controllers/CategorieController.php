@@ -11,7 +11,8 @@ class CategorieController extends Controller
     public function index()
     {
         return view('admin.categories.index', [
-            'categories' => Categorie::orderBy('nom')->get()
+            'categories' => Categorie::orderBy('nom')
+            ->paginate(10)
         ]);
     }
 

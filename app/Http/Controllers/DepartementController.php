@@ -15,7 +15,8 @@ class DepartementController extends Controller
     public function index()
     {
         return view('admin.departements.index', [
-            'departements' => Departement::all()
+            'departements' => Departement::orderBy('nom')
+            ->paginate(10)
         ]);
     }
 

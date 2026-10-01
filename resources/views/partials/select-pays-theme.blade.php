@@ -35,11 +35,11 @@
 </ul>
 
 {{-- Dark mode toggle --}}
-<div class="text-end mb-2">
+<!-- <div class="text-end mb-2">
     <button class="btn btn-sm btn-outline-warning"
             id="themeToggle"
             onclick="toggleTheme()"
             title="Changer de mode">
         <i id="themeIcon" class="bi bi-sun-fill"></i>
     </button>
-</div>
+</div> -->

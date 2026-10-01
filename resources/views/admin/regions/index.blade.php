@@ -1,12 +1,19 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Departements</h1>
 
-<a href="{{ route('admin.regions.create') }}" 
-    class="btn btn-primary mb-3 bi bi-plus-lg">
-    Ajouter une région
-</a>
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-map page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Régions ({{ $regions->total() }})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.regions.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter une région
+    </a>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -45,6 +52,8 @@
     </tbody>
 </table>
 
-{{-- $regionList->links() --}}
+<div class="mt-4">
+    {{ $regions->links() }}
+</div>
 @endsection
 

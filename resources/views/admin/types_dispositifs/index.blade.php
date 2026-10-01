@@ -3,10 +3,16 @@
 @section('content')
 
 {{-- PAGE TITLE --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4><i class="bi bi-cpu me-2"></i> Types de matériels ({{ $types->total() }})</h4>
-    <a href="{{ route('admin.types_dispositifs.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Ajouter un type de matériel
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-cpu page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Types de matériels ({{ $types->total() }})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.types_dispositifs.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter un type de matériel
     </a>
 </div>
 

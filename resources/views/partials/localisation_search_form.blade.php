@@ -2,6 +2,8 @@
 <div class="card mb-4 shadow-sm">
     <div class="card-body">
         <form method="GET">
+            <input type="hidden" id="categorie_id" name="categorie_id" value="{{ request('categorie_id') }}">
+
             <div class="row g-3 align-items-end">
 
                 <div class="col-md-3">

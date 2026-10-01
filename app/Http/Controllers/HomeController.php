@@ -2,66 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
 
-use Stevebauman\Location\Facades\Location;
+use App\Services\CatalogueService;
 
 use App\Models\Pays;
 use App\Models\Region;
 use App\Models\Departement;
-use App\Models\Categorie;
 use App\Models\TypesDispositif;
 use App\Models\Publication;
-use App\Models\Reservation;
-use App\Models\Notification;
 
 class HomeController extends Controller
 {
+    public function __construct(protected CatalogueService $catalogue) {}
+
     /**
      * Page d'accueil avec les publications actives
      */
     public function index(Request $request)
     {
-        // On cherche le pays, mais on prévoit un fallback (ex: 'FR' par défaut)
         $country = getUserCountry();
 
-        // Requête de base avec eager loading
-        $query = Publication::with([
-            'dispositif.photos',
-            'dispositif.type_dispositif.categorie',
-            'departement.region.pays',
-            'devise'
-        ])
-        ->where('active', 1)
-        ->where('date_debut', '<=', now())
-        ->where('date_fin', '>=', now());
+        $publications = $this->catalogue->searchPublications([], perPage: 12);
 
-        $publications = $query
-            ->latest()
-            ->paginate(12)
-            ->withQueryString(); // garde les filtres dans l'URL
-
-        /*
-        |----------------------------------------------------------------------
-        | DONNÉES POUR LES FILTRES
-        |----------------------------------------------------------------------
-        */
-
-        $categories = Categorie::addSelect([
-            'publications_actives_count' => Publication::selectRaw('COUNT(*)')
-                ->whereHas('dispositif', function ($q) {
-                    $q->whereHas('type_dispositif', function ($q2) {
-                        $q2->whereColumn('categorie_id', 'categories.id');
-                    });
-                })
-                ->where('active', true)
-                ->whereDate('date_debut', '<=', now())
-                ->whereDate('date_fin', '>=', now())
-        ])
-        ->orderBy('nom')
-        ->get();
+        $categories = $this->catalogue->categoriesAvecPublicationsActives();
 
         return view('welcome', compact(
             'country',
@@ -70,115 +34,27 @@ class HomeController extends Controller
         ));
     }
 
+    /**
+     * Catalogue public avec filtres (localisation, catégorie, type, tarif)
+     */
     public function showCatalogue(Request $request)
     {
-        // On cherche le pays, mais on prévoit un fallback (ex: 'FR' par défaut)
         $country = getUserCountry();
 
-        // Requête de base avec eager loading
-        $query = Publication::with([
-            'dispositif.photos',
-            'dispositif.type_dispositif.categorie',
-            'departement.region.pays',
-            'devise'
-        ])
-        ->where('active', 1)
-        ->where('date_debut', '<=', now())
-        ->where('date_fin', '>=', now());
+        $filtres = $request->only([
+            'pays_id', 'region_id', 'departement_id',
+            'categorie_id', 'types_dispositif_id',
+            'tarif_min', 'tarif_max',
+        ]);
 
-        /*
-        |----------------------------------------------------------------------
-        | FILTRES
-        |----------------------------------------------------------------------
-        */
+        $publications = $this->catalogue->searchPublications($filtres, perPage: 12);
 
-        // Filtre par Continent via Departement → Région → Pays → Continent
-        /*if ($request->filled('continent_id')) {
-            $query->whereHas('departement.region.pays', function($q) use ($request){
-                $q->whereHas('continent', function($q2) use ($request){
-                    $q2->where('id', $request->continent_id);
-                });
-            });
-        } */       
-
-        // Filtre par Pays via Departement → Région → Pays
-        if ($request->filled('pays_id')) {
-            $query->whereHas('departement.region.pays', function($q) use ($request){
-                $q->where('id', $request->pays_id);
-            });
-        }
-
-        // Filtre par Région via Departement → Région
-        if ($request->filled('region_id')) {
-            $query->whereHas('departement.region', function($q) use ($request){
-                $q->where('id', $request->region_id);
-            });
-        }
-
-        // Filtre par Departement
-        if ($request->filled('departement_id')) {
-            $query->where('departement_id', $request->departement_id);
-        }
-
-        // Filtre par Categorie via TypeDispositif → Dispositif
-        if ($request->filled('categorie_id')) {
-            $query->whereHas('dispositif.type_dispositif.categorie', function ($q) use ($request) {
-                $q->where('id', $request->categorie_id);
-            });
-        }
-
-        // Filtre par Type de dispositif via Dispositif
-        if ($request->filled('types_dispositif_id')) {
-            $query->whereHas('dispositif', function ($q) use ($request) {
-                $q->where('types_dispositif_id', $request->types_dispositif_id);
-            });
-        }
-
-        // Filtre par Tarif minimum
-        if ($request->filled('tarif_min')) {
-            $query->where('tarif_location', '>=', $request->tarif_min);
-        }
-
-        // Filtre par Tarif maximum
-        if ($request->filled('tarif_max')) {
-            $query->where('tarif_location', '<=', $request->tarif_max);
-        }
-
-        /*
-        |----------------------------------------------------------------------
-        | PAGINATION
-        |----------------------------------------------------------------------
-        */
-
-        $publications = $query
-            ->latest()
-            ->paginate(12)
-            ->withQueryString(); // garde les filtres dans l'URL
-
-        /*
-        |----------------------------------------------------------------------
-        | DONNÉES POUR LES FILTRES
-        |----------------------------------------------------------------------
-        */
-
-        $categories = Categorie::addSelect([
-            'publications_actives_count' => Publication::selectRaw('COUNT(*)')
-                ->whereHas('dispositif', function ($q) {
-                    $q->whereHas('type_dispositif', function ($q2) {
-                        $q2->whereColumn('categorie_id', 'categories.id');
-                    });
-                })
-                ->where('active', true)
-                ->whereDate('date_debut', '<=', now())
-                ->whereDate('date_fin', '>=', now())
-        ])
-        ->orderBy('nom')
-        ->get();
+        $categories = $this->catalogue->categoriesAvecPublicationsActives();
 
         $typesDispositifs = TypesDispositif::orderBy('nom')->get();
         $pays             = Pays::orderBy('nom')->get();
-        $regions             = Region::orderBy('nom')->get();
-        $departements             = Departement::orderBy('nom')->get();
+        $regions          = Region::orderBy('nom')->get();
+        $departements     = Departement::orderBy('nom')->get();
 
         return view('publications.index', compact(
             'country', 'publications', 'categories',
@@ -225,52 +101,8 @@ class HomeController extends Controller
         ]);
 
         try {
-
-            DB::beginTransaction();
-
-            // =============================
-            // Création réservation
-            // =============================
-            $reservation = Reservation::create([
-                'publication_id'   => $publication->id,
-                'user_id'          => auth()->id(),
-                'date_reservation' => now()->toDateString(),
-                'date_demandee'    => $data['date_demandee'] ?? null,
-                'duree_demandee'   => $data['duree_demandee'] ?? 1,
-                'nom_prenom'       => $data['nom_prenom'] ?? null,
-                'email'            => $data['email'] ?? null,
-                'telephone'        => $data['telephone'] ?? null,
-                'message'          => $data['message'] ?? null,
-                'statut'           => 'Demandée',
-            ]);
-
-            // =============================
-            // Notification
-            // =============================
-            $dispositif = $publication->dispositif;
-            $owner = $dispositif->user;
-
-            $notificationMessage = "Demande de réservation du dispositif "
-                . $dispositif->designation
-                . " immatriculé "
-                . $dispositif->numero_immatriculation;
-
-            Notification::create([
-                'user_id'              => $owner->id,
-                'type'                 => 'Réservation',
-                'message'              => $notificationMessage,
-                'send_email'           => !empty($owner->email),
-                'send_email_address'   => $owner->email,
-                'send_whatsapp'        => !empty($owner->whatsapp),
-                'send_whatsapp_number' => $owner->whatsapp,
-            ]);
-
-            DB::commit();
-
+            $reservation = $this->catalogue->creerReservation($publication, $data);
         } catch (\Exception $e) {
-
-            DB::rollBack();
-
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -281,26 +113,12 @@ class HomeController extends Controller
             return back()->with('error', 'Une erreur est survenue.');
         }
 
-        // =============================
-        // Construction message WhatsApp
-        // =============================
+        $owner = $publication->dispositif->user;
+
         $lienReservation = route('user.reservations.show', $reservation->id);
+        $message = $this->catalogue->messageWhatsappReservation($publication, $reservation, $data['message'] ?? null)
+            . '&url=' . urlencode($lienReservation); // ajustez si le format attendu diffère
 
-        $message  = "Bonjour,\n\n";
-        $message .= "Je souhaite réserver votre matériel *"
-            . $publication->dispositif->designation . "*\n\n";
-
-        if (!empty($data['message'])) {
-            $message .= "Message : " . $data['message'] . "\n\n";
-        }
-
-        $message .= "Voir la réservation :\n" . $lienReservation;
-
-        $messageEncoded = urlencode($message);
-
-        // =============================
-        // Retour Ajax
-        // =============================
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -310,14 +128,10 @@ class HomeController extends Controller
                     'whatsapp' => $owner->whatsapp,
                     'email'   => $owner->email,
                 ],
-                'message' => $messageEncoded
+                'message' => $message
             ]);
         }
 
-        // =============================
-        // Retour normal
-        // =============================
         return back()->with('success', 'Votre demande de réservation a été envoyée !');
     }
 }
-

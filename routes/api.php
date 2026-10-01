@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Models;
+// routes/api.php
+use App\Http\Controllers\Api\ApiController;
 
-Route::apiResource('publications', PublicationController::class);
-Route::apiResource('dispositifs', DispositifController::class);
-Route::apiResource('categories', CategorieController::class);
-Route::apiResource('pays', PaysController::class);
-Route::apiResource('departements', departementController::class);
+Route::prefix('v1')->group(function () {
+    Route::get('/publications', [ApiController::class, 'publications']);
+    Route::get('/categories', [ApiController::class, 'categories']);
+    Route::post('/publications/{publication}/reservations', [ApiController::class, 'storeReservation']);
+});

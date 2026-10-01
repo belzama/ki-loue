@@ -4,13 +4,15 @@
 
 @section('content')
 
-<div class="container">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4>
-            <i class="bi bi-receipt me-2"></i> 
-            Mes abonnements ({{ $abonnements->total() }})
-        </h4>
+
+    {{-- PAGE TITLE --}}
+    <div class="page-header">
+        <div class="page-header-left">
+            <i class="bi bi-receipt page-header-icon"></i>
+            <div>
+                <h1 class="page-title">Mes abonnements ({{ $abonnements->total() }})</h1>
+            </div>
+        </div>
     </div>
 
     @if(session('success'))
@@ -94,6 +96,5 @@
     </table>
 
     {{ $abonnements->links() }}
-</div>
 
 @endsection

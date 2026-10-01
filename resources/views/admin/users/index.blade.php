@@ -1,12 +1,18 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1>Utilisateurs</h1>
-
-<a href="{{ route('admin.users.create') }}" 
-    class="btn btn-primary mb-3 bi bi-plus-lg">
-    Ajouter un utilisateur
-</a>
+<div class="page-header">
+    <div class="page-header-left">
+        <i class="bi bi-people page-header-icon"></i>
+        <div>
+            <h1 class="page-title">Utilisateurs ({{ $users->total() }})</h1>
+        </div>
+    </div>
+    
+    <a href="{{ route('admin.users.create') }}" class="btn btn-add-el">
+        <i class="bi bi-plus-lg me-2"></i>Ajouter un utilisateur
+    </a>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -52,4 +58,8 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="mt-4">
+    {{ $users->links() }}
+</div>
 @endsection

@@ -11,6 +11,7 @@ class ModePaiement extends Model
         'pays_id',
         'designation',
         'type',
+        'logo',
         'api_url',
         'numero_compte'
     ];

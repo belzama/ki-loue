@@ -19,45 +19,45 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.devises.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.devises.index') ? 'active' : '' }}">
                             <i class="bi bi-currency-exchange me-2"></i> Devises
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.pays.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.pays.index') ? 'active' : '' }}">
                             <i class="bi bi-globe-americas me-2"></i> Pays
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.regions.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.regions.index') ? 'active' : '' }}">
                             <i class="bi bi-map me-2"></i> Régions
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.departements.index') }}" 
-                            class="nav-link">
-                            <i class="bi bi-building me-2"></i> Préfectures/Départements
+                            class="nav-link {{ request()->routeIs('admin.departements.index') ? 'active' : '' }}">
+                            <i class="bi bi-building me-2"></i> Sous-régions
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.users.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
                             <i class="bi bi-people me-2"></i> Utilisateurs
                         </a>
                     </li>
                     
                     <li class="nav-item">
                         <a href="{{ route('admin.categories.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}">
                             <i class="bi bi-tags me-2"></i> Categories de matériels
                         </a>
                     </li>
                     
                     <li class="nav-item">
                         <a href="{{ route('admin.types_dispositifs.index') }}" 
-                            class="nav-link">
+                            class="nav-link {{ request()->routeIs('admin.types_dispositifs.index') ? 'active' : '' }}">
                             <i class="bi bi-cpu me-2"></i> Types de matériels
                         </a>
                     </li>

@@ -12,7 +12,9 @@ class RegionController extends Controller
     public function index()
     {
         return view('admin.regions.index', [
-            'regions' => Region::with('pays')->get()
+            'regions' => Region::with('pays')
+                ->orderBy('nom')
+                ->paginate(10)
         ]);
     }
 

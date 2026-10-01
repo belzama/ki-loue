@@ -26,7 +26,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login') }}"
+            data-waiting
+            data-waiting-message="Connexion en cours...">
                 @csrf
 
                 {{-- Email ou pseudo --}}

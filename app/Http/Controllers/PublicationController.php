@@ -176,7 +176,7 @@ class PublicationController extends Controller
 
         $attributes = [
             'dispositif_id'  => 'Matériel',
-            'departement_id' => 'Préfecture/Département',
+            'departement_id' => 'Sous-région',
             'ville'          => 'Ville/Localité',
             'tarif_location' => 'Tarif journalier',
             'date_debut'     => 'Date de début',

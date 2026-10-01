@@ -78,7 +78,7 @@
                     {{ auth()->user()->prenom ?? '' }}
                 </div>
 
-                <div class="fw-bold">
+<!--                 <div class="fw-bold">
                     <small class="text-white">
                         {{ auth()->user()->raison_sociale ?? auth()->user()->email }}
                     </small>
@@ -91,35 +91,36 @@
                         0, ',', ' '
                     ) }}
                     {{ auth()->user()->pays->devise->symbol }}
-                </small>
+                </small> -->
             </div>
         </a>
 
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 260px;">
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0 overflow-hidden" style="min-width: 300px; border-radius: 20px;">
+
             {{-- HEADER WALLET --}}
-            <li class="px-3 py-3 bg-light border-bottom">
+            <li class="header-wallet px-3 py-3" style="background: var(--rp-navy)">
+                <div style="border-radius: 20px; overflow: hidden;">
+                    <div class="d-flex align-items-stretch text-center">
+                        <div class="flex-fill px-2 bg-white border">
+                            <div class="text-muted small text-uppercase fw-semibold">Solde réel</div>
+                            <div class="fw-bold fs-5 text-navy">
+                                {{ number_format(auth()->user()->solde_reel ?? 0, 0, ',', ' ') }}
+                                {{ auth()->user()->pays->devise->symbol }}
+                            </div>
+                        </div>
 
-                <div class="small mt-2">
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Solde réel</span>
-                        <span class="fw-semibold">
-                            {{ number_format(auth()->user()->solde_reel ?? 0, 0, ',', ' ') }}
-                            {{ auth()->user()->pays->devise->symbol }}
-                        </span>
+                        <div class="flex-fill px-2 bg-white border">
+                            <div class="text-muted small text-uppercase fw-semibold">Bonus</div>
+                            <div class="fw-bold fs-5 text-navy">
+                                {{ number_format(auth()->user()->solde_bonus ?? 0, 0, ',', ' ') }}
+                                {{ auth()->user()->pays->devise->symbol }}
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Bonus</span>
-                        <span class="text-warning fw-semibold">
-                            {{ number_format(auth()->user()->solde_bonus ?? 0, 0, ',', ' ') }}
-                            {{ auth()->user()->pays->devise->symbol }}
-                        </span>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Solde disponible</span>
-
-                        <div class="fw-bold text-success fw-semibold">
+                    {{-- SOLDE DISPONIBLE --}}
+                    <div class="text-center py-3 px-3 border" style="background: var(--rp-orange);">
+                        <div class="text-white fw-semibold">Solde disponible</div>
+                        <div class="text-white fw-bold fs-4">
                             {{ number_format(
                                 (auth()->user()->solde_reel ?? 0) +
                                 (auth()->user()->solde_bonus ?? 0),
@@ -130,39 +131,40 @@
                     </div>
                 </div>
 
-                <a class="btn btn-success btn-sm w-100 mt-3"
+                {{-- AJOUTER DES FONDS --}}
+                <div class="py-3">
+                    <a class="btn w-100 fw-semibold py-2"
+                    style="background: var(--rp-orange); color: #1a1a2e; border-radius: 10px;"
                     href="{{ route('user.transactions.deposit', auth()->user()) }}">
-                    <i class="bi bi-plus-circle me-1"></i>
-                    Ajouter des fonds
-                </a>
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Ajouter des fonds
+                    </a>
+                </div>
             </li>
 
-            {{-- MENU --}}
-            <li>
-                <a class="dropdown-item py-2" href="{{ route('user.profile.show') }}">
-                    <i class="bi bi-person me-2 text-muted"></i>
+            {{-- MON PROFIL --}}
+            <li style="background: var(--rp-navy);">
+                <a class="dropdown-item d-flex align-items-center py-3 px-3 text-white fw-semibold"
+                href="{{ route('user.profile.show') }}">
+                    <i class="bi bi-person-circle me-2 fs-5"></i>
                     Mon profil
                 </a>
             </li>
 
-            {{--<li>
-                <a class="dropdown-item py-2" href="--}}{{-- route('settings.index') --}}{{--">
-                    <i class="bi bi-gear me-2 text-muted"></i>
-                    Paramètres
-                </a>
-            </li>--}}
-
-            <li><hr class="dropdown-divider"></li>
-
-            <li>
-                <form action="{{ route('logout') }}" method="POST">
+            {{-- DECONNEXION --}}
+            <li style="background: var(--rp-navy);">
+                <form action="{{ route('logout') }}" method="POST" class="m-0"
+                data-waiting
+                data-waiting-message="Déconnexion en cours...">
                     @csrf
-                    <button class="dropdown-item text-danger py-2">
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        Déconnexion
+                    <button class="dropdown-item d-flex align-items-center py-3 px-3 fw-semibold border-0 bg-transparent"
+                            style="color: var(--rp-orange);">
+                        <i class="bi bi-box-arrow-right me-2 fs-5"></i>
+                        Deconnexion
                     </button>
                 </form>
             </li>
+
         </ul>
     </li>
 </ul>
