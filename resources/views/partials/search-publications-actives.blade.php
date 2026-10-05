@@ -53,16 +53,19 @@
                         {{ $publication->departement->region->nom ?? '' }}
                     </span>
                 </div>
-
                 {{-- Prix --}}
-                <div class="mt-auto border-top">
-                    <span class="text-success fw-bold fs-3">{{ number_format($publication->tarif_location,0,',',' ') }}</span>
-                    <span class="text-success fw-semibold small">{{ $publication->devise->symbol ?? 'FCFA' }}/ JOUR</span>
+                <div class="mt-auto pt-3" style="border-top: 1px solid #d9dbe1;"">
+                    <span class="text-success fw-bold fs-3">
+                        {{ number_format($publication->tarif_location,0,',',' ') }}
+                    </span>
+                    <span class="text-success fw-semibold small">
+                        {{ $publication->devise->symbol ?? 'FCFA' }}/ JOUR
+                    </span>
                 </div>
             </div>
 
             {{-- Footer (Actions) --}}
-            <div class="card-footer border-0 p-0 pt-0 d-flex gap-2" style="background-color: rgba(var(--bs-white-rgb),var(--bs-bg-opacity))!important">
+            <div class="card-footer border-0 d-flex gap-2" style="background-color: rgba(var(--bs-white-rgb),var(--bs-bg-opacity))!important">
                 <a href="{{ route('publications.show', $publication) }}" class="btn btn-outline-dark flex-grow-1 btn-sm fw-medium">
                     Détails
                 </a>

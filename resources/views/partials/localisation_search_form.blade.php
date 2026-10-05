@@ -1,5 +1,5 @@
 {{-- FILTRES --}}
-<div class="card mb-4 shadow-sm">
+<div class="card mb-4 shadow-sm" style="border: solid 8px var(--rp-orange-dark); border-radius: 15px;">
     <div class="card-body">
         <form method="GET">
             <input type="hidden" id="categorie_id" name="categorie_id" value="{{ request('categorie_id') }}">
@@ -16,8 +16,7 @@
                         @foreach($pays as $p)
                             <option value="{{ $p->id }}"
                                 data-division="{{ $p->libelle_division }}"
-                                data-sous-division="{{ $p->libelle_sous_division }}"
-                                {{ (request('pays_id') == $p->id || (isset($country) && $country->id == $p->id)) ? 'selected' : '' }}>
+                                data-sous-division="{{ $p->libelle_sous_division }}">
                                 {{ $p->nom }}
                             </option>
                         @endforeach
@@ -35,7 +34,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label id="label_sous_division" class="form-label fw-semibold">{{ $country?->libelle_sous_division ?? 'Préfecture' }}</label>
                     <select id="departement_id" name="departement_id"
                             data-selected="{{ request('departement_id') }}"
@@ -44,13 +43,13 @@
                     </select>
                 </div>
 
-                <div class="col-md-3 d-flex gap-2">
+                <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-dark flex-fill" title="Rechercher">
                         <i class="bi bi-search"></i> Rechercher
                     </button>
-                    <a href="{{ url()->current() }}" class="btn btn-outline-secondary flex-fill" title="Réinitialiser">
+                   <!--  <a href="{{ url()->current() }}" class="btn btn-secondary flex-fill" title="Réinitialiser">
                         <i class="bi bi-arrow-counterclockwise"></i>
-                    </a>
+                    </a> -->
                 </div>
 
             </div>

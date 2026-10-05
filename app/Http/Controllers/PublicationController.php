@@ -194,7 +194,26 @@ class PublicationController extends Controller
 
         // 2. Récupération du dispositif et vérification abonnement
         $dispositif = Dispositif::findOrFail($request->dispositif_id);
-        $abonnementActif = $dispositif->abonnementActif()->exists(); 
+        $abonnementActif = $dispositif->abonnementActif()->exists(); $dispositif = Dispositif::findOrFail($request->dispositif_id);
+        $abonnement = $dispositif->abonnementActif;
+        $abonnementActif = (bool) $abonnement;
+
+        if ($abonnement) {
+            $aboDebut = Carbon::parse($abonnement->date_debut)->startOfDay();
+            $aboFin   = Carbon::parse($abonnement->date_fin)->startOfDay();
+
+            if (Carbon::parse($request->date_debut)->lt($aboDebut)
+                || Carbon::parse($request->date_fin)->gt($aboFin)) {
+
+                $msg = "La période de publication doit être comprise entre le "
+                    . $aboDebut->format('d/m/Y') . " et le " . $aboFin->format('d/m/Y')
+                    . " (période de l'abonnement).";
+
+                return $request->ajax()
+                    ? response()->json(['errors' => ['date_fin' => [$msg]]], 422)
+                    : back()->withErrors(['date_fin' => $msg])->withInput();
+            }
+        }
 
         $prix_publication = $abonnementActif
             ? 0  // Gratuit si abonnement actif

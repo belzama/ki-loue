@@ -9,7 +9,7 @@
             <div class="modal-body">
                 <p>Vous êtes sur le point de publier ce matériel. Voici le résumé :</p>
                 
-                @php $abonnementActif = $dispositif->abonnementActif; @endphp
+                @php $abonnementActif = $dispositif?->abonnementActif; @endphp
                 {{-- Période abonnement --}}
                 @if($abonnementActif)
                     <div class="mb-3">
@@ -48,7 +48,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Modifier</button>
-                <button type="button" id="confirmFinalBtn" class="btn btn-success">Confirmer et Publier</button>
+                <button type="button" id="confirmFinalBtn" class="btn btn-success" data-waiting data-waiting-message="Publication en cours...">Confirmer et Publier</button>
             </div>
         </div>
     </div>

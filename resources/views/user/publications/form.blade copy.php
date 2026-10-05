@@ -187,7 +187,6 @@
                     >
                     <div class="invalid-feedback" id="error-date_fin"></div>
             </div>
-            <small id="hint_plage" class="text-muted"></small>
         </div>
 
         {{-- CALCUL --}}
@@ -364,11 +363,6 @@ function diffDays(date1, date2)
     return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-function toISO(d) {
-    const p = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
 /* =================================
    Contraintes dates
 ================================= */
@@ -376,7 +370,7 @@ function appliquerContraintesDates()
 {
     if (!dateDebutInput || !dateFinInput) return;
 
-    const today = toISO(new Date());
+    const today = new Date().toISOString().split('T')[0];
     const bornes = window.abonnementActif && abonnementDebut && abonnementFin;
 
     // Date de début
@@ -392,7 +386,7 @@ function appliquerContraintesDates()
     // Date de fin
     const max31 = new Date(debut);
     max31.setDate(max31.getDate() + 31);
-    let maxFin = toISO(max31);
+    let maxFin = max31.toISOString().split('T')[0];
     if (bornes && abonnementFin < maxFin) maxFin = abonnementFin;
 
     dateFinInput.min = debut;
@@ -400,13 +394,6 @@ function appliquerContraintesDates()
 
     if (dateFinInput.value && dateFinInput.value > maxFin) dateFinInput.value = maxFin;
     if (dateFinInput.value && dateFinInput.value < debut) dateFinInput.value = '';
-
-    const hint = document.getElementById('hint_plage');
-    if (hint) {
-        hint.textContent = (window.abonnementActif && abonnementDebut && abonnementFin)
-            ? `Période d'abonnement : du ${abonnementDebut.split('-').reverse().join('/')} au ${abonnementFin.split('-').reverse().join('/')}`
-            : 'Durée maximale : 31 jours';
-    }
 }
 
 /* =================================
@@ -701,73 +688,6 @@ if (maskInput) {
     });
 }
 
-function afficherErreur(champ, msg) {
-    const el = document.getElementById(champ);
-    const fb = document.getElementById('error-' + champ);
-    if (el && el.type !== 'hidden') el.classList.add('is-invalid');
-    if (fb) { fb.textContent = msg; fb.style.display = 'block'; }
-}
-
-function effacerErreurs() {
-    document.querySelectorAll('#publicationForm .is-invalid')
-        .forEach(e => e.classList.remove('is-invalid'));
-    document.querySelectorAll('#publicationForm .invalid-feedback')
-        .forEach(e => { e.textContent = ''; e.style.display = 'none'; });
-}
-
-function validerFormulaire() {
-    effacerErreurs();
-    const erreurs = [];   // [champ, message]
-
-    const form = document.getElementById('publicationForm');
-    const dispositifId = form.elements['dispositif_id']?.value;
-    const departement  = document.getElementById('departement_id')?.value;
-    const ville        = document.getElementById('ville')?.value.trim() ?? '';
-    const tarif        = parseFloat(realInput?.value) || 0;
-    const debut        = dateDebutInput?.value;
-    const fin          = dateFinInput?.value;
-    const today        = toISO(new Date());
-
-    if (!dispositifId) erreurs.push(['dispositif_id', 'Veuillez sélectionner un matériel.']);
-    if (!departement)  erreurs.push(['departement_id', 'Veuillez sélectionner une sous-région.']);
-
-    if (!ville)              erreurs.push(['ville', 'La ville/localité est obligatoire.']);
-    else if (ville.length > 150) erreurs.push(['ville', '150 caractères maximum.']);
-
-    if (tarif < 1) erreurs.push(['tarif_location', 'Le tarif journalier doit être supérieur à 0.']);
-
-    if (!debut) {
-        erreurs.push(['date_debut', 'La date de début est obligatoire.']);
-    } else if (debut < today) {
-        erreurs.push(['date_debut', 'La date de début ne peut pas être dans le passé.']);
-    }
-
-    if (!fin) {
-        erreurs.push(['date_fin', 'La date de fin est obligatoire.']);
-    } else if (debut && fin <= debut) {
-        erreurs.push(['date_fin', 'La date de fin doit être postérieure à la date de début.']);
-    } else if (debut && diffDays(debut, fin) > 31) {
-        erreurs.push(['date_fin', 'La durée ne peut pas dépasser 31 jours.']);
-    }
-
-    if (window.abonnementActif && abonnementDebut && abonnementFin && debut && fin) {
-        if (debut < abonnementDebut || fin > abonnementFin) {
-            erreurs.push(['date_fin', "La période doit être comprise dans celle de l'abonnement."]);
-        }
-    }
-
-    if (tarifs.length === 0) {
-        erreurs.push(['dispositif_id', 'Les tarifs ne sont pas chargés, réessayez dans un instant.']);
-    }
-
-    erreurs.forEach(([champ, msg]) => afficherErreur(champ, msg));
-
-    if (erreurs.length) {
-        document.getElementById(erreurs[0][0])?.focus();
-    }
-    return erreurs.length === 0;
-}
-
 // Mise à jour lors du changement de matériel (Select)
 dispositifSelect?.addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
@@ -794,27 +714,19 @@ dispositifSelect?.addEventListener('change', function() {
 
 dateDebutInput?.addEventListener('change', () => {
 
-    if (!dateDebutInput.value) {
-        appliquerContraintesDates();
-        return
-    };
+    if (!dateDebutInput.value) return;
 
-    // Date de fin proposée = début + durée minimale
     const d = new Date(dateDebutInput.value);
     d.setDate(d.getDate() + {{ $nbJourMinPub }});
-    dateFinInput.value = toISO(d);
+    dateFinInput.value = d.toISOString().split('T')[0];
 
-    appliquerContraintesDates();  // re-clampe début ET fin (plage abonnement incluse)
+    appliquerContraintesDates();
 
     calculer();
     calculerSimulation();
 });
 
-dateFinInput?.addEventListener('change', () => {
-    appliquerContraintesDates();   // corrige une fin hors plage
-    calculer();
-    calculerSimulation();
-});
+dateFinInput?.addEventListener('change', calculer);
 
 /* =================================
    Init
@@ -860,8 +772,6 @@ document.getElementById('publicationForm').addEventListener('submit', function(e
     e.preventDefault(); // On bloque l'envoi direct
     e.stopImmediatePropagation(); // empêche le loader global de se déclencher
 
-    if (!validerFormulaire()) return;   // pas de modal si invalide
-
     // Remplir le résumé dans le modal
     document.getElementById('resume_jours').innerText = document.getElementById('nb_jours').value + " jours";
     document.getElementById('resume_prix').innerText = document.getElementById('prix_publication').value;
@@ -869,17 +779,6 @@ document.getElementById('publicationForm').addEventListener('submit', function(e
     document.getElementById('resume_cout').innerText = document.getElementById('cout_publication').value;
 
     new bootstrap.Modal(document.getElementById('confirmPubModal')).show();
-});
-
-document.getElementById('publicationForm').addEventListener('input', e => {
-    e.target.classList?.remove('is-invalid');
-    const fb = document.getElementById('error-' + e.target.id);
-    if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
-});
-document.getElementById('publicationForm').addEventListener('change', e => {
-    e.target.classList?.remove('is-invalid');
-    const fb = document.getElementById('error-' + e.target.id);
-    if (fb) { fb.textContent = ''; fb.style.display = 'none'; }
 });
 
 // Action finale du bouton dans le modal

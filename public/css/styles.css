@@ -446,8 +446,8 @@ body {
 
 .cats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-    gap: 14px 12px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
 }
 
 /* Chaque catégorie = UNE carte avec bordure globale (icône en haut,
@@ -476,7 +476,7 @@ body {
     object-fit: contain;
 }
 .cat-label-box {
-    border-top: 1px solid #d9dbe1;
+    /*border-top: 1px solid #d9dbe1;*/
     padding: 10px 4px;
     text-align: center;
 }
@@ -486,9 +486,9 @@ body {
     transform: translateY(-2px);
 }
 .cat-name {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: var(--rp-navy);
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.25;
 }
 
@@ -518,7 +518,9 @@ body {
    6. CARTES PUBLICATION
    ========================================================= */
 .publication-card {
-    border: none !important;
+    /*border: none !important;*/
+    border: solid 1px rgb(223, 217, 217) !important;
+    border-radius: 25px;
     box-shadow: none !important;
     background: transparent;
     overflow: visible;
@@ -555,12 +557,12 @@ body {
    arrondis (exactement ce que montre la maquette). */
 .publication-card .card-body {
     background: #fff;
-    border: solid 1px rgb(223, 217, 217) !important;
-    border-radius: 25px;
+    /*border: solid 1px rgb(223, 217, 217) !important;
+    border-radius: 25px;*/
     margin-top: -20px;
     position: relative;
     z-index: 2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    /*box-shadow: 0 2px 8px rgba(0,0,0,0.05);*/
     text-align: center;
     align-items: center;
 }
@@ -606,9 +608,9 @@ body {
     margin-top: 8px;
 }
 .publication-card .card-footer .btn-outline-dark {
-    background: #fff; /*var(--rp-orange);*/
+    background: var(--rp-orange);
     border-color: var(--rp-orange);
-    color: var(--rp-orange);/*#212529;*/
+    color: #fff;/*#212529;*/
     border-radius: 10px;
     font-weight: 500;
 }
@@ -1297,6 +1299,7 @@ footer hr {
 .category-item a {
     display: flex;
     align-items: center;
+    text-align: left;
     gap: 10px;
     padding: 8px 12px;
     text-decoration: none;
@@ -1317,7 +1320,11 @@ footer hr {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f0f0f0;
+    background-color: #fff;
+    background-image: url('/images/toute-categorie-60x60.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     font-size: 16px;
 }
 
