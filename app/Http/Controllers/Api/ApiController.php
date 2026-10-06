@@ -17,11 +17,13 @@ class ApiController extends Controller
      */
     public function publications(Request $request)
     {
-        $publications = $this->catalogue->searchPublications($request->only([
-            'pays_id', 'region_id', 'departement_id',
-            'categorie_id', 'types_dispositif_id',
-            'tarif_min', 'tarif_max', 'designation',
-        ]));
+        $publications = Publication::with([
+            'devise',
+            'departement.region.pays',
+            'dispositif.type_dispositif.categorie',
+            'dispositif.photos',
+            'dispositif.params.typeParam',
+        ])->paginate(15);
 
         return PublicationResource::collection($publications);
     }

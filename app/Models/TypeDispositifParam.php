@@ -20,6 +20,11 @@ class TypeDispositifParam extends Model
     public function type_dispositif() { 
         return $this->belongsTo(TypesDispositif::class, 'types_dispositif_id'); 
     }   
+
+    public function typeDispositifParam()
+    {
+        return $this->belongsTo(TypeDispositifParam::class, 'type_dispositif_param_id');
+    }
     
      // helper pratique
     public function getListArrayAttribute()
