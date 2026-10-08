@@ -39,8 +39,8 @@ class PublicationResource extends JsonResource
                 'marque'                 => $dispositif->marque,
                 'modele'                 => $dispositif->modele,
 
-                'type'      => $dispositif->typeDispositif?->nom,
-                'categorie' => $dispositif->typeDispositif?->categorie?->nom,
+                'type'      => $dispositif->type_dispositif?->nom,
+                'categorie' => $dispositif->type_dispositif?->categorie?->nom,
 
                 /*'proprietaire' => $dispositif->relationLoaded('user') && $dispositif->user ? [
                     'id'   => $dispositif->user->id,
