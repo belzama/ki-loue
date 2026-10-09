@@ -46,7 +46,8 @@
         <form id="dispositifForm"
               action="{{ $isEdit ? route('user.dispositifs.update', $dispositif) : route('user.dispositifs.store') }}"
               method="POST"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              data-no-waiting>
 
             @csrf
             @if($isEdit) @method('PUT') @endif

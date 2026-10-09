@@ -90,7 +90,7 @@
         {{-- ===== INFOS DISPOSITIF ===== --}}
         <div class="col-md-4">
             <div class="card shadow-sm h-100 border-navy">
-                <div class="card-header bg-navy border-navy text-white fw-semibold">
+                <div class="card-header bg-navy border-navy text-white fw-bold fs-5">
                     Matériel
                 </div>
 
@@ -165,7 +165,7 @@
         {{-- ===== LOCALISATION ===== --}}
         <div class="col-md-4">
             <div class="card shadow-sm h-100 border-navy">
-                <div class="card-header bg-navy border-navy text-white fw-semibold">
+                <div class="card-header bg-navy border-navy text-white fw-bold fs-5">
                     Localisation
                 </div>
 
@@ -215,7 +215,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm h-100 border-orange text-center">
 
-                <div class="card-header bg-orange text-white border-orange fw-semibold">
+                <div class="card-header bg-orange text-navy border-orange fw-bold fs-5">
                     Tarif de location
                 </div>
 

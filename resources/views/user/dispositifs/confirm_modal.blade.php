@@ -11,7 +11,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Modifier</button>
-                <button type="button" id="finalSubmitBtn" class="btn btn-success">Confirmer et Enregistrer</button>
+                <button type="button" id="finalSubmitBtn" class="btn btn-success" data-waiting data-waiting-message="Enregistrement en cours...">Confirmer et Enregistrer</button>
             </div>
         </div>
     </div>

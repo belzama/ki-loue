@@ -519,7 +519,7 @@ body {
    ========================================================= */
 .publication-card {
     /*border: none !important;*/
-    border: solid 1px rgb(223, 217, 217) !important;
+    border: solid 1px var(--rp-navy-dark) !important;
     border-radius: 25px;
     box-shadow: none !important;
     background: transparent;
@@ -558,8 +558,8 @@ body {
 .publication-card .card-body {
     background: #fff;
     /*border: solid 1px rgb(223, 217, 217) !important;
-    border-radius: 25px;*/
-    margin-top: -20px;
+    border-radius: 25px;
+    margin-top: -20px;*/
     position: relative;
     z-index: 2;
     /*box-shadow: 0 2px 8px rgba(0,0,0,0.05);*/
